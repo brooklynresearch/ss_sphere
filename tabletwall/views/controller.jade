@@ -1,0 +1,90 @@
+extends layout
+
+
+block content
+  div(id='content')
+    #controller
+      #lock
+      #gear
+      #confirm
+        #confirm-title.conf-msg CONFIRM
+        #confirm-title-2.conf-msg
+        #confirm-btn-row.conf-msg
+          #enum-yes.confirm-btn YES
+          #enum-no.confirm-btn.last NO
+      #config
+        #config-title MENU
+        #mode-status Current Mode: 1
+        #reset-all(data-id='3' data-msg='RESET ALL TABLETS').config-item RESET ALL
+        #mode-1(data-id='1' data-msg='ACTIVATE MODE 1').config-item MODE 1
+        #mode-2(data-id='2' data-msg='ACTIVATE MODE 2').config-item MODE 2
+        #matrix-wall(data-id='4' data-msg='ACTIVATE MATRIX').config-item ACTIVATE MATRIX
+        #toggle-display(data-id='5', data-msg='TOGGLE DISPLAY').config-item TOGGLE DISPLAY
+      #config-confirm
+        #config-confirm-title.config-conf-msg CONFIRM
+        #config-confirm-title-2.config-conf-msg
+        #config-confirm-btn-row.config-conf-msg
+          #config-enum-yes.config-confirm-btn YES
+          #config-enum-no.config-confirm-btn.last NO
+      #win-confirm
+        #win-confirm-title.win-conf-msg CONFIRM
+        #win-confirm-title-2.win-conf-msg
+        #win-confirm-btn-row.win-conf-msg
+          #win-enum-yes.win-confirm-btn YES
+          #win-enum-no.win-confirm-btn.last NO
+      #matrix
+        .row
+          .tab(data-id='1') 1
+          .tab(data-id='2') 2
+          .tab(data-id='3') 3
+          .tab(data-id='4') 4
+          .tab(data-id='5') 5
+          .tab(data-id='6') 6
+          .tab(data-id='7') 7
+          .tab(data-id='8') 8
+          .tab(data-id='9') 9
+          .tab.last(data-id='10') 10
+        .row
+          .tab(data-id='11') 11
+          .tab(data-id='12') 12
+          .tab(data-id='13') 13
+          .tab(data-id='14') 14
+          .tab(data-id='15') 15
+          .tab(data-id='16') 16
+          .tab(data-id='17') 17
+          .tab(data-id='18') 18
+          .tab(data-id='19') 19
+          .tab.last(data-id='20') 20
+        .row
+          .tab(data-id='21') 21
+          .tab(data-id='22') 22
+          .tab(data-id='23') 23
+          .tab(data-id='24') 24
+          .tab(data-id='25') 25
+          .tab(data-id='26') 26
+          .tab(data-id='27') 27
+          .tab(data-id='28') 28
+          .tab(data-id='29') 29
+          .tab.last(data-id='30') 30
+        .row
+          .tab(data-id='31') 31
+          .tab(data-id='32') 32
+          .tab(data-id='33') 33
+          .tab(data-id='34') 34
+          .tab(data-id='35') 35
+          .tab(data-id='36') 36
+          .tab(data-id='37') 37
+          .tab(data-id='38') 38
+          .tab(data-id='39') 39
+          .tab.last(data-id='40') 40
+        .row
+          .tab(data-id='41') 41
+          .tab(data-id='42') 42
+          .tab(data-id='43') 43
+          .tab(data-id='44') 44
+          .tab(data-id='45') 45
+          .tab(data-id='46') 46
+          .tab(data-id='47') 47
+          .tab(data-id='48') 48
+          .tab(data-id='49') 49
+          .tab.last(data-id='50') 50

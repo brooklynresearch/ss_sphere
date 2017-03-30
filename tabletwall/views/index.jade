@@ -1,0 +1,51 @@
+extends layout
+
+block content
+  h1(id='curpos')
+      text Position: __
+
+    h1(id='state')
+      text NOT ACTIVATED
+
+    h1 Register Position
+
+    - var pos = 1
+    select(id='position')
+      while pos <= 50
+        option(value=pos)
+          text= pos++
+    button(id='registerbutton')
+      text Register
+
+    script.
+      var socket = new io.connect(null, {
+        'reconnection': true,
+        'reconnectionDelay': 500,
+        'reconnectionDelayMax': 1000,
+        'reconnectionAttempts': 999
+      });
+      document.getElementById('registerbutton').addEventListener("click", function(){
+        var e = document.getElementById('position');
+        var pos = e.options[e.selectedIndex].value;
+        socket.emit('register position', pos);
+      });
+      var activated = false;
+      socket.on('cmd', function(msg) {
+        console.log(msg);
+        if (msg == "Toggle!") {
+          activated = !activated
+          document.getElementById('state').innerHTML = activated ? "ACTIVATED" : "NOT ACTIVATED";
+          document.body.style.backgroundColor = activated ? "aqua" : "cornsilk";
+        } else if (msg == "Deactivate!") {
+          activated = false;
+          document.getElementById('state').innerHTML = "NOT ACTIVATED";
+          document.body.style.backgroundColor = "cornsilk";
+        } else if (msg == "Activate!") {
+          activated = true;
+          document.getElementById('state').innerHTML = "ACTIVATED";
+          document.body.style.backgroundColor = "aqua";
+        }
+      });
+      socket.on('pos', function(msg) {
+        document.getElementById('curpos').innerHTML = "Position: " + msg;
+      });

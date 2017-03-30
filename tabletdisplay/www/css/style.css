@@ -1,0 +1,264 @@
+body {
+	margin: 0;
+	background-color: #000000;
+}
+
+@font-face {
+    font-family: Roboto;
+    src: url(../fonts/Roboto-Regular.ttf);
+}
+
+@font-face {
+    font-family: Roboto-Bold;
+    src: url(../fonts/Roboto-Bold.ttf);
+}
+
+/*General Styles*/
+
+#content {
+	width: 100%;
+	height: 100%;
+	-webkit-user-select: none;
+	user-select: none;
+}
+
+.hidden {
+	display: none;
+}
+
+/*Enumeration Panel Admin*/
+
+#vip-access {
+	position: absolute;
+	top: 0;
+	right: 0;
+	width: 150px;
+	height: 150px;
+	z-index: 10;
+}
+
+#show-black {
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 1024px;
+	height: 768px;
+	z-index: 2;
+	display: none;
+	background-color: black;
+}
+
+#enumerate {
+	display: none;
+	text-align: center;
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 1024px;
+	height: 768px;
+	z-index: 1;
+	background-color: red;
+}
+
+#enum-title {
+	text-align: center;
+	color: #FFFFFF;
+	font-family: 'Roboto', sans-serif;
+	font-size: 32pt;
+	font-weight: 700;
+	margin-top: 60px;
+}
+
+#matrix {
+	display: inline-block;
+	margin: 60px auto 0 auto;
+}
+
+.tab-row {
+	margin-bottom: 4px;
+}
+
+.tab {
+	width: 80px;
+	height: 80px;
+	display: inline-block;
+	margin: 0px 4px 9px 0;
+	text-align: center;
+	font-family: 'Roboto';
+	color: #FFFFFF;
+	font-weight: 700;
+	font-size: 30pt;
+	border: 2px solid #FFFFFF;
+	line-height: 60pt;
+}
+
+.active-tab {
+	background-color: rgba(255,255,255,.65);
+}
+
+.last {
+	margin-right: 0 !important;
+}
+
+#confirm {
+	display: none;
+	font-family: 'Roboto';
+	font-weight: 700;
+	color: #900000;
+	border: 3px solid #900000;
+	text-align: center;
+	width: 500px;
+	height: 250px;
+	position: absolute;
+	top: 50%;
+	left: 50%;
+	margin: -110px 0 0 -250px;
+	background-color: #FFFFFF;
+	z-index: 2;
+}
+
+#confirm-title {
+	font-size: 30pt;
+	margin: 30px 0 0 0;
+}
+#confirm-title-2 {
+	font-size: 20pt;
+	margin: 12px 0 31px 0;
+}
+
+#confirm-btn-row {
+	display: inline-block;
+}
+
+.confirm-btn {
+	display: inline-block;
+	font-size: 20pt;
+	line-height: 48px;
+	width: 100px;
+	height: 50px;
+	margin-right: 34px;
+	border: 2px solid #900000;
+}
+
+.confirm-btn:active {
+	background-color: rgba(144,0,0,.65);
+}
+
+.confirm-ajax {
+	background-image: url(../img/ajax-loader.gif);
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+.confirm-success {
+	background-image: url(../img/success.png);
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+.confirm-fail {
+	background-image: url(../img/fail.png);
+	background-repeat: no-repeat;
+	background-position: center;
+}
+
+
+
+/*Prize Cards */
+
+#card {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 1024px;
+	height: 768px;
+	z-index: 0;
+}
+
+#master-card {
+	position: absolute;
+	left: 0;
+	top: 0;
+	width: 1024px;
+	height: 768px;
+	z-index: 0;
+}
+
+.card {
+	
+}
+
+.card #tablet-number {
+	background-image: url(../img/bkg.svg);
+	/*background-image: url(tabletnum-layout-temp.jpg);*/
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: contain;
+}
+
+#tab-num {
+	  text-align: center;
+	  color: #FFFFFF;
+	  font-family: 'Roboto', sans-serif;
+	  font-size: 485pt;
+	  font-weight: 700;
+	  margin-top: 32px;
+}
+
+.card #prize-reveal {
+	text-align: center;
+	color: #FFFFFF;
+	font-family: 'Roboto', sans-serif;
+	background-image: url(../img/bkg.svg);
+	/*background-image: url(prize-layout-temp.png);*/
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: contain;
+}
+
+#prize-title {
+	margin-top: 120px;
+}
+
+/*#youvewona {
+	font-size: 24pt;
+}*/
+/*
+#prize-text {
+	font-size: 53pt;
+  	margin-top: 9px;
+    height: 180px;
+}*/
+
+#prize-graphic {
+    margin-top: 50px;
+	height: 620px;
+	background-image: url(../img/prizes/mode-1/prize-1.svg);
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: contain;
+}
+/*
+
+#ss-gives {
+	font-family: 'Roboto', sans-serif;
+	text-align: center;
+	font-weight: 700;
+	font-size: 24pt;
+	position: fixed;
+	bottom: 38px;
+	width: 100%;
+}
+*/
+
+/*Master Display Matrix*/ 
+
+#master-back {
+	background-color: black;
+	background-image: url(../img/master-img/1.svg);
+	background-repeat: no-repeat;
+	background-position: center;
+	background-size: contain;
+}
+
+

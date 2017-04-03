@@ -39,15 +39,64 @@ var createPhone = function(position, ipAddress, cb) {
     });
 }
 
-var deletePhone = function(phoneId, cb) {
+var getPhones = function(cb) {
+    var query = squel.select()
+                .from("phones")
+                .toParam();
+
+    dbClient.query({text: query.text, values: query.values}, function(err, result) {
+        if(err) {
+            console.log("DB ERROR: retrieving phones ", err.message);
+            cb(err, null);
+        } else {
+            cb(null, result);
+        }
+    });
+}
+
+var updatePhonePosition = function(ipAddress, newPosition, cb) {
+    var query = squel.update()
+                .table("phones")
+                .set("position", newPosition)
+                .where("ipaddress = ?", ipAddress)
+                .returning('*')
+                .toParam();
+
+    dbClient.query({text: query.text, values: query.values}, function(err, result) {
+        if(err) {
+            console.log("DB ERROR: updating phone ", err.message);
+            cb(err, null);
+        } else {
+            cb(null, result);
+        }
+    });
+
+}
+
+var deletePhone = function(phoneIpAddress, cb) {
     var query = squel.delete()
                 .from("phones")
-                .where("id = ?", phoneId)
+                .where("ipaddress = ?", phoneIpAddress)
                 .toParam();
 
     dbClient.query({text: query.text, values: query.values}, function(err, result) {
         if(err) {
             console.log("DB ERROR: deleting phone ", err.message);
+            cb(err, null);
+        } else {
+            cb(null, result);
+        }
+    });
+}
+
+var clearTable = function(cb) {
+    var query = squel.delete()
+                .from("phones")
+                .toParam();
+
+    dbClient.query({text: query.text, values: query.values}, function(err, result) {
+        if(err) {
+            console.log("DB ERROR: deleting phones ", err.message);
             cb(err, null);
         } else {
             cb(null, result);
@@ -63,7 +112,10 @@ module.exports = {
     connect: connect,
     useTestDatabase: useTestDatabase,
     createPhone: createPhone,
+    getPhones: getPhones,
+    updatePhonePosition: updatePhonePosition,
     deletePhone: deletePhone,
+    clearTable: clearTable,
     disconnect: disconnect
 }
 

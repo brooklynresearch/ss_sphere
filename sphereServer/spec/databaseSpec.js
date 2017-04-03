@@ -8,18 +8,23 @@ describe("Database Module", function() {
     console.log("Testing Database Module");
     console.log("=======================");
 
+    // In case test suite crashed last time
+    db.clearTable(function(err, result) {
+        expect(err).toBeFalsy();
+    });
+
     var testPhones = [
-                {position: 111, ipAddress: "111.111.111.111"},
-                {position: 222, ipAddress: "222.222.222.222"},
-                {position: 333, ipAddress: "333.333.333.333"},
-                {position: 444, ipAddress: "444.444.444.444"},
-                {position: -1, ipAddress: "555.555.555.555"},
-        ];
+        {socketId: "111", ipAddress: "111.111.111.111"},
+        {socketId: "222", ipAddress: "222.222.222.222"},
+        {socketId: "333", ipAddress: "333.333.333.333"},
+        {socketId: "444", ipAddress: "444.444.444.444"},
+        {socketId: "555", ipAddress: "555.555.555.555"},
+    ];
 
     beforeEach(function(done) {
 
         testPhones.forEach(function(phone) {
-            db.createPhone(phone.position, phone.ipAddress, function(err, result) {
+            db.createPhone(phone.ipAddress, phone.socketId, function(err, result) {
                 expect(err).toBeFalsy();
                 if(testPhones.indexOf(phone) === testPhones.length-1) {
                     done();
@@ -39,13 +44,13 @@ describe("Database Module", function() {
     describe("Create Phone", function() {
         console.log("\t[+]Testing Create Phone");
 
-        var testPosition = 777;
+        var testSocketId = "777";
         var testIpAddress = "777.777.777.777";
 
         it("should insert new phone in database", function(done) {
-            db.createPhone(testPosition, testIpAddress, function(err, result) {
+            db.createPhone(testIpAddress, testSocketId, function(err, result) {
                 expect(err).toBeFalsy();
-                expect(result.rows[0].position).toEqual(testPosition);
+                expect(result.rows[0].socketid).toEqual(testSocketId);
                 expect(result.rows[0].ipaddress).toEqual(testIpAddress);
                 done();
             });
@@ -64,16 +69,45 @@ describe("Database Module", function() {
         });
     });
 
+    describe("Get Phone", function() {
+        console.log("\t[+]Testing Get Phone");
+
+        let testPhone = testPhones[2];
+        it("should return phone data given IP address", function(done) {
+            db.getPhone(testPhone.ipAddress, function(err, result) {
+                expect(err).toBeFalsy();
+                expect(result.rows[0].ipaddress).toEqual(testPhone.ipAddress);
+                expect(result.rows[0].position).toEqual(-1); // Always new
+                done();
+            });
+        });
+    });
+
     describe("Update Phone Position", function() {
         console.log("\t[+]Testing Update Phone Position");
 
         let testPhone = testPhones[0];
         let newPosition = 999;
-        it("Should update saved phone position given IP adress", function(done) {
+        it("should update saved phone position given IP address", function(done) {
             db.updatePhonePosition(testPhone.ipAddress, newPosition, function(err, result) {
                 expect(err).toBeFalsy();
                 expect(result.rows[0].ipaddress).toEqual(testPhone.ipAddress);
                 expect(result.rows[0].position).toEqual(newPosition);
+                done();
+            });
+        });
+    });
+
+    describe("Update Phone Socket ID", function() {
+        console.log("\t[+]Testing Update Phone Socket ID");
+
+        let testPhone = testPhones[4];
+        let newSocketId = "teststring";
+        it("should update saved phone socket ID given IP address", function(done) {
+            db.updatePhoneSocketId(testPhone.ipAddress, newSocketId, function(err, result) {
+                expect(err).toBeFalsy();
+                expect(result.rows[0].ipaddress).toEqual(testPhone.ipAddress);
+                expect(result.rows[0].socketid).toEqual(newSocketId);
                 done();
             });
         });

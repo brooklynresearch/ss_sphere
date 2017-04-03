@@ -21,11 +21,12 @@ var useTestDatabase = function() {
     });
 }
 
-var createPhone = function(position, ipAddress, cb) {
+var createPhone = function(ipAddress, socketId, cb) {
     var query = squel.insert()
                 .into("phones")
-                .set("position", position)
                 .set("ipaddress", ipAddress)
+                .set("socketid", socketId)
+                .set("position", -1)
                 .returning('*')
                 .toParam();
 
@@ -54,6 +55,22 @@ var getPhones = function(cb) {
     });
 }
 
+var getPhone = function(ipAddress, cb) {
+    var query = squel.select()
+                .from("phones")
+                .where("ipaddress = ?", ipAddress)
+                .toParam();
+
+    dbClient.query({text: query.text, values: query.values}, function(err, result) {
+        if(err) {
+            console.log("DB ERROR: retrieving phone ", err.message);
+            cb(err, null);
+        } else {
+            cb(null, result);
+        }
+    });
+}
+
 var updatePhonePosition = function(ipAddress, newPosition, cb) {
     var query = squel.update()
                 .table("phones")
@@ -70,7 +87,24 @@ var updatePhonePosition = function(ipAddress, newPosition, cb) {
             cb(null, result);
         }
     });
+}
 
+var updatePhoneSocketId = function(ipAddress, newPosition, cb) {
+    var query = squel.update()
+                .table("phones")
+                .set("socketid", newPosition)
+                .where("ipaddress = ?", ipAddress)
+                .returning('*')
+                .toParam();
+
+    dbClient.query({text: query.text, values: query.values}, function(err, result) {
+        if(err) {
+            console.log("DB ERROR: updating phone ", err.message);
+            cb(err, null);
+        } else {
+            cb(null, result);
+        }
+    });
 }
 
 var deletePhone = function(phoneIpAddress, cb) {
@@ -113,7 +147,9 @@ module.exports = {
     useTestDatabase: useTestDatabase,
     createPhone: createPhone,
     getPhones: getPhones,
+    getPhone: getPhone,
     updatePhonePosition: updatePhonePosition,
+    updatePhoneSocketId: updatePhoneSocketId,
     deletePhone: deletePhone,
     clearTable: clearTable,
     disconnect: disconnect

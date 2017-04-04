@@ -5,6 +5,7 @@ var db = require('../db');
 db.useTestDatabase();
 
 describe("Database Module", function() {
+    console.log("\n");
     console.log("Testing Database Module");
     console.log("=======================");
 

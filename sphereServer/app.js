@@ -11,6 +11,14 @@ var users = require('./routes/users');
 
 var app = express();
 
+// SOCKET IO
+var server = require('http').Server(app);
+var io = require('socket.io')(8080);
+
+// OUR SOCKET MODULE
+var socketModule = require('./socket');
+socketModule.startListeners(io);
+
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));
 app.set('view engine', 'hbs');
@@ -45,3 +53,4 @@ app.use(function(err, req, res, next) {
 });
 
 module.exports = app;
+

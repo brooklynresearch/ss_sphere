@@ -39,7 +39,11 @@ var app = {
           'reconnectionAttempts': 1//999
         });
 
+        // currentVideo to load, could be an index for an array of video names
+        // likely will want to figure out a way to load from camera resources rather than www assets folder
+        // as we'll have to save new ones anyhow as they come in
         var currentVideo;
+        // variable later for tablet position placement
         var position;
 
         function isMobile() {
@@ -51,9 +55,12 @@ var app = {
                 var player = window.player = videojs('videojs-panorama-player', {}, function () {
                     window.addEventListener("resize", function () {
                         var canvas = player.getChild('Canvas');
+                        console.log(canvas);
                         if(canvas) canvas.handleResize();
                     });
                 });
+
+                var canvas;
                 var videoElement = document.getElementById("videojs-panorama-player");
                 var width = videoElement.offsetWidth;
                 var height = videoElement.offsetHeight;
@@ -63,10 +70,10 @@ var app = {
                     clickToToggle: (!isMobile()),
                     autoMobileOrientation: true,
                     initFov: 30,
-                    minLat: 20,
-                    maxLat: 20,
-                    minLon: 10,
-                    maxLon: 10,
+                    initLat: 20,
+                    initLon: 10,
+                    backToVerticalCenter: false,
+                    backToHorizonCenter: false,
                     VREnable: isMobile(),
                     NoticeMessage: (isMobile())? "please drag and drop the video" : "please use your mouse drag and drop the video",
                     callback: function () {
@@ -76,6 +83,7 @@ var app = {
 
                 console.log("requesting fullscreen");
                 console.log(player);
+                // will need to figure out how to spoof user interaction to force fullscreen call on startup
                 player.requestFullscreen();
 
                 player.ready(function(){
@@ -85,19 +93,29 @@ var app = {
                     console.log("is ready");
                     $(".vjs-fullscreen-control").click();
                     console.log("clicked");
+                    canvas = player.getChild('Canvas');
+                    console.log(canvas);
                 });
 
                 document.addEventListener('keydown', function(event) {
                 
                     console.log("key pressed");
                     console.log(event.keyCode);
+                    console.log("width: " + width);
+                    console.log("canvas next");
+                    console.log(canvas);
+
                     switch(event.keyCode){
                         case 37:
-                            // 'a'
+                            // key left, camera manipulation for longitude, latitude is canvas.lat
+                            console.log(canvas.lon);
+                            canvas.lon = canvas.lon - 1;
                             console.log("pressed left");
+                            console.log(canvas.lon);
                             break;
                         case 39:
-                            // 'b'
+                            // key right, camera manipulation
+                            canvas.lon = canvas.lon + 1;
                             console.log("pressed right");
                             break;
                         default:

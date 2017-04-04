@@ -1,0 +1,15 @@
+.DS_Store
+sphere/platforms/android/assets/www
+sphere/platforms/android/bin
+sphere/platforms/android/gen
+sphere/platforms/android/.gradle
+sphere/platforms/android/local.properties
+sphere/platforms/android/ant-build
+sphere/platforms/android/ant-gen
+sphere/platforms/android/CordovaLib/ant-build
+sphere/platforms/android/CordovaLib/ant-gen
+sphere/platforms/android/CordovaLib/bin
+sphere/platforms/android/CordovaLib/gen
+sphere/platforms/android/CordovaLib/local.properties
+sphere/platforms/browser
+sphere/www/img/*.mp4

@@ -3,6 +3,7 @@ var request = require("request");
 var base_url = "http://localhost:3000/"
 
 describe("Server Routes", function() {
+    console.log("\n");
     console.log("Testing Server Routes");
     console.log("=====================");
 

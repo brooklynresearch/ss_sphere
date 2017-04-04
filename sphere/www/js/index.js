@@ -30,7 +30,7 @@ var app = {
         this.receivedEvent('deviceready');
         StatusBar.hide();
 
-        var serveraddress = 'http://172.16.0.11:3000';
+        var serveraddress = 'http://127.0.0.1:8080';
         //var socket = new io.connect('http://192.168.0.153:3000', {
         var socket = new io.connect(serveraddress, {
           'reconnection': true,
@@ -38,6 +38,19 @@ var app = {
           'reconnectionDelayMax': 1000,
           'reconnectionAttempts': 1//999
         });
+
+        socket.on('connect', function() {
+            console.log("Connected to sphereserver");
+        });
+        socket.on('pos', function(data) {
+            console.log("position", data);
+            document.getElementById("position-debug").innerHTML = "Position: " + data;
+        });
+        socket.on('rotate', function(data) {
+            console.log("Rotate", data);
+            document.getElementById("rotation-debug").innerHTML = "Rotation: " + data;
+        });
+
 
         // currentVideo to load, could be an index for an array of video names
         // likely will want to figure out a way to load from camera resources rather than www assets folder
@@ -109,13 +122,13 @@ var app = {
                         case 37:
                             // key left, camera manipulation for longitude, latitude is canvas.lat
                             console.log(canvas.lon);
-                            canvas.lon = canvas.lon - 1;
+                            canvas.lon = canvas.lon - 0.1;
                             console.log("pressed left");
                             console.log(canvas.lon);
                             break;
                         case 39:
                             // key right, camera manipulation
-                            canvas.lon = canvas.lon + 1;
+                            canvas.lon = canvas.lon + 0.1;
                             console.log("pressed right");
                             break;
                         default:

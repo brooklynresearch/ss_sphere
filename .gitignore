@@ -1,4 +1,5 @@
 .DS_Store
+sphere/platforms/*
 sphere/platforms/android/assets/www
 sphere/platforms/android/bin
 sphere/platforms/android/gen
@@ -13,3 +14,5 @@ sphere/platforms/android/CordovaLib/gen
 sphere/platforms/android/CordovaLib/local.properties
 sphere/platforms/browser
 sphere/www/img/*.mp4
+*~
+*.swp

@@ -30,28 +30,38 @@ var app = {
         this.receivedEvent('deviceready');
         StatusBar.hide();
 
-        var serveraddress = 'http://127.0.0.1:8080';
+        var serveraddress = 'http://192.168.1.200:8080';
         //var socket = new io.connect('http://192.168.0.153:3000', {
         var socket = new io.connect(serveraddress, {
           'reconnection': true,
           'reconnectionDelay': 500,
           'reconnectionDelayMax': 1000,
-          'reconnectionAttempts': 1//999
+          'reconnectionAttempts': 999
         });
 
         socket.on('connect', function() {
             console.log("Connected to sphereserver");
         });
         socket.on('pos', function(data) {
-            console.log("position", data);
+            console.log("position ", data);
+            document.getElementById("position-debug").innerHTML = "Position: " + data;
+        });
+        socket.on('newpos', function(data) {
+            console.log("New position ", data);
             document.getElementById("position-debug").innerHTML = "Position: " + data;
         });
         socket.on('rotate', function(data) {
-            console.log("Rotate", data);
+            console.log("Rotate ", data);
             document.getElementById("rotation-debug").innerHTML = "Rotation: " + data;
         });
 
+        document.getElementById('change-position-debug-1').onclick = function() {
+            socket.emit('register position', -420);
+        };
 
+        document.getElementById('change-position-debug-2').onclick = function() {
+            socket.emit('register position', -666);
+        };
         // currentVideo to load, could be an index for an array of video names
         // likely will want to figure out a way to load from camera resources rather than www assets folder
         // as we'll have to save new ones anyhow as they come in
@@ -102,12 +112,13 @@ var app = {
                 player.ready(function(){
                     player.play();
                     player.pause();
-                    player.currentTime(0);
+                    player.currentTime(30);
                     console.log("is ready");
                     $(".vjs-fullscreen-control").click();
                     console.log("clicked");
                     canvas = player.getChild('Canvas');
                     console.log(canvas);
+
                 });
 
                 document.addEventListener('keydown', function(event) {

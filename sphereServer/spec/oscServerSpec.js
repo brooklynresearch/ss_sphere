@@ -16,7 +16,7 @@ describe("OSC Server Class", function() {
             localAddress: '0.0.0.0',
             localPort: 57122,
             remoteAddress: '127.0.0.1',
-            remotePort: 57121
+            remotePort: 12345
         });
         // WEBSOCKET LISTENER
         socket = io(server,{});

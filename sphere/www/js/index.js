@@ -39,6 +39,20 @@ var app = {
           'reconnectionAttempts': 999
         });
 
+        var convertToRange = function(value, srcRange, dstRange){
+            // value is outside source range return
+            if (value < srcRange[0] || value > srcRange[1]){
+                return NaN; 
+            }
+
+            var srcMax = srcRange[1] - srcRange[0],
+            dstMax = dstRange[1] - dstRange[0],
+            adjValue = value - srcRange[0];
+
+            return (adjValue * dstMax / srcMax) + dstRange[0];
+        }
+
+        var canvas;
         socket.on('connect', function() {
             console.log("Connected to sphereserver");
         });
@@ -53,6 +67,10 @@ var app = {
         socket.on('rotate', function(data) {
             console.log("Rotate ", data);
             document.getElementById("rotation-debug").innerHTML = "Rotation: " + data;
+            let converted = (convertToRange(data, [0,12000], [0,1000]))/10.0;
+            if(canvas) {
+                canvas.lon = converted;
+            }
         });
 
         document.getElementById('change-position-debug-1').onclick = function() {
@@ -77,13 +95,12 @@ var app = {
             (function(window, videojs) {
                 var player = window.player = videojs('videojs-panorama-player', {}, function () {
                     window.addEventListener("resize", function () {
-                        var canvas = player.getChild('Canvas');
+                        canvas = player.getChild('Canvas');
                         console.log(canvas);
                         if(canvas) canvas.handleResize();
                     });
                 });
 
-                var canvas;
                 var videoElement = document.getElementById("videojs-panorama-player");
                 var width = videoElement.offsetWidth;
                 var height = videoElement.offsetHeight;
@@ -91,7 +108,7 @@ var app = {
                 player.width(width), player.height(height);
                 player.panorama({
                     clickToToggle: (!isMobile()),
-                    autoMobileOrientation: true,
+                    autoMobileOrientation: false,
                     initFov: 30,
                     initLat: 20,
                     initLon: 10,

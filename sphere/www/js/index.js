@@ -47,7 +47,7 @@ var app = {
           'reconnection': true,
           'reconnectionDelay': 500,
           'reconnectionDelayMax': 1000,
-          'reconnectionAttempts': 1//999
+          'reconnectionAttempts': 999
         });
 
         // currentVideo to load, could be an index for an array of video names
@@ -83,7 +83,7 @@ var app = {
                                 console.log("fileStr at index: " + index);
                                 console.log(fileStr);
 
-                                if(fileStr == "/storage/emulated/0/Movies/sphere/0_DYNE_FinalOutput_Gear360_H264_3840x1920.mp4<br>"){
+                                if(fileStr == "/storage/emulated/0/Movies/sphere/DYNE_FinalOutput_Gear360_H264_3840x1920.mp4<br>"){
                                     console.log("!!!!! !MATCHIHNG ! !! ! !!!!!")
                                     console.log(fileStr);
                                     console.log("the following are: typeof(entries[i], entries[i], typeof(entries)");

@@ -71,6 +71,45 @@ var app = {
         socket.on('pos', function(data) {
             console.log("position ", data);
             document.getElementById("position-debug").innerHTML = "Position: " + data;
+
+        });
+        socket.on('newpos', function(data) {
+            console.log("New position ", data);
+            document.getElementById("position-debug").innerHTML = "Position: " + data;
+        });
+        socket.on('rotate', function(data) {
+            console.log("Rotate ", data);
+            document.getElementById("rotation-debug").innerHTML = "Rotation: " + data;
+            let converted = (convertToRange(data, [0,12000], [0,1000]))/10.0;
+            if(canvas) {
+                canvas.lon = converted;
+            }
+        });
+
+        document.getElementById('change-position-debug-1').onclick = function() {
+            socket.emit('register position', -420);
+        };
+
+        var convertToRange = function(value, srcRange, dstRange){
+            // value is outside source range return
+            if (value < srcRange[0] || value > srcRange[1]){
+                return NaN; 
+            }
+
+            var srcMax = srcRange[1] - srcRange[0],
+            dstMax = dstRange[1] - dstRange[0],
+            adjValue = value - srcRange[0];
+
+            return (adjValue * dstMax / srcMax) + dstRange[0];
+        }
+
+        var canvas;
+        socket.on('connect', function() {
+            console.log("Connected to sphereserver");
+        });
+        socket.on('pos', function(data) {
+            console.log("position ", data);
+            document.getElementById("position-debug").innerHTML = "Position: " + data;
         });
         socket.on('newpos', function(data) {
             console.log("New position ", data);

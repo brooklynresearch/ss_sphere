@@ -5,8 +5,8 @@ class OscServer extends events.EventEmitter {
     constructor() {
         super();
         var udpPort = new osc.UDPPort({
-            localAddress: "127.0.0.1",
-            localPort: 57121
+            localAddress: "192.168.1.200",
+            localPort: 12345
         });
 
         udpPort.on("ready", function () {
@@ -15,6 +15,7 @@ class OscServer extends events.EventEmitter {
 
         udpPort.on("message", (oscMessage) => {
             console.log("Got OSC message ", oscMessage);
+            this.setMaxListeners(0); // Unlimited
             this.emit('osc', oscMessage);
         });
 

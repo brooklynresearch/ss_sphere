@@ -41,7 +41,8 @@ var app = {
             cordova.file.syncedDataDirectory
         ];
 
-        var serveraddress = 'http://172.16.0.11:3000';
+
+        var serveraddress = 'http://192.168.1.200:8080';
         //var socket = new io.connect('http://192.168.0.153:3000', {
         var socket = new io.connect(serveraddress, {
           'reconnection': true,
@@ -50,6 +51,47 @@ var app = {
           'reconnectionAttempts': 999
         });
 
+        var convertToRange = function(value, srcRange, dstRange){
+            // value is outside source range return
+            if (value < srcRange[0] || value > srcRange[1]){
+                return NaN; 
+            }
+
+            var srcMax = srcRange[1] - srcRange[0],
+            dstMax = dstRange[1] - dstRange[0],
+            adjValue = value - srcRange[0];
+
+            return (adjValue * dstMax / srcMax) + dstRange[0];
+        }
+
+        var canvas;
+        socket.on('connect', function() {
+            console.log("Connected to sphereserver");
+        });
+        socket.on('pos', function(data) {
+            console.log("position ", data);
+            document.getElementById("position-debug").innerHTML = "Position: " + data;
+        });
+        socket.on('newpos', function(data) {
+            console.log("New position ", data);
+            document.getElementById("position-debug").innerHTML = "Position: " + data;
+        });
+        socket.on('rotate', function(data) {
+            console.log("Rotate ", data);
+            document.getElementById("rotation-debug").innerHTML = "Rotation: " + data;
+            let converted = (convertToRange(data, [0,12000], [0,1000]))/10.0;
+            if(canvas) {
+                canvas.lon = converted;
+            }
+        });
+
+        document.getElementById('change-position-debug-1').onclick = function() {
+            socket.emit('register position', -420);
+        };
+
+        document.getElementById('change-position-debug-2').onclick = function() {
+            socket.emit('register position', -666);
+        };
         // currentVideo to load, could be an index for an array of video names
         // likely will want to figure out a way to load from camera resources rather than www assets folder
         // as we'll have to save new ones anyhow as they come in
@@ -134,13 +176,12 @@ var app = {
             (function(window, videojs) {
                 var player = window.player = videojs('videojs-panorama-player', {}, function () {
                     window.addEventListener("resize", function () {
-                        var canvas = player.getChild('Canvas');
+                        canvas = player.getChild('Canvas');
                         console.log(canvas);
                         if(canvas) canvas.handleResize();
                     });
                 });
 
-                var canvas;
                 var videoElement = document.getElementById("videojs-panorama-player");
                 var width = videoElement.offsetWidth;
                 var height = videoElement.offsetHeight;
@@ -169,25 +210,28 @@ var app = {
                 player.ready(function(){
                     player.play();
                     player.pause();
-                    player.currentTime(0);
+                    player.currentTime(30);
                     console.log("is ready");
                     $(".vjs-fullscreen-control").click();
                     console.log("clicked");
                     canvas = player.getChild('Canvas');
                     console.log(canvas);
 
-                    setTimeout(function(){ 
+                    // swap test below
 
-                        console.log("timeout of ready");
-                        console.log(targetFile);
-                        console.log(targetEntry);
-                        console.log("replacing!");
+                    // setTimeout(function(){ 
 
-                        var videoGrab = document.getElementById("videojs-panorama-player_html5_api");
-                        console.log(videoGrab);
-                        videoGrab.src = targetEntry.nativeURL;
-                        player.play();
-                    }, 60000);
+                    //     console.log("timeout of ready");
+                    //     console.log(targetFile);
+                    //     console.log(targetEntry);
+                    //     console.log("replacing!");
+
+                    //     var videoGrab = document.getElementById("videojs-panorama-player_html5_api");
+                    //     console.log(videoGrab);
+                    //     videoGrab.src = targetEntry.nativeURL;
+                    //     player.play();
+                    // }, 60000);
+
                 });
 
                 document.addEventListener('keydown', function(event) {
@@ -202,13 +246,13 @@ var app = {
                         case 37:
                             // key left, camera manipulation for longitude, latitude is canvas.lat
                             console.log(canvas.lon);
-                            canvas.lon = canvas.lon - 1;
+                            canvas.lon = canvas.lon - 0.1;
                             console.log("pressed left");
                             console.log(canvas.lon);
                             break;
                         case 39:
                             // key right, camera manipulation
-                            canvas.lon = canvas.lon + 1;
+                            canvas.lon = canvas.lon + 0.1;
                             console.log("pressed right");
                             break;
                         default:

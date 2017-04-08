@@ -51,6 +51,7 @@ var app = {
 
         console.log(posTable[pos].lat);
         console.log(posTable[pos].lon);
+        document.body.style.background = "rgb(0,0,0)";
 
         var serveraddress = 'http://192.168.1.200:8080';
         //var socket = new io.connect('http://192.168.0.153:3000', {
@@ -61,10 +62,11 @@ var app = {
           'reconnectionAttempts': 999
         });
 
-        var convertToRange = function(value, srcRange, dstRange){
-            // value is outside source range return
-            if (value < srcRange[0] || value > srcRange[1]){
-                return NaN; 
+        var arrayBufferToString = function(buf) {
+            var str= '';
+            var ui8= new Uint8Array(buf);
+            for (var i= 0 ; i < ui8.length ; i++) {
+                str= str+String.fromCharCode(ui8[i]);
             }
 
             var srcMax = srcRange[1] - srcRange[0],
@@ -108,6 +110,7 @@ var app = {
 
         document.getElementById('change-position-debug-1').onclick = function() {
             socket.emit('register position', -420);
+            return str;
         };
 
         var convertToRange = function(value, srcRange, dstRange){
@@ -123,26 +126,52 @@ var app = {
             return (adjValue * dstMax / srcMax) + dstRange[0];
         }
 
+        // UDP Listener
         var canvas;
+        chrome.sockets.udp.create({}, function(createInfo) {
+            let socketId = createInfo.socketId;
+            console.log("CREATED UDP socket: ", socketId);
+            chrome.sockets.udp.bind(socketId, "0.0.0.0", 55555, function(result) {
+                console.log("Bind UDP: ", result);
+            });
+            chrome.sockets.udp.onReceive.addListener(function(message) {
+                let data = parseInt(arrayBufferToString(message.data));
+                console.log("UDP DATA: ", data);
+                //let converted = convertToRange(data, [0,36000], [0,255]);
+                let converted = (data / 100.00) - 180;
+                if(canvas) {
+                    canvas.lon = converted;
+                }
+                //document.body.style.background = "rgb("+ Math.round(converted) + ",0,0)";
+                //document.getElementById("rotation-debug").innerHTML = "Rotation: " + data;
+            });
+        });
+
+        // WEBSOCKET
         socket.on('connect', function() {
             console.log("Connected to sphereserver");
         });
         socket.on('pos', function(data) {
             console.log("position ", data);
             document.getElementById("position-debug").innerHTML = "Position: " + data;
+
         });
         socket.on('newpos', function(data) {
             console.log("New position ", data);
             document.getElementById("position-debug").innerHTML = "Position: " + data;
         });
+        /*
         socket.on('rotate', function(data) {
             console.log("Rotate ", data);
             document.getElementById("rotation-debug").innerHTML = "Rotation: " + data;
-            let converted = (convertToRange(data, [0,12000], [0,1000]))/10.0;
-            if(canvas) {
-                canvas.lon = converted;
-            }
+            let converted = convertToRange(data, [0,36000], [0,255]);
+            document.body.style.background = "rgb("+ Math.round(converted) + ",0,0)";
+            console.log(converted);
+            //if(canvas) {
+                //canvas.lon = converted;
+            //}
         });
+        */
 
         document.getElementById('change-position-debug-1').onclick = function() {
             socket.emit('register position', -420);
@@ -210,8 +239,6 @@ var app = {
                                 addFileEntry(entries[i]);
                             } else {
                                 fileStr += (entries[i].fullPath + "<br>"); // << replace with something useful
-                                // console.log("fileStr at index: " + index);
-                                // console.log(fileStr);
 
                                 if(fileStr == "/storage/emulated/0/Movies/sphere/DYNE_FinalOutput_Gear360_H264_3840x1920.mp4<br>"){
 
@@ -258,7 +285,7 @@ var app = {
                 var player = window.player = videojs('videojs-panorama-player', {}, function () {
                     window.addEventListener("resize", function () {
                         canvas = player.getChild('Canvas');
-                        console.log(canvas);
+                        //console.log(canvas);
                         if(canvas) canvas.handleResize();
                     });
                 });
@@ -287,8 +314,8 @@ var app = {
                     }
                 });
 
-                console.log("requesting fullscreen");
-                console.log(player);
+                //console.log("requesting fullscreen");
+                //console.log(player);
                 // will need to figure out how to spoof user interaction to force fullscreen call on startup
                 player.requestFullscreen();
 
@@ -366,12 +393,7 @@ var app = {
 
     // Update DOM on a Received Event
     receivedEvent: function(id) {
-        // var parentElement = document.getElementById(id);
-        // var listeningElement = parentElement.querySelector('.listening');
-        // var receivedElement = parentElement.querySelector('.received');
 
-        // listeningElement.setAttribute('style', 'display:none;');
-        // receivedElement.setAttribute('style', 'display:block;');
 
         console.log('Received Event: ' + id);
     }

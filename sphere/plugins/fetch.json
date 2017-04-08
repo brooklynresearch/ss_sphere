@@ -18,7 +18,7 @@
     "cordova-plugin-file": {
         "source": {
             "type": "registry",
-            "id": "cordova-plugin-file"
+            "id": "cordova-plugin-file@~4.3.2"
         },
         "is_top_level": true,
         "variables": {}
@@ -27,6 +27,22 @@
         "source": {
             "type": "registry",
             "id": "cordova-plugin-compat"
+        },
+        "is_top_level": false,
+        "variables": {}
+    },
+    "cordova-plugin-chrome-apps-sockets-udp": {
+        "source": {
+            "type": "registry",
+            "id": "cordova-plugin-chrome-apps-sockets-udp"
+        },
+        "is_top_level": true,
+        "variables": {}
+    },
+    "cordova-plugin-chrome-apps-common": {
+        "source": {
+            "type": "registry",
+            "id": "cordova-plugin-chrome-apps-common@1"
         },
         "is_top_level": false,
         "variables": {}

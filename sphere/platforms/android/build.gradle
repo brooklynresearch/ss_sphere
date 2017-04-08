@@ -174,11 +174,6 @@ android {
 
     lintOptions {
       abortOnError false;
-      checkReleaseBuilds false
-    }
-
-    dexOptions {
-      javaMaxHeapSize "4096m"
     }
 
     compileSdkVersion cdvCompileSdkVersion

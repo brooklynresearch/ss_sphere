@@ -14,13 +14,15 @@ body.vjs-full-window .player_wrapper{
 }
 
 .player_container{
-    padding-top: 56.25%;
+    /*padding-top: 56.25%;*/
 }
 
 #videojs-panorama-player{
     position: absolute;
-    width: 100%;
-    height: 100%;
+/*    width: 100%;
+    height: 100%;*/
+    width: 2960px;
+    height: 1440px;
     top: 0;
     left: 0;
 }

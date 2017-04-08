@@ -41,6 +41,16 @@ var app = {
             cordova.file.syncedDataDirectory
         ];
 
+        var posTable = [
+            {pos: 0, lat: 20.0, lon: 30, fov: 20},
+            {pos: 1, lat: 20.0, lon: 33, fov: 20},
+            {pos: 2, lat: 20.0, lon: 40, fov: 20},
+        ];
+
+        var pos = 0;
+
+        console.log(posTable[pos].lat);
+        console.log(posTable[pos].lon);
 
         var serveraddress = 'http://192.168.1.200:8080';
         //var socket = new io.connect('http://192.168.0.153:3000', {
@@ -84,6 +94,16 @@ var app = {
             if(canvas) {
                 canvas.lon = converted;
             }
+        });
+
+        // for testing and calibration
+        socket.on('newtable', function(data) {
+            // receive from server new parameters for posTable variable
+
+            // save new pos parameters in a persistent file
+
+            // reload parameters for this phone's position
+
         });
 
         document.getElementById('change-position-debug-1').onclick = function() {
@@ -131,6 +151,7 @@ var app = {
         document.getElementById('change-position-debug-2').onclick = function() {
             socket.emit('register position', -666);
         };
+
         // currentVideo to load, could be an index for an array of video names
         // likely will want to figure out a way to load from camera resources rather than www assets folder
         // as we'll have to save new ones anyhow as they come in
@@ -139,6 +160,34 @@ var app = {
         var position;
         var targetFile = "dummy";
         var targetEntry;
+
+
+        // write test
+
+        function writeLog(str) {
+            if(!logOb) return;
+            var log = str + " [" + (new Date()) + "]\n";
+            console.log("going to log "+log);
+            logOb.createWriter(function(fileWriter) {
+                
+                fileWriter.seek(fileWriter.length);
+                
+                var blob = new Blob([log], {type:'text/plain'});
+                fileWriter.write(blob);
+                console.log("ok, in theory i worked");
+            });
+        }
+
+        window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dir){
+            console.log("got main dir",dir)
+            dir.getFile("log.txt", {create:true}, function(file) {
+                console.log("got the file", file);
+                logOb = file;
+                writeLog("App started");          
+            });
+
+        });
+
 
         function isMobile() {
 
@@ -161,21 +210,13 @@ var app = {
                                 addFileEntry(entries[i]);
                             } else {
                                 fileStr += (entries[i].fullPath + "<br>"); // << replace with something useful
-                                console.log("fileStr at index: " + index);
-                                console.log(fileStr);
+                                // console.log("fileStr at index: " + index);
+                                // console.log(fileStr);
 
                                 if(fileStr == "/storage/emulated/0/Movies/sphere/DYNE_FinalOutput_Gear360_H264_3840x1920.mp4<br>"){
-                                    console.log("!!!!! !MATCHIHNG ! !! ! !!!!!")
-                                    console.log(fileStr);
-                                    console.log("the following are: typeof(entries[i], entries[i], typeof(entries)");
-                                    console.log(typeof(entries[i]));
-                                    console.log(entries[i]);
-                                    console.log(typeof(entries));
-                                    console.log(targetFile);
+
                                     targetFile = entries[i].fullPath;
-                                    console.log(targetFile);
                                     targetEntry = (entries[i]);
-                                    console.log(targetEntry);
                                 }
 
                                 index++;
@@ -202,9 +243,10 @@ var app = {
                 if (localURLs[i] === null || localURLs[i].length === 0) {
                     continue; // skip blank / non-existent paths for this platform
                 }
-                window.resolveLocalFileSystemURL(localURLs[i], addFileEntry, addError);
+                // window.resolveLocalFileSystemURL(localURLs[i], addFileEntry, addError);
             }
 
+            
 
             // canvas test
 
@@ -226,10 +268,14 @@ var app = {
                 var height = videoElement.offsetHeight;
                 console.log(width, height);
                 player.width(width), player.height(height);
+                
+                // these options are for testing
                 player.panorama({
                     clickToToggle: (!isMobile()),
                     autoMobileOrientation: false,
                     initFov: 30,
+                    maxFov: 60,
+                    minFov: 5,
                     initLat: 20,
                     initLon: 10,
                     backToVerticalCenter: false,
@@ -248,27 +294,37 @@ var app = {
 
                 player.ready(function(){
                     player.play();
+                    player.currentTime(15);
                     player.pause();
-                    player.currentTime(30);
                     console.log("is ready");
                     $(".vjs-fullscreen-control").click();
                     console.log("clicked");
                     canvas = player.getChild('Canvas');
                     console.log(canvas);
 
-                    // swap test below
+
+                    // positioning test snippet
 
                     // setTimeout(function(){ 
 
-                    //     console.log("timeout of ready");
-                    //     console.log(targetFile);
-                    //     console.log(targetEntry);
-                    //     console.log("replacing!");
-
-                    //     var videoGrab = document.getElementById("videojs-panorama-player_html5_api");
-                    //     console.log(videoGrab);
-                    //     videoGrab.src = targetEntry.nativeURL;
+                    //     console.log("testing for position shift");
                     //     player.play();
+                    //     player.currentTime(15);
+                    //     player.pause();
+
+                    //     console.log(canvas);
+
+                    //     canvas.lon = posTable[pos].lon;
+                    //     canvas.lat = posTable[pos].lat;
+
+                    //     console.log(canvas);
+
+
+                    //     // vid swap test snippet
+                    //     // var videoGrab = document.getElementById("videojs-panorama-player_html5_api");
+                    //     // console.log(videoGrab);
+                    //     // videoGrab.src = targetEntry.nativeURL;
+                    //     // player.play();
                     // }, 60000);
 
                 });

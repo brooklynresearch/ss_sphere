@@ -30,6 +30,8 @@ var app = {
         this.receivedEvent('deviceready');
         StatusBar.hide();
 
+        console.log(screen.width, screen.height);
+
         var localURLs    = [
             cordova.file.dataDirectory,
             cordova.file.documentsDirectory,
@@ -290,12 +292,23 @@ var app = {
                     });
                 });
 
+
                 var videoElement = document.getElementById("videojs-panorama-player");
                 var width = videoElement.offsetWidth;
                 var height = videoElement.offsetHeight;
+                // var width = screen.width;
+                // var height = screen.height;
                 console.log(width, height);
                 player.width(width), player.height(height);
                 
+
+                // full screen
+                
+                // var videoWrapper = document.getElementByClassName('player_wrapper');
+                // videoWrapper.style.width = screen.width;
+                // videoWrapper.style.height = screen.height;
+                // player.width(screen.width), player.height(screen.height);
+                // console.log(width, height);
                 // these options are for testing
                 player.panorama({
                     clickToToggle: (!isMobile()),
@@ -317,15 +330,15 @@ var app = {
                 //console.log("requesting fullscreen");
                 //console.log(player);
                 // will need to figure out how to spoof user interaction to force fullscreen call on startup
-                player.requestFullscreen();
+                // player.requestFullscreen();
 
                 player.ready(function(){
+                    player.width(screen.width), player.height(screen.height);
+
                     player.play();
                     player.currentTime(15);
-                    player.pause();
+                    // player.pause();
                     console.log("is ready");
-                    $(".vjs-fullscreen-control").click();
-                    console.log("clicked");
                     canvas = player.getChild('Canvas');
                     console.log(canvas);
 

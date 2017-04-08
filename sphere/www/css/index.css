@@ -10,19 +10,23 @@ body.vjs-full-window .player_wrapper{
     position: relative;
     /*max-width: 960px;*/
     /*width: 100%;*/
-    height: 100%;
+    width: 412px;
+    height: 846px;
 }
 
+#video_wrapper{
+
+}
+
+
 .player_container{
-    /*padding-top: 56.25%;*/
+    padding-top: 56.25%;
 }
 
 #videojs-panorama-player{
     position: absolute;
-/*    width: 100%;
-    height: 100%;*/
-    width: 2960px;
-    height: 1440px;
+    width: 100%;
+    height: 100%;
     top: 0;
     left: 0;
 }

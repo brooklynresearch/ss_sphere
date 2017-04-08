@@ -76,6 +76,7 @@ var app = {
         }
 
         // UDP Listener
+        var canvas;
         chrome.sockets.udp.create({}, function(createInfo) {
             let socketId = createInfo.socketId;
             console.log("CREATED UDP socket: ", socketId);
@@ -85,13 +86,17 @@ var app = {
             chrome.sockets.udp.onReceive.addListener(function(message) {
                 let data = parseInt(arrayBufferToString(message.data));
                 console.log("UDP DATA: ", data);
-                let converted = convertToRange(data, [0,36000], [0,255]);
-                document.body.style.background = "rgb("+ Math.round(converted) + ",0,0)";
+                //let converted = convertToRange(data, [0,36000], [0,255]);
+                let converted = (data / 100.00) - 180;
+                if(canvas) {
+                    canvas.lon = converted;
+                }
+                //document.body.style.background = "rgb("+ Math.round(converted) + ",0,0)";
+                //document.getElementById("rotation-debug").innerHTML = "Rotation: " + data;
             });
         });
 
         // WEBSOCKET
-        var canvas;
         socket.on('connect', function() {
             console.log("Connected to sphereserver");
         });

@@ -3,16 +3,19 @@ var dgram = require('dgram');
 
 db.useTestDatabase();
 
+var udpBroadcaster;
+
 var startListeners = function(io) {
 
     var oscServer = require('./oscServer').OscServer;
 
-    var udpBroadcaster = dgram.createSocket('udp4');
+    udpBroadcaster = dgram.createSocket('udp4');
+    let broadcast = process.env.BROADCAST_ADDR;
 
     oscServer.on('osc', (oscMessage) => {
         let encoderValue = oscMessage.args[0];
         console.log("UDP BROADCAST: ", encoderValue);
-        udpBroadcaster.send(encoderValue.toString(), 55555, '192.168.1.255', (err) => {
+        udpBroadcaster.send(encoderValue.toString(), 55555, broadcast, (err) => {
             if (err) {
                 console.log("ERROR on broadcast: ", err);
             }
@@ -26,7 +29,7 @@ var startListeners = function(io) {
     });
 
     udpBroadcaster.bind({
-        address: '192.168.1.200',
+        address: process.env.MACHINE_IP,
         port: 41234}
     );
 
@@ -56,6 +59,19 @@ var startListeners = function(io) {
     });
 }
 
+var sendUdpCommand = function(cmd) {
+    let broadcast = process.env.BROADCAST_ADDR;
+    for( var i = 0; i < 10; i++) {
+        console.log("Sending Command: ", cmd);
+        udpBroadcaster.send(cmd, 55555, broadcast, (err) => {
+            if (err) {
+                console.log("ERROR on Send Udp Command: ", err);
+            }
+        });
+    }
+}
+
 module.exports = {
-    startListeners: startListeners
+    startListeners: startListeners,
+    sendUdpCommand: sendUdpCommand
 }

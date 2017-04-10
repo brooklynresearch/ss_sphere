@@ -7,6 +7,9 @@
         "files": {}
     },
     "installed_plugins": {
+        "cordova-plugin-chrome-apps-sockets-udp": {
+            "PACKAGE_NAME": "com.ss.sphere"
+        },
         "cordova-plugin-file": {
             "PACKAGE_NAME": "com.ss.sphere"
         },
@@ -16,7 +19,7 @@
         "cordova-plugin-whitelist": {
             "PACKAGE_NAME": "com.ss.sphere"
         },
-        "cordova-plugin-chrome-apps-sockets-udp": {
+        "cordova-hot-code-push-local-dev-addon": {
             "PACKAGE_NAME": "com.ss.sphere"
         },
         "cordova-hot-code-push-plugin": {
@@ -24,10 +27,10 @@
         }
     },
     "dependent_plugins": {
-        "cordova-plugin-compat": {
+        "cordova-plugin-chrome-apps-common": {
             "PACKAGE_NAME": "com.ss.sphere"
         },
-        "cordova-plugin-chrome-apps-common": {
+        "cordova-plugin-compat": {
             "PACKAGE_NAME": "com.ss.sphere"
         }
     }

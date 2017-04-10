@@ -71,11 +71,7 @@ var app = {
                 str= str+String.fromCharCode(ui8[i]);
             }
 
-            var srcMax = srcRange[1] - srcRange[0],
-            dstMax = dstRange[1] - dstRange[0],
-            adjValue = value - srcRange[0];
-
-            return (adjValue * dstMax / srcMax) + dstRange[0];
+            return str;
         }
 
         var canvas;
@@ -130,6 +126,7 @@ var app = {
 
         // UDP Listener
         var canvas;
+
         chrome.sockets.udp.create({}, function(createInfo) {
             let socketId = createInfo.socketId;
             console.log("CREATED UDP socket: ", socketId);
@@ -137,15 +134,45 @@ var app = {
                 console.log("Bind UDP: ", result);
             });
             chrome.sockets.udp.onReceive.addListener(function(message) {
-                let data = parseInt(arrayBufferToString(message.data));
-                console.log("UDP DATA: ", data);
-                //let converted = convertToRange(data, [0,36000], [0,255]);
-                let converted = (data / 100.00) - 180;
-                if(canvas) {
-                    canvas.lon = converted;
+
+                console.log("UDP DATA: ", message.data);
+
+                // let data = parseInt(arrayBufferToString(message.data));
+                let data = arrayBufferToString(message.data);
+                if(parseInt(data) === NaN){
+                    // command logic
+                    console.log("got command: " + data);
+
+                    switch(data){
+                        case 'play':
+                            if(canvas){
+                                player.play();
+                            }
+                            break;
+                        case 'pause':
+                            if (canvas){
+                                player.pause();
+                            }
+                            break;
+                        default:
+
+                            console.log("unprocessed command: " + data)
+                            break;
+                    }
                 }
-                //document.body.style.background = "rgb("+ Math.round(converted) + ",0,0)";
-                //document.getElementById("rotation-debug").innerHTML = "Rotation: " + data;
+
+                else{                
+                    //let converted = convertToRange(data, [0,36000], [0,255]);
+                    var posData = parseInt(data);
+
+                    console.log("inside conversion");
+                    let converted = (posData / 100.00) - 180;
+                    if(canvas) {
+                        canvas.lon = converted;
+                    }
+                    //document.body.style.background = "rgb("+ Math.round(converted) + ",0,0)";
+                    //document.getElementById("rotation-debug").innerHTML = "Rotation: " + data;
+                }
             });
         });
 

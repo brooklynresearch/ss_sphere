@@ -211,6 +211,14 @@ module.exports = [
         "clobbers": [
             "chrome.sockets.udp"
         ]
+    },
+    {
+        "id": "cordova-hot-code-push-plugin.chcp",
+        "file": "plugins/cordova-hot-code-push-plugin/www/chcp.js",
+        "pluginId": "cordova-hot-code-push-plugin",
+        "clobbers": [
+            "chcp"
+        ]
     }
 ];
 module.exports.metadata = 
@@ -221,7 +229,8 @@ module.exports.metadata =
     "cordova-plugin-statusbar": "2.2.2",
     "cordova-plugin-whitelist": "1.3.2",
     "cordova-plugin-chrome-apps-common": "1.0.7",
-    "cordova-plugin-chrome-apps-sockets-udp": "1.3.0"
+    "cordova-plugin-chrome-apps-sockets-udp": "1.3.0",
+    "cordova-hot-code-push-plugin": "1.5.2"
 };
 // BOTTOM OF METADATA
 });

@@ -36,3 +36,5 @@ sphere/platforms/android/CordovaLib/build/intermediates/bundles/debug/classes.ja
 sphere/platforms/android/CordovaLib/build/intermediates/incremental/packageDebugResources/compile-file-map.properties
 
 sphere/platforms/android/CordovaLib/build/intermediates/incremental/packageDebugResources/compile-file-map.properties
+
+sphere/plugins/*

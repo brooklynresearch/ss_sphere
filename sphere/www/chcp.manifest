@@ -1,0 +1,50 @@
+[
+  {
+    "file": "css/index-default.css",
+    "hash": "e46d9a1c456a9c913ca10f3c16d50000"
+  },
+  {
+    "file": "css/index.css",
+    "hash": "5af18e6c22fcc4e7264865d6ef333b30"
+  },
+  {
+    "file": "css/video-js.css",
+    "hash": "25c0ee9be005c59ef095ff469f8e9c8f"
+  },
+  {
+    "file": "css/videojs-panorama.css",
+    "hash": "ccfdfec1a67534e27336c75237624fc8"
+  },
+  {
+    "file": "img/logo.png",
+    "hash": "7e34c95ac701f8cd9f793586b9df2156"
+  },
+  {
+    "file": "index.html",
+    "hash": "c9900093292036cde2d432dfe09125e2"
+  },
+  {
+    "file": "js/index.js",
+    "hash": "1f6d4284ba405e0c97c080d0131bd8dd"
+  },
+  {
+    "file": "js/jquery-3.2.0.min.js",
+    "hash": "d4162c9d7e520a5de05001be6e741899"
+  },
+  {
+    "file": "js/socket.io.js",
+    "hash": "98e2b926a3c7a7dda9e43721d9213a3a"
+  },
+  {
+    "file": "js/three.js",
+    "hash": "9e7f2a3f5e3b9c64c64fa2002037ba84"
+  },
+  {
+    "file": "js/video.js",
+    "hash": "275d9f493061bf4b0983d6a1e53b9f99"
+  },
+  {
+    "file": "js/videojs-panorama.v5.js",
+    "hash": "106ab0e0a193b244145ec7b667bbd5d0"
+  }
+]

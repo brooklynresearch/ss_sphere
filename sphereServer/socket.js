@@ -5,12 +5,25 @@ db.useTestDatabase();
 
 var startListeners = function(io) {
 
-    var oscServer = require('./oscServer').OscServer;
+    // var oscServer = require('./oscServer').OscServer;
+    var serialServer = require('./serialServer').SerialServer;
 
     var udpBroadcaster = dgram.createSocket('udp4');
 
-    oscServer.on('osc', (oscMessage) => {
-        let encoderValue = oscMessage.args[0];
+    // oscServer.on('osc', (oscMessage) => {
+    //     let encoderValue = oscMessage.args[0];
+    //     console.log("UDP BROADCAST: ", encoderValue);
+    //     udpBroadcaster.send(encoderValue.toString(), 55555, '192.168.1.255', (err) => {
+    //         if (err) {
+    //             console.log("ERROR on broadcast: ", err);
+    //         }
+    //     });
+    // });
+
+    serialServer.on('serial', (data) => {
+        console.log("got serial");
+        console.log(data);
+        let encoderValue = data;
         console.log("UDP BROADCAST: ", encoderValue);
         udpBroadcaster.send(encoderValue.toString(), 55555, '192.168.1.255', (err) => {
             if (err) {

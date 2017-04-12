@@ -58,9 +58,10 @@ var startListeners = function(io) {
 
         socket.on('register position', function(msg) {
             let pos = msg;
-            db.updatePhonePosition(ipAddress, pos, function(err, result) {
-                io.emit('newpos', result.rows[0].position);
-            });
+            console.log("position: " + pos);
+            // db.updatePhonePosition(ipAddress, pos, function(err, result) {
+            //     io.emit('newpos', result.rows[0].position);
+            // });
         });
 
         socket.on('error', function(err) {

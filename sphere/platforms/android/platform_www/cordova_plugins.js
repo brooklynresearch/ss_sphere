@@ -1,6 +1,45 @@
 cordova.define('cordova/plugin_list', function(require, exports, module) {
 module.exports = [
     {
+        "id": "cordova-hot-code-push-plugin.chcp",
+        "file": "plugins/cordova-hot-code-push-plugin/www/chcp.js",
+        "pluginId": "cordova-hot-code-push-plugin",
+        "clobbers": [
+            "chcp"
+        ]
+    },
+    {
+        "id": "cordova-plugin-chrome-apps-common.events",
+        "file": "plugins/cordova-plugin-chrome-apps-common/events.js",
+        "pluginId": "cordova-plugin-chrome-apps-common",
+        "clobbers": [
+            "chrome.Event"
+        ]
+    },
+    {
+        "id": "cordova-plugin-chrome-apps-common.errors",
+        "file": "plugins/cordova-plugin-chrome-apps-common/errors.js",
+        "pluginId": "cordova-plugin-chrome-apps-common"
+    },
+    {
+        "id": "cordova-plugin-chrome-apps-common.stubs",
+        "file": "plugins/cordova-plugin-chrome-apps-common/stubs.js",
+        "pluginId": "cordova-plugin-chrome-apps-common"
+    },
+    {
+        "id": "cordova-plugin-chrome-apps-common.helpers",
+        "file": "plugins/cordova-plugin-chrome-apps-common/helpers.js",
+        "pluginId": "cordova-plugin-chrome-apps-common"
+    },
+    {
+        "id": "cordova-plugin-chrome-apps-sockets-udp.sockets.udp",
+        "file": "plugins/cordova-plugin-chrome-apps-sockets-udp/sockets.udp.js",
+        "pluginId": "cordova-plugin-chrome-apps-sockets-udp",
+        "clobbers": [
+            "chrome.sockets.udp"
+        ]
+    },
+    {
         "id": "cordova-plugin-file.DirectoryEntry",
         "file": "plugins/cordova-plugin-file/www/DirectoryEntry.js",
         "pluginId": "cordova-plugin-file",
@@ -180,57 +219,18 @@ module.exports = [
         "clobbers": [
             "window.StatusBar"
         ]
-    },
-    {
-        "id": "cordova-plugin-chrome-apps-common.events",
-        "file": "plugins/cordova-plugin-chrome-apps-common/events.js",
-        "pluginId": "cordova-plugin-chrome-apps-common",
-        "clobbers": [
-            "chrome.Event"
-        ]
-    },
-    {
-        "id": "cordova-plugin-chrome-apps-common.errors",
-        "file": "plugins/cordova-plugin-chrome-apps-common/errors.js",
-        "pluginId": "cordova-plugin-chrome-apps-common"
-    },
-    {
-        "id": "cordova-plugin-chrome-apps-common.stubs",
-        "file": "plugins/cordova-plugin-chrome-apps-common/stubs.js",
-        "pluginId": "cordova-plugin-chrome-apps-common"
-    },
-    {
-        "id": "cordova-plugin-chrome-apps-common.helpers",
-        "file": "plugins/cordova-plugin-chrome-apps-common/helpers.js",
-        "pluginId": "cordova-plugin-chrome-apps-common"
-    },
-    {
-        "id": "cordova-plugin-chrome-apps-sockets-udp.sockets.udp",
-        "file": "plugins/cordova-plugin-chrome-apps-sockets-udp/sockets.udp.js",
-        "pluginId": "cordova-plugin-chrome-apps-sockets-udp",
-        "clobbers": [
-            "chrome.sockets.udp"
-        ]
-    },
-    {
-        "id": "cordova-hot-code-push-plugin.chcp",
-        "file": "plugins/cordova-hot-code-push-plugin/www/chcp.js",
-        "pluginId": "cordova-hot-code-push-plugin",
-        "clobbers": [
-            "chcp"
-        ]
     }
 ];
 module.exports.metadata = 
 // TOP OF METADATA
 {
+    "cordova-hot-code-push-plugin": "1.5.2",
+    "cordova-plugin-chrome-apps-common": "1.0.7",
+    "cordova-plugin-chrome-apps-sockets-udp": "1.3.0",
     "cordova-plugin-compat": "1.1.0",
     "cordova-plugin-file": "4.3.2",
     "cordova-plugin-statusbar": "2.2.2",
-    "cordova-plugin-whitelist": "1.3.2",
-    "cordova-plugin-chrome-apps-common": "1.0.7",
-    "cordova-plugin-chrome-apps-sockets-udp": "1.3.0",
-    "cordova-hot-code-push-plugin": "1.5.2"
+    "cordova-plugin-whitelist": "1.3.2"
 };
 // BOTTOM OF METADATA
 });

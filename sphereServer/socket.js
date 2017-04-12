@@ -38,17 +38,17 @@ var startListeners = function(io) {
         db.getPhone(ipAddress, function(err, result) {
             if(result.rows.length === 0) {
                 db.createPhone(ipAddress, socket.id, function(err, result) {
-                    io.emit("pos", result.rows[0].position);
+                    socket.emit('pos', result.rows[0].position);
                 });
             } else {
-                io.emit('pos', result.rows[0].position);
+                socket.emit('pos', result.rows[0].position);
             }
         });
 
         socket.on('register position', function(msg) {
             let pos = msg;
             db.updatePhonePosition(ipAddress, pos, function(err, result) {
-                io.emit('newpos', result.rows[0].position);
+                socket.emit('newpos', result.rows[0].position);
             });
         });
 
@@ -75,3 +75,4 @@ module.exports = {
     startListeners: startListeners,
     sendUdpCommand: sendUdpCommand
 }
+

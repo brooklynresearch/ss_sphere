@@ -8,8 +8,8 @@ router.get('/', function(req, res, next) {
 });
 
 /* GET control page */
-router.get('/control', function(req, res, next) {
-  res.render('control');
+router.get('/moviecontrol', function(req, res, next) {
+  res.render('moviecontrol');
 });
 
 /* GET play cmd */
@@ -22,3 +22,4 @@ router.get('/pause', function(req, res, next) {
 });
 
 module.exports = router;
+

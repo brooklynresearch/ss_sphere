@@ -32,7 +32,7 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);
-app.use('/control', index);
+app.use('/moviecontrol', index);
 app.use('/play', index);
 app.use('/pause', index);
 //app.use('/users', users);

@@ -15,10 +15,9 @@ jQuery(function() {
 
         // in case there is a new order of images we need to
         socket.on('order', function(msg) {
-
+        	console.log("order received");
+        	console.log(msg);
         });
-
-        socket.emit('currentVideo', 'which');
     }
 
 	function getCurrent() {
@@ -34,7 +33,7 @@ jQuery(function() {
 
 		$('#vid-0'+vid).addClass('active').siblings().removeClass('active');
 
-		socket.emit('setVideo', current);
+		socket.emit('set video', current);
 		        
 	}
 

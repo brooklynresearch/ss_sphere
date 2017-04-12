@@ -509,6 +509,7 @@ var app = {
                     $('#confirm').click(function(event) {
                         if (newPos.length == 4) { //Don't conirm with incomplete position
                             //Send the new position somewhere
+                            socket.emit('register position', newPos);
                             //Can add an ajax loader and confirm if needed
                             currentPos = newPos;
                             //maybe on success you confirm with?:

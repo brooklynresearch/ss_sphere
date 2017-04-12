@@ -21,6 +21,7 @@
     "osc": "^2.2.0",
     "pg": "^6.1.5",
     "request": "^2.81.0",
+    "serialport": "^4.0.7",
     "serve-favicon": "~2.4.2",
     "socket.io": "^1.7.3",
     "squel": "^5.8.0"

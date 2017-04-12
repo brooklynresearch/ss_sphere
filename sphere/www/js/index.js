@@ -71,11 +71,7 @@ var app = {
                 str= str+String.fromCharCode(ui8[i]);
             }
 
-            var srcMax = srcRange[1] - srcRange[0],
-            dstMax = dstRange[1] - dstRange[0],
-            adjValue = value - srcRange[0];
-
-            return (adjValue * dstMax / srcMax) + dstRange[0];
+            return str;
         }
 
         var canvas;
@@ -130,6 +126,7 @@ var app = {
 
         // UDP Listener
         var canvas;
+
         chrome.sockets.udp.create({}, function(createInfo) {
             let socketId = createInfo.socketId;
             console.log("CREATED UDP socket: ", socketId);
@@ -137,15 +134,45 @@ var app = {
                 console.log("Bind UDP: ", result);
             });
             chrome.sockets.udp.onReceive.addListener(function(message) {
-                let data = parseInt(arrayBufferToString(message.data));
-                console.log("UDP DATA: ", data);
-                //let converted = convertToRange(data, [0,36000], [0,255]);
-                let converted = (data / 100.00) - 180;
-                if(canvas) {
-                    canvas.lon = converted;
+
+                console.log("UDP DATA: ", message.data);
+
+                // let data = parseInt(arrayBufferToString(message.data));
+                let data = arrayBufferToString(message.data);
+                if(parseInt(data) === NaN){
+                    // command logic
+                    console.log("got command: " + data);
+
+                    switch(data){
+                        case 'play':
+                            if(canvas){
+                                player.play();
+                            }
+                            break;
+                        case 'pause':
+                            if (canvas){
+                                player.pause();
+                            }
+                            break;
+                        default:
+
+                            console.log("unprocessed command: " + data)
+                            break;
+                    }
                 }
-                //document.body.style.background = "rgb("+ Math.round(converted) + ",0,0)";
-                //document.getElementById("rotation-debug").innerHTML = "Rotation: " + data;
+
+                else{                
+                    //let converted = convertToRange(data, [0,36000], [0,255]);
+                    var posData = parseInt(data);
+
+                    console.log("inside conversion");
+                    let converted = (posData / 100.00) - 180;
+                    if(canvas) {
+                        canvas.lon = converted;
+                    }
+                    //document.body.style.background = "rgb("+ Math.round(converted) + ",0,0)";
+                    //document.getElementById("rotation-debug").innerHTML = "Rotation: " + data;
+                }
             });
         });
 
@@ -401,7 +428,138 @@ var app = {
                     if(!player.isFullscreen())
                         player.controlBar.fullscreenToggle.trigger("tap");
                 });
+
+
             }(window, window.videojs));
+
+            // hidden assignment and debug block
+
+            jQuery(function() {
+
+                console.log("Within JQuery");
+
+                currentPos = 1234; //If you are seeing this on the front something is wrong
+
+                function getPosition() {
+                    // something that gets a posiiton in a four digit format: 0101 for row 1 column 01 or somehting you prefer.
+                    var pos = String(currentPos); //replace currentPos here with what you get
+                    var row = pos.substring(0,2);
+                    var col = pos.slice(-2);
+
+                    $('#pos-row').text(row);
+                    $('#pos-col').text(col);
+                }
+
+
+                function initSecret() {
+
+                    var tapCount = 0;
+
+                    $('#hidden-btn').click(function(event) {
+                        tapCount ++;
+                        if (tapCount == 3) {
+                            $('#re-assn-wrap').fadeIn('fast', function() {
+                                tapCount = 0;
+                                $('#hidden-btn').hide();
+                            });
+                        }
+
+                    });
+
+                    $('#exit').click(function(event) {
+                        $('#re-assn-wrap').fadeOut('fast', function() {
+                                $('#hidden-btn').show();
+                            });
+                    });
+                }
+
+
+                function initAssign() {
+
+                    var newPos = '';
+                    
+                    $('#re-assn').click(function(event) {
+                        newPos = ''
+                        $('.view-mode').hide();
+                        $('.assn-mode').show();
+
+                        $('#pos-row').text("__");
+                        $('#pos-col').text("__");
+                    });
+
+                    
+                    $('.key').click(function(event) {
+
+                        if (newPos.length < 4) {
+
+                            var input = $(this).attr('data-id');
+                            newPos += input;
+                            console.log(newPos);
+                            if (newPos.length < 3) {
+                                $('#pos-row').text(newPos);
+                            }
+                            else {
+                                var newCol = newPos.substr(2);
+                                $('#pos-col').text(newCol);
+                            }
+
+                        }
+                    });
+
+                    $('#confirm').click(function(event) {
+                        if (newPos.length == 4) { //Don't conirm with incomplete position
+                            //Send the new position somewhere
+                            socket.emit('register position', newPos);
+                            //Can add an ajax loader and confirm if needed
+                            currentPos = newPos;
+                            //maybe on success you confirm with?:
+                            getPosition();
+                            //then:
+                            $('.view-mode').show();
+                            $('.assn-mode').hide();
+                        }
+                    });   
+
+                    $('#cancel').click(function(event) {
+
+                        newPos = '';
+
+                        getPosition(); //in case input was not completed revert back to current position
+
+                        $('.view-mode').show();
+                        $('.assn-mode').hide();
+                    });     
+
+                }
+
+
+                function initDebug() {
+                    $('#debug').click(function(event) {
+                        //The world is your oyster
+                    });
+                }
+
+
+                function initRefresh() {
+                    $('.refresh').click(function(event) {
+                        //So Refreshing!
+                    });
+                }
+                
+
+                function init() {
+                    getPosition();
+                    initSecret();
+                    initAssign();
+                    // initDebug();
+                    // initRefresh();
+                }
+
+
+                init();
+
+            });
+
         },
 
     // Update DOM on a Received Event

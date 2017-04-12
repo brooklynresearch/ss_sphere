@@ -7,13 +7,26 @@ var udpBroadcaster;
 
 var startListeners = function(io) {
 
-    var oscServer = require('./oscServer').OscServer;
+    // var oscServer = require('./oscServer').OscServer;
+    var serialServer = require('./serialServer').SerialServer;
 
     udpBroadcaster = dgram.createSocket('udp4');
     let broadcast = process.env.BROADCAST_ADDR;
 
-    oscServer.on('osc', (oscMessage) => {
-        let encoderValue = oscMessage.args[0];
+    // oscServer.on('osc', (oscMessage) => {
+    //     let encoderValue = oscMessage.args[0];
+    //     console.log("UDP BROADCAST: ", encoderValue);
+    //     udpBroadcaster.send(encoderValue.toString(), 55555, '192.168.1.255', (err) => {
+    //         if (err) {
+    //             console.log("ERROR on broadcast: ", err);
+    //         }
+    //     });
+    // });
+
+    serialServer.on('serial', (data) => {
+        console.log("got serial");
+        console.log(data);
+        let encoderValue = data;
         console.log("UDP BROADCAST: ", encoderValue);
         udpBroadcaster.send(encoderValue.toString(), 55555, broadcast, (err) => {
             if (err) {
@@ -50,11 +63,22 @@ var startListeners = function(io) {
             db.updatePhonePosition(ipAddress, pos, function(err, result) {
                 socket.emit('newpos', result.rows[0].position);
             });
+            console.log("position: " + pos);
         });
 
         socket.on('error', function(err) {
             console.log("Socket Error: ", err.message);
             socket.disconnect(true);
+        });
+
+        // controller has set a new video
+        socket.on('set video', function(msg) {
+            console.log("set video");
+
+            // set an internal variable to this new set video if it is new
+
+            // emit this to all the devices in order to tell them to play
+
         });
     });
 }

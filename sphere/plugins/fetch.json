@@ -31,14 +31,6 @@
         "is_top_level": false,
         "variables": {}
     },
-    "cordova-plugin-chrome-apps-sockets-udp": {
-        "source": {
-            "type": "registry",
-            "id": "cordova-plugin-chrome-apps-sockets-udp"
-        },
-        "is_top_level": true,
-        "variables": {}
-    },
     "cordova-plugin-chrome-apps-common": {
         "source": {
             "type": "registry",
@@ -47,10 +39,26 @@
         "is_top_level": false,
         "variables": {}
     },
+    "cordova-plugin-chrome-apps-sockets-udp": {
+        "source": {
+            "type": "registry",
+            "id": "cordova-plugin-chrome-apps-sockets-udp@~1.3.0"
+        },
+        "is_top_level": true,
+        "variables": {}
+    },
     "cordova-hot-code-push-plugin": {
         "source": {
             "type": "registry",
             "id": "cordova-hot-code-push-plugin"
+        },
+        "is_top_level": true,
+        "variables": {}
+    },
+    "cordova-hot-code-push-local-dev-addon": {
+        "source": {
+            "type": "registry",
+            "id": "cordova-hot-code-push-local-dev-addon@~0.4.2"
         },
         "is_top_level": true,
         "variables": {}

@@ -47,7 +47,7 @@
             </div> -->
             <div class="player_wrapper" id="video_wrapper">
                 <div class="player_container">
-                    <video id="videojs-panorama-player" class="video-js vjs-default-skin" poster="img/logo.png"  crossorigin="anonymous" controls>
+                    <video id="videojs-panorama-player" class="video-js vjs-default-skin" poster="img/logo.png"  crossorigin="anonymous" controls preload="auto">
                         <source src="file:///storage/emulated/0/Movies/sphere/20160803_451_Samsung837_IH-C_Final-422HQ-3840x2160-h265-gearvr_1.mp4" type='video/mp4'>
                     </video>
                 </div>
@@ -55,8 +55,45 @@
             <div id="debug-display">
                 <p id="position-debug"></p>
                 <p id="rotation-debug"></p>
-                <button id="change-position-debug-1">Set Test Pos: -420</button></br>
+                <button id="change-position-debug-1">Try Test Pos: -420</button></br>
                 <button id="change-position-debug-2">Set Test Pos: -666</button>
+            </div>
+            <div id="hidden-btn"></div>
+
+            <div id="re-assn-wrap">
+                <div id="header">
+                    <div id="title" class="left">Current Position:</div>
+                    <div id="exit" class="right"></div>
+                </div>
+                <div id="position-wrap" class="center">
+                    <div id="pos-row" class="position">00</div>
+                    <div id="pos-space" class="position">-</div>
+                    <div id="pos-col" class="position">00</div>
+                    <div id="pos-labels">
+                        <div id="row" class="label left">Row</div>
+                        <div id="column" class="labe right">Column</div>
+                    </div>
+                </div>
+                <div id="re-assn" class="button center view-mode">Re-Assign</div>
+                <div id="key-wrap" class="assn-mode">
+                    <div id="key-07" class="key" data-id="7">7</div>
+                    <div id="key-08" class="key" data-id="8">8</div>
+                    <div id="key-09" class="key" data-id="9">9</div>
+                    <div id="key-04" class="key" data-id="4">4</div>
+                    <div id="key-05" class="key" data-id="5">5</div>
+                    <div id="key-06" class="key" data-id="6">6</div>
+                    <div id="key-01" class="key" data-id="1">1</div>
+                    <div id="key-02" class="key" data-id="2">2</div>
+                    <div id="key-03" class="key" data-id="3">3</div>
+                    <div id="key-00" class="key" style="margin-left: 76px" data-id="0">0</div>
+                </div>
+                <div id="footer">
+                <div id="footer-btn-wrap">
+                    <div id="debug" class="button left view-mode">debug</div>
+                    <div id="refresh" class="button right view-mode">refresh</div>
+                    <div id="confirm" class="button left assn-mode">confirm</div>
+                    <div id="cancel" class="button right assn-mode">cancel</div>
+                </div>
             </div>
         </div>
         <script type="text/javascript" src="cordova.js"></script>

@@ -11,6 +11,7 @@ sphere/platforms/android/CordovaLib/ant-build
 sphere/platforms/android/CordovaLib/ant-gen
 sphere/platforms/android/CordovaLib/bin
 sphere/platforms/android/CordovaLib/gen
+sphere/platforms/android/CordovaLib/build
 sphere/platforms/android/CordovaLib/local.properties
 sphere/platforms/browser
 sphere/www/img/*.mp4
@@ -38,3 +39,9 @@ sphere/platforms/android/CordovaLib/build/intermediates/incremental/packageDebug
 sphere/platforms/android/CordovaLib/build/intermediates/incremental/packageDebugResources/compile-file-map.properties
 
 sphere/plugins/*
+
+sphereServer/public/appupdate/*
+
+sphere/www/chcp.json
+
+sphere/www/chcp.manifest

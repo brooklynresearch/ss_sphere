@@ -2,6 +2,6 @@
   "name": "sphere",
   "ios_identifier": "",
   "android_identifier": "",
-  "update": "resume",
-  "content_url": "http://192.168.1.200:8080/appupdate"
+  "update": "now",
+  "content_url": "http://192.168.1.200:3000/appupdate"
 }

@@ -38,6 +38,7 @@ var startListeners = function(io) {
                     io.emit("pos", result.rows[0].position);
                 });
             } else {
+                // is this correct?
                 io.emit('pos', result.rows[0].position);
             }
         });
@@ -52,6 +53,16 @@ var startListeners = function(io) {
         socket.on('error', function(err) {
             console.log("Socket Error: ", err.message);
             socket.disconnect(true);
+        });
+
+        // controller has set a new video
+        socket.on('set video', function(msg) {
+            console.log("set video");
+
+            // set an internal variable to this new set video if it is new
+
+            // emit this to all the devices in order to tell them to play
+
         });
     });
 }

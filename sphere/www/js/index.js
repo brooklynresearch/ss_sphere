@@ -88,7 +88,9 @@ var app = {
             canvas.lon = convertToRange(encoderPosition, [0, encoderRange], [0, 360.0]) - 180.0 + parameters['long'];
             canvas.lat = parameters['lat'];
             canvas.camera.fov = parameters['fov'];
+            canvas.camera.updateProjectionMatrix();
             console.log("updated position parameters for: " + devicePosition);
+            console.log(canvas);
         }
 
         

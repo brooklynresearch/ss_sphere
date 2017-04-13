@@ -28,7 +28,7 @@ var latOrigin = 0.0;
 var latCalc = true;
 
 // assuming this should be the same for all
-var fov = 6.3;
+var fov = 5.3;
 
 
 var generatedJSON = positionGenerator();

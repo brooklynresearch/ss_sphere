@@ -64,17 +64,7 @@ var app = {
           'reconnectionAttempts': 999
         });
 
-        var arrayBufferToString = function(buf) {
-            var str= '';
-            var ui8= new Uint8Array(buf);
-            for (var i= 0 ; i < ui8.length ; i++) {
-                str= str+String.fromCharCode(ui8[i]);
-            }
-
-            return str;
-        }
-
-        var canvas;
+        // WEBSOCKET
         socket.on('connect', function() {
             console.log("Connected to sphereserver");
         });
@@ -87,15 +77,10 @@ var app = {
             console.log("New position ", data);
             document.getElementById("position-debug").innerHTML = "Position: " + data;
         });
-        socket.on('rotate', function(data) {
-            console.log("Rotate ", data);
-            document.getElementById("rotation-debug").innerHTML = "Rotation: " + data;
-            let converted = (convertToRange(data, [0,12000], [0,1000]))/10.0;
-            if(canvas) {
-                canvas.lon = converted;
-            }
-        });
+        socket.on('switch video', function(data) {
+            //Load the video and start playing
 
+        });
         // for testing and calibration
         socket.on('newtable', function(data) {
             // receive from server new parameters for posTable variable
@@ -105,11 +90,16 @@ var app = {
             // reload parameters for this phone's position
 
         });
+ 
+        var arrayBufferToString = function(buf) {
+            var str= '';
+            var ui8= new Uint8Array(buf);
+            for (var i= 0 ; i < ui8.length ; i++) {
+                str= str+String.fromCharCode(ui8[i]);
+            }
 
-        document.getElementById('change-position-debug-1').onclick = function() {
-            socket.emit('register position', -420);
             return str;
-        };
+        }
 
         var convertToRange = function(value, srcRange, dstRange){
             // value is outside source range return
@@ -135,61 +125,38 @@ var app = {
             });
             chrome.sockets.udp.onReceive.addListener(function(message) {
 
-                console.log("UDP DATA: ", message.data);
-
-                // let data = parseInt(arrayBufferToString(message.data));
                 let data = arrayBufferToString(message.data);
-                if(parseInt(data) === NaN){
-                    // command logic
-                    console.log("got command: " + data);
+                console.log("got command: " + data);
 
-                    switch(data){
-                        case 'play':
-                            if(canvas){
-                                player.play();
-                            }
-                            break;
-                        case 'pause':
-                            if (canvas){
-                                player.pause();
-                            }
-                            break;
-                        default:
+                switch(data) {
+                    case 'play':
+                        if(canvas) {
+                            player.play();
+                        }
+                        if (socket) {
+                            socket.emit('ACK', "play");
+                        }
+                        break;
+                    case 'pause':
+                        if (canvas) {
+                            player.pause();
+                        }
+                        if (socket) {
+                            socket.emit('ACK', "PAUSE");
+                        }
+                        break;
+                    default:
+                        var posData = parseInt(data);
 
-                            console.log("unprocessed command: " + data)
-                            break;
-                    }
-                }
-
-                else{                
-                    //let converted = convertToRange(data, [0,36000], [0,255]);
-                    var posData = parseInt(data);
-
-                    console.log("inside conversion");
-                    let converted = (posData / 100.00) - 180;
-                    if(canvas) {
-                        canvas.lon = converted;
-                    }
-                    //document.body.style.background = "rgb("+ Math.round(converted) + ",0,0)";
-                    //document.getElementById("rotation-debug").innerHTML = "Rotation: " + data;
+                        let converted = (posData / 100.00) - 180;
+                        if(canvas) {
+                            canvas.lon = converted;
+                        }
                 }
             });
         });
 
-        // WEBSOCKET
-        socket.on('connect', function() {
-            console.log("Connected to sphereserver");
-        });
-        socket.on('pos', function(data) {
-            console.log("position ", data);
-            document.getElementById("position-debug").innerHTML = "Position: " + data;
-
-        });
-        socket.on('newpos', function(data) {
-            console.log("New position ", data);
-            document.getElementById("position-debug").innerHTML = "Position: " + data;
-        });
-        /*
+       /*
         socket.on('rotate', function(data) {
             console.log("Rotate ", data);
             document.getElementById("rotation-debug").innerHTML = "Rotation: " + data;
@@ -202,14 +169,6 @@ var app = {
         });
         */
 
-        document.getElementById('change-position-debug-1').onclick = function() {
-            socket.emit('register position', -420);
-        };
-
-        document.getElementById('change-position-debug-2').onclick = function() {
-            socket.emit('register position', -666);
-        };
-
         // currentVideo to load, could be an index for an array of video names
         // likely will want to figure out a way to load from camera resources rather than www assets folder
         // as we'll have to save new ones anyhow as they come in
@@ -218,7 +177,6 @@ var app = {
         var position;
         var targetFile = "dummy";
         var targetEntry;
-
 
         // write test
 
@@ -245,7 +203,6 @@ var app = {
             });
 
         });
-
 
         function isMobile() {
 
@@ -302,7 +259,7 @@ var app = {
                 // window.resolveLocalFileSystemURL(localURLs[i], addFileEntry, addError);
             }
 
-            
+
 
             // canvas test
 
@@ -327,10 +284,10 @@ var app = {
                 // var height = screen.height;
                 console.log(width, height);
                 player.width(width), player.height(height);
-                
+
 
                 // full screen
-                
+
                 // var videoWrapper = document.getElementByClassName('player_wrapper');
                 // videoWrapper.style.width = screen.width;
                 // videoWrapper.style.height = screen.height;
@@ -518,7 +475,7 @@ var app = {
                             $('.view-mode').show();
                             $('.assn-mode').hide();
                         }
-                    });   
+                    });
 
                     $('#cancel').click(function(event) {
 

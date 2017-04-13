@@ -78,6 +78,7 @@ var startListeners = function(io) {
             // set an internal variable to this new set video if it is new
 
             // emit this to all the devices in order to tell them to play
+            io.emit('switch video', msg);
 
         });
     });

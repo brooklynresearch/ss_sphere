@@ -352,6 +352,7 @@ var app = {
                     minFov: 5,
                     initLat: 20,
                     initLon: 10,
+                    // clickAndDrag: false, // this disables all camera movement, instead, we should have a transparent div covering the entire thing
                     backToVerticalCenter: false,
                     backToHorizonCenter: false,
                     VREnable: isMobile(),

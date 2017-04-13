@@ -44,18 +44,23 @@ var app = {
             cordova.file.syncedDataDirectory
         ];
 
-        var posTable = [
-            {pos: 0, lat: 20.0, lon: 30, fov: 20},
-            {pos: 1, lat: 20.0, lon: 33, fov: 20},
-            {pos: 2, lat: 20.0, lon: 40, fov: 20},
-        ];
-
-        var pos = 0;
+        var devicePosition;
+        var currentVideo;
 
         var encoderRange = 36000;
 
-        console.log(posTable[pos].lat);
-        console.log(posTable[pos].lon);
+        function newPositionParameters(canvas, json){
+            var parameters = json[devicePosition];
+            console.log("parameters");
+            console.log(parameters);
+            canvas.lon = convertToRange(parameters['long'], 360, encoderRange)
+            canvas.lat = parameters['lat'];
+            canvas.camera.fov = parameters['fov'];
+            console.log("registered new positions");
+        }
+
+        
+
         document.body.style.background = "rgb(0,0,0)";
 
         var serveraddress = 'http://192.168.1.200:8080';
@@ -78,6 +83,7 @@ var app = {
         }
 
         var canvas;
+
         socket.on('connect', function() {
             console.log("Connected to sphereserver");
         });
@@ -102,10 +108,13 @@ var app = {
         // for testing and calibration
         socket.on('newtable', function(data) {
             // receive from server new parameters for posTable variable
+            if(canvas && devicePosition){
+                newPositionParameters(canvas, data);
+            }
 
-            // save new pos parameters in a persistent file
-
-            // reload parameters for this phone's position
+            else{
+                console.log("nothing to assign");
+            }
 
         });
 
@@ -216,16 +225,6 @@ var app = {
         document.getElementById('change-position-debug-2').onclick = function() {
             socket.emit('register position', -666);
         };
-
-        // currentVideo to load, could be an index for an array of video names
-        // likely will want to figure out a way to load from camera resources rather than www assets folder
-        // as we'll have to save new ones anyhow as they come in
-        var currentVideo;
-        // variable later for tablet position placement
-        var position;
-        var targetFile = "dummy";
-        var targetEntry;
-
 
         // write test
 
@@ -438,7 +437,7 @@ var app = {
 
             }(window, window.videojs));
 
-            // hidden assignment and debug block
+            // Assignment and debug block
 
             jQuery(function() {
 
@@ -518,6 +517,7 @@ var app = {
                             socket.emit('register position', newPos);
                             //Can add an ajax loader and confirm if needed
                             currentPos = newPos;
+                            devicePos = currentPos;
                             //maybe on success you confirm with?:
                             getPosition();
                             //then:

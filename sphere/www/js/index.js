@@ -366,32 +366,32 @@ var app = {
                     player.width(screen.width), player.height(screen.height);
 
                     player.play();
-                    player.currentTime(15);
+                    // player.currentTime(15);
                     // player.pause();
                     console.log("is ready");
                     canvas = player.getChild('Canvas');
                     console.log(canvas);
 
-                    setTimeout(function(){ 
+                    // setTimeout(function(){ 
 
                         
-                        console.log("testing for position shift");
+                    //     console.log("testing for position shift");
 
-                        console.log(canvas);
+                    //     console.log(canvas);
 
-                        // canvas.lon = posTable[pos].lon;
-                        // canvas.lat = posTable[pos].lat;
-                        newPositionParameters(canvas, testJSON);
+                    //     // canvas.lon = posTable[pos].lon;
+                    //     // canvas.lat = posTable[pos].lat;
+                    //     newPositionParameters(canvas, testJSON);
 
-                        console.log(canvas);
+                    //     console.log(canvas);
 
-                        player.pause();
-                        // vid swap test snippet
-                        //var videoGrab = document.getElementById("videojs-panorama-player_html5_api");
-                        //console.log(videoGrab);
-                        //videoGrab.src = targetEntry.nativeURL;
-                        //player.play();
-                    }, 1000);
+                    //     player.pause();
+                    //     // vid swap test snippet
+                    //     //var videoGrab = document.getElementById("videojs-panorama-player_html5_api");
+                    //     //console.log(videoGrab);
+                    //     //videoGrab.src = targetEntry.nativeURL;
+                    //     //player.play();
+                    // }, 1000);
 
                 });
 

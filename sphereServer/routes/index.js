@@ -28,9 +28,9 @@ router.get('/sendparams', function(req, res, next) {
     console.log("IN sendparams");
 
     let jsonData = require('../pos-generator').generateParams();
-    //console.log('Sending Params ', jsonData);
+    console.log('Sending Params ', jsonData);
 
-    socketCmd.sendSocketBroadcast('params', jsonData);
+    socketCmd.sendSocketBroadcast('newtable', jsonData);
 
     //res.setHeader('Content-Type', 'application/json');
     //res.send(JSON.stringify(jsonData));

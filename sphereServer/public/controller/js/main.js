@@ -68,7 +68,7 @@ jQuery(function() {
     function init() {
 
     	initSocket();
-    	getCurrent();
+    	// getCurrent();
     	initVids();
  
     }

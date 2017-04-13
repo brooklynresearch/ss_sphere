@@ -15,11 +15,13 @@ router.get('/moviecontrol', function(req, res, next) {
 
 /* GET play cmd */
 router.get('/play', function(req,res,next) {
+  console.log("play");
   socketCmd.sendUdpCommand("play");  
   res.end();
 });
 
 router.get('/pause', function(req, res, next) {
+  console.log("paused");
   socketCmd.sendUdpCommand("pause");
   res.end();
 });

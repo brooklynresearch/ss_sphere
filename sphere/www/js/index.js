@@ -45,30 +45,33 @@ var app = {
         ];
 
         var testJSON = {
-        '0101':
-            {
-                'lat': 44.55,
-                'long': 40,
-                'fov': 6.3
-            }
+            '0101':
+                {
+                    'lat': 44.55,
+                    'long': 40,
+                    'fov': 5
+                }
 
         }
 
         var devicePosition;
+        var deviceParameters;
         var currentVideo;
 
+        var encoderPosition = 0;
         var encoderRange = 36000;
 
         function newPositionParameters(canvas, json){
             console.log(devicePosition);
             var parameters = json[devicePosition];
+            deviceParameters = parameters;
             console.log("parameters");
             console.log(parameters);
             // this needs to change to actual equation taking into account current encoder readings
-            canvas.lon = convertToRange(parameters['long'], 360, encoderRange)
+            canvas.lon = convertToRange(encoderPosition, [0, encoderRange], [0, 360.0]) - 180.0 + parameters['long'];
             canvas.lat = parameters['lat'];
             canvas.camera.fov = parameters['fov'];
-            console.log("registered new positions");
+            console.log("updated position parameters for: " + devicePosition);
         }
 
         
@@ -188,13 +191,16 @@ var app = {
                 else{                
                     //let converted = convertToRange(data, [0,36000], [0,255]);
                     var posData = parseInt(data);
+                    encoderPosition = posData;
 
                     console.log("inside conversion");
 
+                    console.log(convertToRange(posData, [0, encoderRange], [0, 360.0]));
+                    console.log(deviceParameters);
                     // should be a mapping of encoder range to 360 then subtract 180
-
-                    let converted = (posData / 100.00) - 180;
+                    let converted = convertToRange(posData, [0, encoderRange], [0, 360.0]) - 180.0 + deviceParameters['long'];
                     console.log(converted)
+                    
                     if(canvas) {
                         canvas.lon = converted;
                     }

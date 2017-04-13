@@ -1,6 +1,7 @@
 var express = require('express');
 var router = express.Router();
 var socketCmd = require('../socket');
+var fs = require('fs');
 
 /* GET home page. */
 router.get('/', function(req, res, next) {
@@ -25,15 +26,17 @@ router.get('/pause', function(req, res, next) {
 
 router.get('/sendparams', function(req, res, next) {
 
-    console.log("IN sendparams");
-
-    let jsonData = require('../pos-generator').generateParams();
-    console.log('Sending Params ', jsonData);
-
-    socketCmd.sendSocketBroadcast('newtable', jsonData);
-
-    //res.setHeader('Content-Type', 'application/json');
-    //res.send(JSON.stringify(jsonData));
+    //console.log("IN sendparams");
+    fs.readFile('./public/positions.json', 'utf8', function(err, data) {
+        if (err) {
+            console.log("couldn't Open positions file!: ", err);
+        } else {
+            console.log("Sending Position Table");
+            let jsonData = JSON.parse(data);
+            socketCmd.sendSocketBroadcast('newtable', jsonData);
+        }
+    });
+    res.end();
 });
 
 module.exports = router;

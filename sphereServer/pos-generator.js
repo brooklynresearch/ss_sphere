@@ -17,13 +17,13 @@ var rowLongOrigin = [40.0, 32.0, 24.0, 16.0, 8.0, 0.0, 0.0, 8.0, 16.0, 24.0, 32.
 // these should probably be the exact same for all, so we may actually generate this
 
 var rowLongOffset = [8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0];
-var longOffset = 8.0;
+var longOffset = 8.1;
 var longCalc = true;
 
 // These are the latitude settings for all phones of each row
 // it may make sense to make it generative
 var rowLat = [44.0, 36.0, 28.0, 20.0, 12.0, 4.0, -4.0, -12.0, -20.0, -28.0, -36.0, -44.0]; 
-var latOffset = 8.0;
+var latOffset = 8.1;
 var latOrigin = 0.0;
 var latCalc = true;
 
@@ -46,6 +46,7 @@ function positionGenerator() {
 
 			if(longCalc){
 				longitude = rowLongOrigin[row] + longOffset * col;
+				// longitude = longitude.toFixed(5);
 			}
 			else{
 				longitude = rowLongOrigin[row] + rowLongOffset[row] * col;
@@ -58,6 +59,7 @@ function positionGenerator() {
 
 			if(latCalc){
 				latitude = latOrigin - latOffset/2 + latOffset * (rowLat.length/2 - row);
+				// latitude = latitude.toFixed(5);
 			}
 			else{
 				latitude = rowLat[row];

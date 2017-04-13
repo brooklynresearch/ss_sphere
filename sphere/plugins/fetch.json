@@ -55,5 +55,13 @@
         },
         "is_top_level": true,
         "variables": {}
+    },
+    "cordova-hot-code-push-local-dev-addon": {
+        "source": {
+            "type": "registry",
+            "id": "cordova-hot-code-push-local-dev-addon@~0.4.2"
+        },
+        "is_top_level": true,
+        "variables": {}
     }
 }

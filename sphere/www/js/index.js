@@ -44,15 +44,27 @@ var app = {
             cordova.file.syncedDataDirectory
         ];
 
+        var testJSON = {
+        '0101':
+            {
+                'lat': 44.55,
+                'long': 40,
+                'fov': 6.3
+            }
+
+        }
+
         var devicePosition;
         var currentVideo;
 
         var encoderRange = 36000;
 
         function newPositionParameters(canvas, json){
+            console.log(devicePosition);
             var parameters = json[devicePosition];
             console.log("parameters");
             console.log(parameters);
+            // this needs to change to actual equation taking into account current encoder readings
             canvas.lon = convertToRange(parameters['long'], 360, encoderRange)
             canvas.lat = parameters['lat'];
             canvas.camera.fov = parameters['fov'];
@@ -378,20 +390,22 @@ var app = {
 
 
                     // positioning test snippet
+                    devicePosition = '0101';
 
                     setTimeout(function(){ 
 
+                        
                         console.log("testing for position shift");
-                        player.pause();
 
                         console.log(canvas);
 
                         // canvas.lon = posTable[pos].lon;
                         // canvas.lat = posTable[pos].lat;
+                        newPositionParameters(canvas, testJSON);
 
                         console.log(canvas);
 
-
+                        player.pause();
                         // vid swap test snippet
                         // var videoGrab = document.getElementById("videojs-panorama-player_html5_api");
                         // console.log(videoGrab);

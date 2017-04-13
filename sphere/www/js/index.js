@@ -44,22 +44,38 @@ var app = {
             cordova.file.syncedDataDirectory
         ];
 
+        
+
+        var devicePosition;
+        var deviceParameters;
+        var parametersTable;
+        var currentVideo;
+
+        var encoderPosition = 0;
+        var encoderRange = 36000;
+
+        var canvas;
+
+
+        // testing vars
         var testJSON = {
             '0101':
                 {
                     'lat': 44.55,
                     'long': 40,
-                    'fov': 5
-                }
+                    'fov': 6.3
+                },
 
-        }
+            '0102':
+                {
+                    'lat': 44.55,
+                    'long': 48.1,
+                    'fov': 6.3
+                }                
 
-        var devicePosition;
-        var deviceParameters;
-        var currentVideo;
+        };
 
-        var encoderPosition = 0;
-        var encoderRange = 36000;
+        parametersTable = testJSON;
 
         function newPositionParameters(canvas, json){
             console.log(devicePosition);
@@ -97,8 +113,6 @@ var app = {
             return str;
         }
 
-        var canvas;
-
         socket.on('connect', function() {
             console.log("Connected to sphereserver");
         });
@@ -124,7 +138,9 @@ var app = {
         socket.on('newtable', function(data) {
             // receive from server new parameters for posTable variable
             if(canvas && devicePosition){
-                newPositionParameters(canvas, data);
+                // should be a json object
+                parametersTable = data;
+                newPositionParameters(canvas, parametersTable);
             }
 
             else{
@@ -537,9 +553,14 @@ var app = {
                             socket.emit('register position', newPos);
                             //Can add an ajax loader and confirm if needed
                             currentPos = newPos;
-                            devicePos = currentPos;
+                            devicePosition = currentPos;
                             //maybe on success you confirm with?:
                             getPosition();
+
+                            // provided we have a table
+                            if(parametersTable && canvas){
+                                newPositionParameters(canvas, parametersTable);
+                            }
                             //then:
                             $('.view-mode').show();
                             $('.assn-mode').hide();

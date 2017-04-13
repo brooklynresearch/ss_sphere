@@ -72,7 +72,7 @@ function positionGenerator() {
 
 			var row_col_string = rowColGenerator(row, col);
 			jsonData[row_col_string] = eachData;
-			console.log(row_col_string);
+//			console.log(row_col_string);
 		}	
 	}
 
@@ -96,7 +96,7 @@ function rowColGenerator(row, col) {
 }
 
 console.log("Here is your JSON");
-console.log(generatedJSON);
+//console.log(generatedJSON);
 
 var fileDirectory = "public/"
 
@@ -107,3 +107,8 @@ fs.writeFile(fileDirectory + "positions.json", JSON.stringify(generatedJSON), fu
 
     console.log("The file was saved!");
 });
+
+module.exports = {
+   generateParams: positionGenerator
+}
+

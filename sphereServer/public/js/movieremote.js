@@ -12,3 +12,9 @@ pauseBtn.onclick = function() {
   xhr.send();
 };
 
+var sndParamsBtn = document.getElementById('send-params');
+sndParamsBtn.onclick = function() {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "http://localhost:3000/sendparams");
+    xhr.send();
+};

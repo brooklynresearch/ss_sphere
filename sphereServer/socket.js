@@ -4,9 +4,11 @@ var dgram = require('dgram');
 db.useTestDatabase();
 
 var udpBroadcaster;
+var ioInstance;
 
 var startListeners = function(io) {
 
+    ioInstance = io;
     // var oscServer = require('./oscServer').OscServer;
     var serialServer = require('./serialServer').SerialServer;
 
@@ -58,6 +60,9 @@ var startListeners = function(io) {
             }
         });
 
+        let positionParams = require('./pos-generator').generateParams();
+        socket.emit('newtable', positionParams);
+
         socket.on('register position', function(msg) {
             let pos = msg;
             db.updatePhonePosition(ipAddress, pos, function(err, result) {
@@ -84,6 +89,11 @@ var startListeners = function(io) {
     });
 }
 
+var sendSocketBroadcast = function(sockEvent, msg) {
+    //console.log("sending params");
+    ioInstance.emit(sockEvent, msg);
+}
+
 var sendUdpCommand = function(cmd) {
     let broadcast = process.env.BROADCAST_ADDR;
     for( var i = 0; i < 10; i++) {
@@ -98,6 +108,7 @@ var sendUdpCommand = function(cmd) {
 
 module.exports = {
     startListeners: startListeners,
-    sendUdpCommand: sendUdpCommand
+    sendUdpCommand: sendUdpCommand,
+    sendSocketBroadcast: sendSocketBroadcast
 }
 

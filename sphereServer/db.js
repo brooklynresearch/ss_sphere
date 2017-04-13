@@ -26,7 +26,7 @@ var createPhone = function(ipAddress, socketId, cb) {
                 .into("phones")
                 .set("ipaddress", ipAddress)
                 .set("socketid", socketId)
-                .set("position", -1)
+                .set("position", "-1")
                 .returning('*')
                 .toParam();
 

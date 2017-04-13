@@ -5,8 +5,8 @@ exports.up = function(pgm, run) {
         'name': {type: 'string'},
         'url': {type: 'string'},
         'runtime': {type:  'integer'},
-        'active': {type: boolean},
-        'selected': {type: boolean}}
+        'active': {type: 'boolean'},
+        'selected': {type: 'boolean'}}
     );
     run();
 };

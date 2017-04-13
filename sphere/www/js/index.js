@@ -82,16 +82,20 @@ var app = {
         });
         socket.on('switch video', function(data) {
             //Load the video and start playing
-
+            // vid swap test snippet
+            var videoGrab = document.getElementById("videojs-panorama-player_html5_api");
+            console.log(videoGrab);
+            videoGrab.src = "/storage/emulated/0/Movies/sphere/" + data;
+            player.play();
         });
         // for testing and calibration
         socket.on('newtable', function(data) {
             // receive from server new parameters for posTable variable
+            console.log("Recv new table: ", data);
 
             // save new pos parameters in a persistent file
 
             // reload parameters for this phone's position
-
         });
  
         var arrayBufferToString = function(buf) {
@@ -100,7 +104,6 @@ var app = {
             for (var i= 0 ; i < ui8.length ; i++) {
                 str= str+String.fromCharCode(ui8[i]);
             }
-
             return str;
         }
 
@@ -145,7 +148,7 @@ var app = {
                             player.pause();
                         }
                         if (socket) {
-                            socket.emit('ACK', "PAUSE");
+                            socket.emit('ACK', "pause");
                         }
                         break;
                     default:
@@ -348,16 +351,16 @@ var app = {
 
 
                         // vid swap test snippet
-                        // var videoGrab = document.getElementById("videojs-panorama-player_html5_api");
-                        // console.log(videoGrab);
-                        // videoGrab.src = targetEntry.nativeURL;
-                        // player.play();
+                        //var videoGrab = document.getElementById("videojs-panorama-player_html5_api");
+                        //console.log(videoGrab);
+                        //videoGrab.src = targetEntry.nativeURL;
+                        //player.play();
                     }, 1000);
 
                 });
 
                 document.addEventListener('keydown', function(event) {
-                
+
                     console.log("key pressed");
                     console.log(event.keyCode);
                     console.log("width: " + width);

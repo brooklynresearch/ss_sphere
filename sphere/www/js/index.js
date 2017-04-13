@@ -29,6 +29,7 @@ var app = {
     onDeviceReady: function() {
         this.receivedEvent('deviceready');
         StatusBar.hide();
+        window.plugins.insomnia.keepAwake();
 
         console.log(screen.width, screen.height);
 
@@ -50,6 +51,8 @@ var app = {
         ];
 
         var pos = 0;
+
+        var encoderRange = 36000;
 
         console.log(posTable[pos].lat);
         console.log(posTable[pos].lon);
@@ -166,7 +169,11 @@ var app = {
                     var posData = parseInt(data);
 
                     console.log("inside conversion");
+
+                    // should be a mapping of encoder range to 360 then subtract 180
+
                     let converted = (posData / 100.00) - 180;
+                    console.log(converted)
                     if(canvas) {
                         canvas.lon = converted;
                     }
@@ -345,6 +352,7 @@ var app = {
                     minFov: 5,
                     initLat: 20,
                     initLon: 10,
+                    // clickAndDrag: false, // this disables all camera movement, instead, we should have a transparent div covering the entire thing
                     backToVerticalCenter: false,
                     backToHorizonCenter: false,
                     VREnable: isMobile(),
@@ -372,27 +380,25 @@ var app = {
 
                     // positioning test snippet
 
-                    // setTimeout(function(){ 
+                    setTimeout(function(){ 
 
-                    //     console.log("testing for position shift");
-                    //     player.play();
-                    //     player.currentTime(15);
-                    //     player.pause();
+                        console.log("testing for position shift");
+                        player.pause();
 
-                    //     console.log(canvas);
+                        console.log(canvas);
 
-                    //     canvas.lon = posTable[pos].lon;
-                    //     canvas.lat = posTable[pos].lat;
+                        // canvas.lon = posTable[pos].lon;
+                        // canvas.lat = posTable[pos].lat;
 
-                    //     console.log(canvas);
+                        console.log(canvas);
 
 
-                    //     // vid swap test snippet
-                    //     // var videoGrab = document.getElementById("videojs-panorama-player_html5_api");
-                    //     // console.log(videoGrab);
-                    //     // videoGrab.src = targetEntry.nativeURL;
-                    //     // player.play();
-                    // }, 60000);
+                        // vid swap test snippet
+                        // var videoGrab = document.getElementById("videojs-panorama-player_html5_api");
+                        // console.log(videoGrab);
+                        // videoGrab.src = targetEntry.nativeURL;
+                        // player.play();
+                    }, 1000);
 
                 });
 

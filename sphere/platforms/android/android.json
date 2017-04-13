@@ -9,10 +9,6 @@
                 "parents": {
                     "/*": [
                         {
-                            "xml": "<feature name=\"HotCodePush\"><param name=\"android-package\" value=\"com.nordnetab.chcp.main.HotCodePushPlugin\" /><param name=\"onload\" value=\"true\" /></feature>",
-                            "count": 1
-                        },
-                        {
                             "xml": "<feature name=\"File\"><param name=\"android-package\" value=\"org.apache.cordova.file.FileUtils\" /><param name=\"onload\" value=\"true\" /></feature>",
                             "count": 1
                         },
@@ -27,6 +23,10 @@
                         {
                             "xml": "<feature name=\"Whitelist\"><param name=\"android-package\" value=\"org.apache.cordova.whitelist.WhitelistPlugin\" /><param name=\"onload\" value=\"true\" /></feature>",
                             "count": 1
+                        },
+                        {
+                            "xml": "<feature name=\"Insomnia\"><param name=\"android-package\" value=\"nl.xservices.plugins.Insomnia\" /></feature>",
+                            "count": 1
                         }
                     ],
                     "/widget": [
@@ -39,34 +39,12 @@
             },
             "config.xml": {
                 "parents": {
-                    "/*": [
-                        {
-                            "xml": "<preference name=\"loadUrlTimeoutValue\" value=\"60000\" />",
-                            "count": 1
-                        }
-                    ]
+                    "/*": []
                 }
             },
             "AndroidManifest.xml": {
                 "parents": {
-                    "/manifest": [
-                        {
-                            "xml": "<uses-permission android:name=\"android.permission.INTERNET\" />",
-                            "count": 1
-                        },
-                        {
-                            "xml": "<uses-permission android:name=\"android.permission.ACCESS_NETWORK_STATE\" />",
-                            "count": 1
-                        },
-                        {
-                            "xml": "<uses-permission android:name=\"android.permission.ACCESS_WIFI_STATE\" />",
-                            "count": 1
-                        },
-                        {
-                            "xml": "<uses-permission android:name=\"android.permission.WRITE_EXTERNAL_STORAGE\" />",
-                            "count": 1
-                        }
-                    ],
+                    "/manifest": [],
                     "/*": [
                         {
                             "xml": "<uses-permission android:name=\"android.permission.WRITE_EXTERNAL_STORAGE\" />",
@@ -78,9 +56,6 @@
         }
     },
     "installed_plugins": {
-        "cordova-hot-code-push-plugin": {
-            "PACKAGE_NAME": "com.ss.sphere"
-        },
         "cordova-plugin-chrome-apps-common": {
             "PACKAGE_NAME": "com.ss.sphere"
         },
@@ -98,18 +73,13 @@
         },
         "cordova-plugin-whitelist": {
             "PACKAGE_NAME": "com.ss.sphere"
+        },
+        "cordova-plugin-insomnia": {
+            "PACKAGE_NAME": "com.ss.sphere"
         }
     },
     "dependent_plugins": {},
     "modules": [
-        {
-            "id": "cordova-hot-code-push-plugin.chcp",
-            "file": "plugins/cordova-hot-code-push-plugin/www/chcp.js",
-            "pluginId": "cordova-hot-code-push-plugin",
-            "clobbers": [
-                "chcp"
-            ]
-        },
         {
             "id": "cordova-plugin-chrome-apps-common.events",
             "file": "plugins/cordova-plugin-chrome-apps-common/events.js",
@@ -321,15 +291,23 @@
             "clobbers": [
                 "window.StatusBar"
             ]
+        },
+        {
+            "id": "cordova-plugin-insomnia.Insomnia",
+            "file": "plugins/cordova-plugin-insomnia/www/Insomnia.js",
+            "pluginId": "cordova-plugin-insomnia",
+            "clobbers": [
+                "window.plugins.insomnia"
+            ]
         }
     ],
     "plugin_metadata": {
-        "cordova-hot-code-push-plugin": "1.5.2",
         "cordova-plugin-chrome-apps-common": "1.0.7",
         "cordova-plugin-chrome-apps-sockets-udp": "1.3.0",
         "cordova-plugin-compat": "1.1.0",
         "cordova-plugin-file": "4.3.2",
         "cordova-plugin-statusbar": "2.2.2",
-        "cordova-plugin-whitelist": "1.3.2"
+        "cordova-plugin-whitelist": "1.3.2",
+        "cordova-plugin-insomnia": "4.3.0"
     }
 }

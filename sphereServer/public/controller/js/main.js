@@ -6,7 +6,7 @@ jQuery(function() {
 
     function initSocket() {
 
-        socket = new io.connect(null, {
+        socket = new io.connect("http://192.168.1.200:8080", {
           'reconnection': true,
           'reconnectionDelay': 500,
           'reconnectionDelayMax': 1000,
@@ -68,7 +68,7 @@ jQuery(function() {
     function init() {
 
     	initSocket();
-    	getCurrent();
+    	// getCurrent();
     	initVids();
  
     }

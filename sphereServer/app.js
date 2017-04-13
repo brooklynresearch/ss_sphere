@@ -33,7 +33,10 @@ app.use(cookieParser());
 app.use(express.static(path.join(__dirname, 'public')));
 
 app.use('/', index);
-app.use('/users', users);
+app.use('/moviecontrol', index);
+app.use('/play', index);
+app.use('/pause', index);
+app.use('/sendparams', index);
 app.use('/controller', routeController);
 
 // catch 404 and forward to error handler

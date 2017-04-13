@@ -26,7 +26,7 @@ var createPhone = function(ipAddress, socketId, cb) {
                 .into("phones")
                 .set("ipaddress", ipAddress)
                 .set("socketid", socketId)
-                .set("position", -1)
+                .set("position", "-1")
                 .returning('*')
                 .toParam();
 
@@ -123,6 +123,59 @@ var deletePhone = function(phoneIpAddress, cb) {
     });
 }
 
+var createFile = function(name, url, runtime, cb) {
+    var query = squel.insert()
+                .into("files")
+                .set("name", name)
+                .set("url", url)
+                .set("runtime", -1)
+                .set("active", false)
+                .set("selected", false)
+                .returning('*')
+                .toParam();
+
+    dbClient.query({text: query.text, values: query.values}, function(err, result) {
+        if(err) {
+            console.log("DB ERROR: inserting file ", err.message);
+            cb(err, null);
+        } else {
+            cb(null, result);
+        }
+    });
+}
+
+var deleteFile = function(id, cb) {
+    var query = squel.delete()
+                .from("files")
+                .where("id = ?", id)
+                .toParam();
+
+    dbClient.query({text: query.text, values: query.values}, function(err, result) {
+        if(err) {
+            console.log("DB ERROR: deleting file ", err.message);
+            cb(err, null);
+        } else {
+            cb(null, result);
+        }
+    });
+}
+
+var getFiles = function(cb) {
+    var query = squel.select()
+                .from("files")
+                .toParam();
+
+    dbClient.query({text: query.text, values: query.values}, function(err, result) {
+        if(err) {
+            console.log("DB ERROR: retrieving files ", err.message);
+            cb(err, null);
+        } else {
+            cb(null, result);
+        }
+    });
+
+}
+
 var clearTable = function(cb) {
     var query = squel.delete()
                 .from("phones")
@@ -151,6 +204,9 @@ module.exports = {
     updatePhonePosition: updatePhonePosition,
     updatePhoneSocketId: updatePhoneSocketId,
     deletePhone: deletePhone,
+    createFile: createFile,
+    getFiles: getFiles,
+    deleteFile: deleteFile,
     clearTable: clearTable,
     disconnect: disconnect
 }

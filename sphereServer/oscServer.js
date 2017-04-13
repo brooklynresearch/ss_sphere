@@ -5,7 +5,7 @@ class OscServer extends events.EventEmitter {
     constructor() {
         super();
         var udpPort = new osc.UDPPort({
-            localAddress: "192.168.1.200",
+            localAddress: process.env.MACHINE_IP,
             localPort: 12345
         });
 

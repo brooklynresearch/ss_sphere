@@ -104,16 +104,7 @@ var app = {
           'reconnectionAttempts': 999
         });
 
-        var arrayBufferToString = function(buf) {
-            var str= '';
-            var ui8= new Uint8Array(buf);
-            for (var i= 0 ; i < ui8.length ; i++) {
-                str= str+String.fromCharCode(ui8[i]);
-            }
-
-            return str;
-        }
-
+        // WEBSOCKET
         socket.on('connect', function() {
             console.log("Connected to sphereserver");
         });
@@ -126,18 +117,18 @@ var app = {
             console.log("New position ", data);
             document.getElementById("position-debug").innerHTML = "Position: " + data;
         });
-        socket.on('rotate', function(data) {
-            console.log("Rotate ", data);
-            document.getElementById("rotation-debug").innerHTML = "Rotation: " + data;
-            let converted = (convertToRange(data, [0,12000], [0,1000]))/10.0;
-            if(canvas) {
-                canvas.lon = converted;
-            }
+        socket.on('switch video', function(data) {
+            //Load the video and start playing
+            // vid swap test snippet
+            var videoGrab = document.getElementById("videojs-panorama-player_html5_api");
+            console.log(videoGrab);
+            videoGrab.src = "/storage/emulated/0/Movies/sphere/" + data;
+            player.play();
         });
-
         // for testing and calibration
         socket.on('newtable', function(data) {
             // receive from server new parameters for posTable variable
+            console.log("Recv new table: ", data);
             if(canvas && devicePosition){
                 // should be a json object
                 parametersTable = data;
@@ -149,11 +140,15 @@ var app = {
             }
 
         });
-
-        document.getElementById('change-position-debug-1').onclick = function() {
-            socket.emit('register position', -420);
+ 
+        var arrayBufferToString = function(buf) {
+            var str= '';
+            var ui8= new Uint8Array(buf);
+            for (var i= 0 ; i < ui8.length ; i++) {
+                str= str+String.fromCharCode(ui8[i]);
+            }
             return str;
-        };
+        }
 
         var convertToRange = function(value, srcRange, dstRange){
             // value is outside source range return
@@ -179,88 +174,55 @@ var app = {
             });
             chrome.sockets.udp.onReceive.addListener(function(message) {
 
-                console.log("UDP DATA: ", message.data);
-
-                // let data = parseInt(arrayBufferToString(message.data));
                 let data = arrayBufferToString(message.data);
-                if(parseInt(data) === NaN){
-                    // command logic
-                    console.log("got command: " + data);
+                console.log("got command: " + data);
 
-                    switch(data){
-                        case 'play':
-                            if(canvas){
-                                player.play();
-                            }
-                            break;
-                        case 'pause':
-                            if (canvas){
-                                player.pause();
-                            }
-                            break;
-                        default:
+                switch(data) {
+                    case 'play':
+                        if(canvas) {
+                            player.play();
+                        }
+                        if (socket) {
+                            socket.emit('ACK', "play");
+                        }
+                        break;
+                    case 'pause':
+                        if (canvas) {
+                            player.pause();
+                        }
+                        if (socket) {
+                            socket.emit('ACK', "pause");
+                        }
+                        break;
+                    default:
+                        //let converted = convertToRange(data, [0,36000], [0,255]);
+                        var posData = parseInt(data);
+                        encoderPosition = posData;
 
-                            console.log("unprocessed command: " + data)
-                            break;
-                    }
-                }
+                        console.log("inside conversion");
 
-                else{                
-                    //let converted = convertToRange(data, [0,36000], [0,255]);
-                    var posData = parseInt(data);
-                    encoderPosition = posData;
+                        console.log(convertToRange(posData, [0, encoderRange], [0, 360.0]));
+                        console.log(deviceParameters);
+                        // should be a mapping of encoder range to 360 then subtract 180
+                        let converted = convertToRange(posData, [0, encoderRange], [0, 360.0]) - 180.0 + deviceParameters['long'];
+                        console.log(converted)
 
-                    console.log("inside conversion");
+                        if(canvas) {
+                            canvas.lon = converted;
+                        }
 
-                    console.log(convertToRange(posData, [0, encoderRange], [0, 360.0]));
-                    console.log(deviceParameters);
-                    // should be a mapping of encoder range to 360 then subtract 180
-                    let converted = convertToRange(posData, [0, encoderRange], [0, 360.0]) - 180.0 + deviceParameters['long'];
-                    console.log(converted)
-                    
-                    if(canvas) {
-                        canvas.lon = converted;
-                    }
-                    //document.body.style.background = "rgb("+ Math.round(converted) + ",0,0)";
-                    //document.getElementById("rotation-debug").innerHTML = "Rotation: " + data;
                 }
             });
         });
 
-        // WEBSOCKET
-        socket.on('connect', function() {
-            console.log("Connected to sphereserver");
-        });
-        socket.on('pos', function(data) {
-            console.log("position ", data);
-            document.getElementById("position-debug").innerHTML = "Position: " + data;
-
-        });
-        socket.on('newpos', function(data) {
-            console.log("New position ", data);
-            document.getElementById("position-debug").innerHTML = "Position: " + data;
-        });
-        /*
-        socket.on('rotate', function(data) {
-            console.log("Rotate ", data);
-            document.getElementById("rotation-debug").innerHTML = "Rotation: " + data;
-            let converted = convertToRange(data, [0,36000], [0,255]);
-            document.body.style.background = "rgb("+ Math.round(converted) + ",0,0)";
-            console.log(converted);
-            //if(canvas) {
-                //canvas.lon = converted;
-            //}
-        });
-        */
-
-        document.getElementById('change-position-debug-1').onclick = function() {
-            socket.emit('register position', -420);
-        };
-
-        document.getElementById('change-position-debug-2').onclick = function() {
-            socket.emit('register position', -666);
-        };
-
+        // currentVideo to load, could be an index for an array of video names
+        // likely will want to figure out a way to load from camera resources rather than www assets folder
+        // as we'll have to save new ones anyhow as they come in
+        var currentVideo;
+        // variable later for tablet position placement
+        var position;
+        var targetFile = "dummy";
+        var targetEntry;
         // write test
 
         function writeLog(str) {
@@ -286,7 +248,6 @@ var app = {
             });
 
         });
-
 
         function isMobile() {
 
@@ -343,7 +304,7 @@ var app = {
                 // window.resolveLocalFileSystemURL(localURLs[i], addFileEntry, addError);
             }
 
-            
+
 
             // canvas test
 
@@ -368,10 +329,10 @@ var app = {
                 // var height = screen.height;
                 console.log(width, height);
                 player.width(width), player.height(height);
-                
+
 
                 // full screen
-                
+
                 // var videoWrapper = document.getElementByClassName('player_wrapper');
                 // videoWrapper.style.width = screen.width;
                 // videoWrapper.style.height = screen.height;
@@ -405,37 +366,37 @@ var app = {
                     player.width(screen.width), player.height(screen.height);
 
                     player.play();
-                    player.currentTime(15);
+                    // player.currentTime(15);
                     // player.pause();
                     console.log("is ready");
                     canvas = player.getChild('Canvas');
                     console.log(canvas);
 
-                    setTimeout(function(){ 
+                    // setTimeout(function(){ 
 
                         
-                        console.log("testing for position shift");
+                    //     console.log("testing for position shift");
 
-                        console.log(canvas);
+                    //     console.log(canvas);
 
-                        // canvas.lon = posTable[pos].lon;
-                        // canvas.lat = posTable[pos].lat;
-                        newPositionParameters(canvas, testJSON);
+                    //     // canvas.lon = posTable[pos].lon;
+                    //     // canvas.lat = posTable[pos].lat;
+                    //     newPositionParameters(canvas, testJSON);
 
-                        console.log(canvas);
+                    //     console.log(canvas);
 
-                        player.pause();
-                        // vid swap test snippet
-                        // var videoGrab = document.getElementById("videojs-panorama-player_html5_api");
-                        // console.log(videoGrab);
-                        // videoGrab.src = targetEntry.nativeURL;
-                        // player.play();
-                    }, 1000);
+                    //     player.pause();
+                    //     // vid swap test snippet
+                    //     //var videoGrab = document.getElementById("videojs-panorama-player_html5_api");
+                    //     //console.log(videoGrab);
+                    //     //videoGrab.src = targetEntry.nativeURL;
+                    //     //player.play();
+                    // }, 1000);
 
                 });
 
                 document.addEventListener('keydown', function(event) {
-                
+
                     console.log("key pressed");
                     console.log(event.keyCode);
                     console.log("width: " + width);
@@ -562,7 +523,7 @@ var app = {
                             $('.view-mode').show();
                             $('.assn-mode').hide();
                         }
-                    });   
+                    });
 
                     $('#cancel').click(function(event) {
 

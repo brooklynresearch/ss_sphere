@@ -3,12 +3,17 @@ var dgram = require('dgram');
 
 db.useTestDatabase();
 
+var udpBroadcaster;
+var ioInstance;
+
 var startListeners = function(io) {
 
+    ioInstance = io;
     // var oscServer = require('./oscServer').OscServer;
     var serialServer = require('./serialServer').SerialServer;
 
-    var udpBroadcaster = dgram.createSocket('udp4');
+    udpBroadcaster = dgram.createSocket('udp4');
+    let broadcast = process.env.BROADCAST_ADDR;
 
     // oscServer.on('osc', (oscMessage) => {
     //     let encoderValue = oscMessage.args[0];
@@ -25,7 +30,7 @@ var startListeners = function(io) {
         console.log(data);
         let encoderValue = data;
         console.log("UDP BROADCAST: ", encoderValue);
-        udpBroadcaster.send(encoderValue.toString(), 55555, '192.168.1.255', (err) => {
+        udpBroadcaster.send(encoderValue.toString(), 55555, broadcast, (err) => {
             if (err) {
                 console.log("ERROR on broadcast: ", err);
             }
@@ -39,7 +44,7 @@ var startListeners = function(io) {
     });
 
     udpBroadcaster.bind({
-        address: '192.168.1.200',
+        address: process.env.MACHINE_IP,
         port: 41234}
     );
 
@@ -48,20 +53,22 @@ var startListeners = function(io) {
         db.getPhone(ipAddress, function(err, result) {
             if(result.rows.length === 0) {
                 db.createPhone(ipAddress, socket.id, function(err, result) {
-                    io.emit("pos", result.rows[0].position);
+                    socket.emit('pos', result.rows[0].position);
                 });
             } else {
-                // is this correct?
-                io.emit('pos', result.rows[0].position);
+                socket.emit('pos', result.rows[0].position);
             }
         });
 
+        let positionParams = require('./pos-generator').generateParams();
+        socket.emit('newtable', positionParams);
+
         socket.on('register position', function(msg) {
             let pos = msg;
+            db.updatePhonePosition(ipAddress, pos, function(err, result) {
+                socket.emit('newpos', result.rows[0].position);
+            });
             console.log("position: " + pos);
-            // db.updatePhonePosition(ipAddress, pos, function(err, result) {
-            //     io.emit('newpos', result.rows[0].position);
-            // });
         });
 
         socket.on('error', function(err) {
@@ -76,11 +83,32 @@ var startListeners = function(io) {
             // set an internal variable to this new set video if it is new
 
             // emit this to all the devices in order to tell them to play
+            io.emit('switch video', msg);
 
         });
     });
 }
 
-module.exports = {
-    startListeners: startListeners
+var sendSocketBroadcast = function(sockEvent, msg) {
+    //console.log("sending params");
+    ioInstance.emit(sockEvent, msg);
 }
+
+var sendUdpCommand = function(cmd) {
+    let broadcast = process.env.BROADCAST_ADDR;
+    for( var i = 0; i < 10; i++) {
+        console.log("Sending Command: ", cmd);
+        udpBroadcaster.send(cmd, 55555, broadcast, (err) => {
+            if (err) {
+                console.log("ERROR on Send Udp Command: ", err);
+            }
+        });
+    }
+}
+
+module.exports = {
+    startListeners: startListeners,
+    sendUdpCommand: sendUdpCommand,
+    sendSocketBroadcast: sendSocketBroadcast
+}
+

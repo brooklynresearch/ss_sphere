@@ -44,18 +44,55 @@ var app = {
             cordova.file.syncedDataDirectory
         ];
 
-        var posTable = [
-            {pos: 0, lat: 20.0, lon: 30, fov: 20},
-            {pos: 1, lat: 20.0, lon: 33, fov: 20},
-            {pos: 2, lat: 20.0, lon: 40, fov: 20},
-        ];
+        
 
-        var pos = 0;
+        var devicePosition;
+        var deviceParameters;
+        var parametersTable;
+        var currentVideo;
 
+        var encoderPosition = 0;
         var encoderRange = 36000;
 
-        console.log(posTable[pos].lat);
-        console.log(posTable[pos].lon);
+        var canvas;
+
+
+        // testing vars
+        var testJSON = {
+            '0101':
+                {
+                    'lat': 44.55,
+                    'long': 40,
+                    'fov': 6.3
+                },
+
+            '0102':
+                {
+                    'lat': 44.55,
+                    'long': 48.1,
+                    'fov': 6.3
+                }                
+
+        };
+
+        parametersTable = testJSON;
+        devicePosition = '0101';
+
+        function newPositionParameters(canvas, json){
+            console.log(devicePosition);
+            var parameters = json[devicePosition];
+            deviceParameters = parameters;
+            console.log("parameters");
+            console.log(parameters);
+            // this needs to change to actual equation taking into account current encoder readings
+            canvas.lon = convertToRange(encoderPosition, [0, encoderRange], [0, 360.0]) - 180.0 + parameters['long'];
+            canvas.lat = parameters['lat'];
+            canvas.camera.fov = parameters['fov'];
+            console.log("updated position parameters for: " + devicePosition);
+        }
+
+        
+
         document.body.style.background = "rgb(0,0,0)";
 
         var serveraddress = 'http://192.168.1.200:8080';
@@ -92,10 +129,16 @@ var app = {
         socket.on('newtable', function(data) {
             // receive from server new parameters for posTable variable
             console.log("Recv new table: ", data);
+            if(canvas && devicePosition){
+                // should be a json object
+                parametersTable = data;
+                newPositionParameters(canvas, parametersTable);
+            }
 
-            // save new pos parameters in a persistent file
+            else{
+                console.log("nothing to assign");
+            }
 
-            // reload parameters for this phone's position
         });
  
         var arrayBufferToString = function(buf) {
@@ -152,29 +195,25 @@ var app = {
                         }
                         break;
                     default:
+                        //let converted = convertToRange(data, [0,36000], [0,255]);
                         var posData = parseInt(data);
+                        encoderPosition = posData;
 
+                        console.log("inside conversion");
+
+                        console.log(convertToRange(posData, [0, encoderRange], [0, 360.0]));
+                        console.log(deviceParameters);
                         // should be a mapping of encoder range to 360 then subtract 180
-                        let converted = (posData / 100.00) - 180;
+                        let converted = convertToRange(posData, [0, encoderRange], [0, 360.0]) - 180.0 + deviceParameters['long'];
+                        console.log(converted)
+
                         if(canvas) {
                             canvas.lon = converted;
                         }
+
                 }
             });
         });
-
-       /*
-        socket.on('rotate', function(data) {
-            console.log("Rotate ", data);
-            document.getElementById("rotation-debug").innerHTML = "Rotation: " + data;
-            let converted = convertToRange(data, [0,36000], [0,255]);
-            document.body.style.background = "rgb("+ Math.round(converted) + ",0,0)";
-            console.log(converted);
-            //if(canvas) {
-                //canvas.lon = converted;
-            //}
-        });
-        */
 
         // currentVideo to load, could be an index for an array of video names
         // likely will want to figure out a way to load from camera resources rather than www assets folder
@@ -184,7 +223,6 @@ var app = {
         var position;
         var targetFile = "dummy";
         var targetEntry;
-
         // write test
 
         function writeLog(str) {
@@ -334,22 +372,20 @@ var app = {
                     canvas = player.getChild('Canvas');
                     console.log(canvas);
 
-
-                    // positioning test snippet
-
                     setTimeout(function(){ 
 
+                        
                         console.log("testing for position shift");
-                        player.pause();
 
                         console.log(canvas);
 
                         // canvas.lon = posTable[pos].lon;
                         // canvas.lat = posTable[pos].lat;
+                        newPositionParameters(canvas, testJSON);
 
                         console.log(canvas);
 
-
+                        player.pause();
                         // vid swap test snippet
                         //var videoGrab = document.getElementById("videojs-panorama-player_html5_api");
                         //console.log(videoGrab);
@@ -395,7 +431,7 @@ var app = {
 
             }(window, window.videojs));
 
-            // hidden assignment and debug block
+            // Assignment and debug block
 
             jQuery(function() {
 
@@ -475,8 +511,14 @@ var app = {
                             socket.emit('register position', newPos);
                             //Can add an ajax loader and confirm if needed
                             currentPos = newPos;
+                            devicePosition = currentPos;
                             //maybe on success you confirm with?:
                             getPosition();
+
+                            // provided we have a table
+                            if(parametersTable && canvas){
+                                newPositionParameters(canvas, parametersTable);
+                            }
                             //then:
                             $('.view-mode').show();
                             $('.assn-mode').hide();

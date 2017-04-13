@@ -76,6 +76,7 @@ var app = {
         };
 
         parametersTable = testJSON;
+        devicePosition = '0101';
 
         function newPositionParameters(canvas, json){
             console.log(devicePosition);
@@ -409,10 +410,6 @@ var app = {
                     console.log("is ready");
                     canvas = player.getChild('Canvas');
                     console.log(canvas);
-
-
-                    // positioning test snippet
-                    devicePosition = '0101';
 
                     setTimeout(function(){ 
 

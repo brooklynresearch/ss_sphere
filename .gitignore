@@ -45,3 +45,5 @@ sphereServer/public/appupdate/*
 sphere/www/chcp.json
 
 sphere/www/chcp.manifest
+
+sphereServer/public/positions.json

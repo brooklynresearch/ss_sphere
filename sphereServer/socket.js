@@ -1,5 +1,6 @@
 var db = require('./db');
 var dgram = require('dgram');
+var fs = require('fs');
 
 db.useTestDatabase();
 
@@ -60,8 +61,15 @@ var startListeners = function(io) {
             }
         });
 
-        let positionParams = require('./pos-generator').generateParams();
-        socket.emit('newtable', positionParams);
+        fs.readFile('./public/positions.json', 'utf8', function(err, data) {
+            if (err) {
+                console.log('Error opening file!: ', err);
+            } else {
+                console.log('Sending Position Table');
+                let jsonData = JSON.parse(data);
+                socket.emit('newtable', jsonData);
+            }
+        });
 
         socket.on('register position', function(msg) {
             let pos = msg;

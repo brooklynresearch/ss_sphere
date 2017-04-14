@@ -11,24 +11,24 @@ var rowPhones = [6, 9, 10, 11, 12, 13, 13, 12, 11, 10, 9, 6];
 
 // the starting Longitude of each "leftmost" phone in the row
 // the first half and second half should be symmetrical
-var rowLongOrigin = [40.0, 32.0, 24.0, 16.0, 8.0, 0.0, 0.0, 8.0, 16.0, 24.0, 32.0, 40.0];
+var rowLongOrigin = [30.0, 24.0, 18.0, 12.0, 6.0, 0.0, 0.0, 6.0, 12.0, 18.0, 24.0, 30.0];
 
 // the difference in longitude between each phone for each row
 // these should probably be the exact same for all, so we may actually generate this
 
 var rowLongOffset = [8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0, 8.0];
-var longOffset = 8.1;
+var longOffset = 11.1;
 var longCalc = true;
 
 // These are the latitude settings for all phones of each row
 // it may make sense to make it generative
 var rowLat = [44.0, 36.0, 28.0, 20.0, 12.0, 4.0, -4.0, -12.0, -20.0, -28.0, -36.0, -44.0]; 
-var latOffset = 8.1;
+var latOffset = 15.1;
 var latOrigin = 0.0;
 var latCalc = true;
 
 // assuming this should be the same for all
-var fov = 6.3;
+var fov = 15.0;
 
 
 var generatedJSON = positionGenerator();

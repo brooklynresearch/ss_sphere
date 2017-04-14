@@ -1,5 +1,6 @@
 var db = require('./db');
-
+var events = require('events');
+var socket = require('./socket');
 
 class FileSync extends events.EventEmitter {
     constructor() {
@@ -54,7 +55,12 @@ class FileSync extends events.EventEmitter {
     downloadFromCMS(url, done) {
 
     }
+
+    sendDownloadLink(url) {
+        console.log("Broadcasting url: ", url);
+        socket.sendSocketBroadcast("file", url);
+    }
 }
 
-module.exports = new FileSync;
+module.exports.FileSync = new FileSync;
 

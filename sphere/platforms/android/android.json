@@ -7,6 +7,12 @@
         "files": {
             "res/xml/config.xml": {
                 "parents": {
+                    "/widget": [
+                        {
+                            "xml": "<feature name=\"ChromeSocketsUdp\"><param name=\"android-package\" value=\"org.chromium.ChromeSocketsUdp\" /></feature>",
+                            "count": 1
+                        }
+                    ],
                     "/*": [
                         {
                             "xml": "<feature name=\"File\"><param name=\"android-package\" value=\"org.apache.cordova.file.FileUtils\" /><param name=\"onload\" value=\"true\" /></feature>",
@@ -14,6 +20,10 @@
                         },
                         {
                             "xml": "<allow-navigation href=\"cdvfile:*\" />",
+                            "count": 1
+                        },
+                        {
+                            "xml": "<feature name=\"Insomnia\"><param name=\"android-package\" value=\"nl.xservices.plugins.Insomnia\" /></feature>",
                             "count": 1
                         },
                         {
@@ -25,30 +35,18 @@
                             "count": 1
                         },
                         {
-                            "xml": "<feature name=\"Insomnia\"><param name=\"android-package\" value=\"nl.xservices.plugins.Insomnia\" /></feature>",
-                            "count": 1
-                        }
-                    ],
-                    "/widget": [
-                        {
-                            "xml": "<feature name=\"ChromeSocketsUdp\"><param name=\"android-package\" value=\"org.chromium.ChromeSocketsUdp\" /></feature>",
+                            "xml": "<feature name=\"FileTransfer\"><param name=\"android-package\" value=\"org.apache.cordova.filetransfer.FileTransfer\" /></feature>",
                             "count": 1
                         }
                     ]
                 }
             },
-            "config.xml": {
-                "parents": {
-                    "/*": []
-                }
-            },
             "AndroidManifest.xml": {
                 "parents": {
-                    "/manifest": [],
                     "/*": [
                         {
                             "xml": "<uses-permission android:name=\"android.permission.WRITE_EXTERNAL_STORAGE\" />",
-                            "count": 1
+                            "count": 2
                         }
                     ]
                 }
@@ -68,13 +66,16 @@
         "cordova-plugin-file": {
             "PACKAGE_NAME": "com.ss.sphere"
         },
+        "cordova-plugin-insomnia": {
+            "PACKAGE_NAME": "com.ss.sphere"
+        },
         "cordova-plugin-statusbar": {
             "PACKAGE_NAME": "com.ss.sphere"
         },
         "cordova-plugin-whitelist": {
             "PACKAGE_NAME": "com.ss.sphere"
         },
-        "cordova-plugin-insomnia": {
+        "cordova-plugin-file-transfer": {
             "PACKAGE_NAME": "com.ss.sphere"
         }
     },
@@ -285,6 +286,14 @@
             "runs": true
         },
         {
+            "id": "cordova-plugin-insomnia.Insomnia",
+            "file": "plugins/cordova-plugin-insomnia/www/Insomnia.js",
+            "pluginId": "cordova-plugin-insomnia",
+            "clobbers": [
+                "window.plugins.insomnia"
+            ]
+        },
+        {
             "id": "cordova-plugin-statusbar.statusbar",
             "file": "plugins/cordova-plugin-statusbar/www/statusbar.js",
             "pluginId": "cordova-plugin-statusbar",
@@ -293,11 +302,19 @@
             ]
         },
         {
-            "id": "cordova-plugin-insomnia.Insomnia",
-            "file": "plugins/cordova-plugin-insomnia/www/Insomnia.js",
-            "pluginId": "cordova-plugin-insomnia",
+            "id": "cordova-plugin-file-transfer.FileTransferError",
+            "file": "plugins/cordova-plugin-file-transfer/www/FileTransferError.js",
+            "pluginId": "cordova-plugin-file-transfer",
             "clobbers": [
-                "window.plugins.insomnia"
+                "window.FileTransferError"
+            ]
+        },
+        {
+            "id": "cordova-plugin-file-transfer.FileTransfer",
+            "file": "plugins/cordova-plugin-file-transfer/www/FileTransfer.js",
+            "pluginId": "cordova-plugin-file-transfer",
+            "clobbers": [
+                "window.FileTransfer"
             ]
         }
     ],
@@ -306,8 +323,9 @@
         "cordova-plugin-chrome-apps-sockets-udp": "1.3.0",
         "cordova-plugin-compat": "1.1.0",
         "cordova-plugin-file": "4.3.2",
+        "cordova-plugin-insomnia": "4.3.0",
         "cordova-plugin-statusbar": "2.2.2",
         "cordova-plugin-whitelist": "1.3.2",
-        "cordova-plugin-insomnia": "4.3.0"
+        "cordova-plugin-file-transfer": "1.6.2"
     }
 }

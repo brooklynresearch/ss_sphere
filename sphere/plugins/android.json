@@ -21,6 +21,9 @@
         },
         "cordova-plugin-whitelist": {
             "PACKAGE_NAME": "com.ss.sphere"
+        },
+        "cordova-plugin-file-transfer": {
+            "PACKAGE_NAME": "com.ss.sphere"
         }
     },
     "dependent_plugins": {

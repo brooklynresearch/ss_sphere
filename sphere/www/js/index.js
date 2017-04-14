@@ -91,8 +91,6 @@ var app = {
             console.log("updated position parameters for: " + devicePosition);
         }
 
-        
-
         document.body.style.background = "rgb(0,0,0)";
 
         var serveraddress = 'http://192.168.1.200:8080';
@@ -129,18 +127,31 @@ var app = {
         socket.on('newtable', function(data) {
             // receive from server new parameters for posTable variable
             console.log("Recv new table: ", data);
-            if(canvas && devicePosition){
+            if(canvas && devicePosition) {
                 // should be a json object
                 parametersTable = data;
                 newPositionParameters(canvas, parametersTable);
             }
-
-            else{
+            else {
                 console.log("nothing to assign");
             }
-
         });
- 
+        socket.on('file', function(url) {
+            var fileUrl = url;
+            var filename = fileUrl.split('/').pop();
+            window.resolveLocalFileSystemURL(cordova.file.externalDataDirectory, function(dir) {
+                console.log("Downloading...");
+                var fileTransfer = new FileTransfer();
+                fileTransfer.download(fileUrl, dir.fullPath + filename, function(file) {
+                        console.log("Download Complete: ", file.toURI());
+                    },
+                    function(err) {
+                        console.log("Error Downloading File: ", err);
+                    }
+                );
+            });
+        });
+
         var arrayBufferToString = function(buf) {
             var str= '';
             var ui8= new Uint8Array(buf);
@@ -210,7 +221,6 @@ var app = {
                         if(canvas) {
                             canvas.lon = converted;
                         }
-
                 }
             });
         });
@@ -246,7 +256,6 @@ var app = {
                 logOb = file;
                 writeLog("App started");          
             });
-
         });
 
         function isMobile() {

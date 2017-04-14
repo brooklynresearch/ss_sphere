@@ -35,4 +35,5 @@
         <config-file url="http://192.168.1.200:3000/appupdate/chcp.json" />
     </chcp>
     <plugin name="cordova-plugin-insomnia" spec="https://github.com/EddyVerbruggen/Insomnia-PhoneGap-Plugin.git" />
+    <plugin name="cordova-plugin-file-transfer" spec="~1.6.2" />
 </widget>

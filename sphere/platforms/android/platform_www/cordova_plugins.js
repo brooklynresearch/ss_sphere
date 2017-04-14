@@ -1,14 +1,6 @@
 cordova.define('cordova/plugin_list', function(require, exports, module) {
 module.exports = [
     {
-        "id": "cordova-hot-code-push-plugin.chcp",
-        "file": "plugins/cordova-hot-code-push-plugin/www/chcp.js",
-        "pluginId": "cordova-hot-code-push-plugin",
-        "clobbers": [
-            "chcp"
-        ]
-    },
-    {
         "id": "cordova-plugin-chrome-apps-common.events",
         "file": "plugins/cordova-plugin-chrome-apps-common/events.js",
         "pluginId": "cordova-plugin-chrome-apps-common",
@@ -213,6 +205,14 @@ module.exports = [
         "runs": true
     },
     {
+        "id": "cordova-plugin-insomnia.Insomnia",
+        "file": "plugins/cordova-plugin-insomnia/www/Insomnia.js",
+        "pluginId": "cordova-plugin-insomnia",
+        "clobbers": [
+            "window.plugins.insomnia"
+        ]
+    },
+    {
         "id": "cordova-plugin-statusbar.statusbar",
         "file": "plugins/cordova-plugin-statusbar/www/statusbar.js",
         "pluginId": "cordova-plugin-statusbar",
@@ -221,25 +221,33 @@ module.exports = [
         ]
     },
     {
-        "id": "cordova-hot-code-push-local-dev-addon.chcpLocalDev",
-        "file": "plugins/cordova-hot-code-push-local-dev-addon/www/chcpLocalDev.js",
-        "pluginId": "cordova-hot-code-push-local-dev-addon",
+        "id": "cordova-plugin-file-transfer.FileTransferError",
+        "file": "plugins/cordova-plugin-file-transfer/www/FileTransferError.js",
+        "pluginId": "cordova-plugin-file-transfer",
         "clobbers": [
-            "chcpLocalDev"
+            "window.FileTransferError"
+        ]
+    },
+    {
+        "id": "cordova-plugin-file-transfer.FileTransfer",
+        "file": "plugins/cordova-plugin-file-transfer/www/FileTransfer.js",
+        "pluginId": "cordova-plugin-file-transfer",
+        "clobbers": [
+            "window.FileTransfer"
         ]
     }
 ];
 module.exports.metadata = 
 // TOP OF METADATA
 {
-    "cordova-hot-code-push-plugin": "1.5.2",
     "cordova-plugin-chrome-apps-common": "1.0.7",
     "cordova-plugin-chrome-apps-sockets-udp": "1.3.0",
     "cordova-plugin-compat": "1.1.0",
     "cordova-plugin-file": "4.3.2",
+    "cordova-plugin-insomnia": "4.3.0",
     "cordova-plugin-statusbar": "2.2.2",
     "cordova-plugin-whitelist": "1.3.2",
-    "cordova-hot-code-push-local-dev-addon": "0.4.2"
+    "cordova-plugin-file-transfer": "1.6.2"
 };
 // BOTTOM OF METADATA
 });

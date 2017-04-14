@@ -84,7 +84,11 @@ var startListeners = function(io) {
 
             // emit this to all the devices in order to tell them to play
             io.emit('switch video', msg);
-
+        });
+        socket.on('newfile', function(url) {
+            console.log("sending URL: ", url);
+            sendSocketBroadcast("file", url);
+            //socket.emit('ACK', 'newfile');
         });
     });
 }
@@ -106,9 +110,14 @@ var sendUdpCommand = function(cmd) {
     }
 }
 
+var stop = function() {
+    ioInstance.close();
+}
+
 module.exports = {
     startListeners: startListeners,
     sendUdpCommand: sendUdpCommand,
-    sendSocketBroadcast: sendSocketBroadcast
+    sendSocketBroadcast: sendSocketBroadcast,
+    stop: stop
 }
 

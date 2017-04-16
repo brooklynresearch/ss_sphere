@@ -12,6 +12,8 @@ var rowPhones = [6, 9, 10, 11, 12, 13, 13, 12, 11, 10, 9, 6];
 // the starting Longitude of each "leftmost" phone in the row
 // the first half and second half should be symmetrical
 var rowLongOrigin = [30.0, 24.0, 18.0, 12.0, 6.0, 0.0, 0.0, 6.0, 12.0, 18.0, 24.0, 30.0];
+var longOrigin = 6.0;
+var longOriginCalc = true;
 
 // the difference in longitude between each phone for each row
 // these should probably be the exact same for all, so we may actually generate this
@@ -38,11 +40,31 @@ function positionGenerator() {
 	var jsonData = {};
 	
 	for(var row = 0; row < rowPhones.length; row++){
+
+		// calculate latitude
+		var latitude;
+
+		if(latCalc){
+			latitude = latOrigin - latOffset/2 + latOffset * (rowLat.length/2 - row);
+			// latitude = latitude.toFixed(5);
+		}
+		else{
+			latitude = rowLat[row];
+		}
+
+		if(longOriginCalc){
+			if(row < rowLongOrigin.length / 2){
+				rowLongOrigin[row] = longOrigin * ((rowLongOrigin.length / 2) - row - 1);
+				rowLongOrigin[rowLongOrigin.length - row - 1] = rowLongOrigin[row];
+			}
+		}
+
 		for(var col = 0; col < rowPhones[row]; col++){
 			var eachData = {};
 
 			// calculate longitude
 			var longitude;
+
 
 			if(longCalc){
 				longitude = rowLongOrigin[row] + longOffset * col;
@@ -54,17 +76,6 @@ function positionGenerator() {
 
 			eachData['long'] = longitude;
 
-			// calculate latitude
-			var latitude;
-
-			if(latCalc){
-				latitude = latOrigin - latOffset/2 + latOffset * (rowLat.length/2 - row);
-				// latitude = latitude.toFixed(5);
-			}
-			else{
-				latitude = rowLat[row];
-			}
-
 			eachData['lat'] = latitude;
 
 			// calculate fov
@@ -72,7 +83,7 @@ function positionGenerator() {
 
 			var row_col_string = rowColGenerator(row, col);
 			jsonData[row_col_string] = eachData;
-//			console.log(row_col_string);
+			console.log(eachData);
 		}	
 	}
 

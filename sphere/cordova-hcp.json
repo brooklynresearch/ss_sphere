@@ -1,7 +1,0 @@
-{
-  "name": "sphere",
-  "ios_identifier": "",
-  "android_identifier": "",
-  "update": "now",
-  "content_url": "http://192.168.1.200:3000/appupdate"
-}

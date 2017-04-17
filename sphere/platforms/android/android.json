@@ -72,10 +72,13 @@
         "cordova-plugin-statusbar": {
             "PACKAGE_NAME": "com.ss.sphere"
         },
-        "cordova-plugin-whitelist": {
+        "cordova-plugin-statusbar": {
             "PACKAGE_NAME": "com.ss.sphere"
         },
         "cordova-plugin-file-transfer": {
+            "PACKAGE_NAME": "com.ss.sphere"
+        },
+        "cordova-plugin-whitelist": {
             "PACKAGE_NAME": "com.ss.sphere"
         }
     },
@@ -315,6 +318,14 @@
             "pluginId": "cordova-plugin-file-transfer",
             "clobbers": [
                 "window.FileTransfer"
+            ]
+        },
+        {
+            "id": "cordova-plugin-statusbar.statusbar",
+            "file": "plugins/cordova-plugin-statusbar/www/statusbar.js",
+            "pluginId": "cordova-plugin-statusbar",
+            "clobbers": [
+                "window.StatusBar"
             ]
         }
     ],

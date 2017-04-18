@@ -17,8 +17,14 @@ var server = require('http').Server(app);
 var io = require('socket.io')(8080);
 
 // OUR SOCKET MODULE
-var socketModule = require('./socket');
-socketModule.startListeners(io);
+var socketModule;
+
+var fileSync = require('./fileSync').FileSync;
+fileSync.getSavedFiles(() => {
+    fileSync.saveLocalFiles();
+    socketModule = require('./socket');
+    socketModule.startListeners(io);
+});
 
 // view engine setup
 app.set('views', path.join(__dirname, 'views'));

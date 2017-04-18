@@ -71,6 +71,18 @@ var startListeners = function(io) {
             }
         });
 
+        db.getFiles((err, result) => {
+            if (err) {
+                console.log("Error reading file table: ", err.message);
+            } else {
+                let jsonData = result.rows.map(function(r) {
+                    return {id: r.id, name: r.name, active: r.active, selected: r.selected}
+                });
+                console.log("Sending File List");
+                socket.emit('filelist', jsonData);
+            }
+        });
+
         socket.on('register position', function(msg) {
             let pos = msg;
             db.updatePhonePosition(ipAddress, pos, function(err, result) {

@@ -1,6 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<<<<<<< HEAD
-<merger version="3"><dataSet config="main"><source path="/home/tarvu/projects/ss_sphere/sphere/platforms/android/CordovaLib/src/main/shaders"/></dataSet><dataSet config="debug"><source path="/home/tarvu/projects/ss_sphere/sphere/platforms/android/CordovaLib/src/debug/shaders"/></dataSet></merger>
-=======
-<merger version="3"><dataSet config="main"><source path="/Users/chareau/ss_sphere/sphere/platforms/android/CordovaLib/src/main/shaders"/></dataSet><dataSet config="debug"><source path="/Users/chareau/ss_sphere/sphere/platforms/android/CordovaLib/src/debug/shaders"/></dataSet></merger>
->>>>>>> master

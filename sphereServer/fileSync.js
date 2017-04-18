@@ -8,7 +8,7 @@ class FileSync extends events.EventEmitter {
         super();
         db.useTestDatabase();
         this.updateHour;
-        this.localFiles = [];
+        this.fileTable = [];
         this.remoteFiles;
     }
 
@@ -34,10 +34,21 @@ class FileSync extends events.EventEmitter {
 
     saveLocalFiles() {
         fs.readdir('./public/moviefiles/', (err, files) => {
+            this.fileTable.forEach((tfile) => {
+                if(files.indexOf(tfile) === -1) {
+                    db.deleteFile(tfile, (err, result) => {
+                        if (err) {
+                            console.log("ERROR deleting from db: ", tfile);
+                        } else {
+                            console.log("Deleted from db: ", tfile);
+                        }
+                    });
+                }
+            });
             var i = 0;
             files.forEach((file) => {
                 console.log("File: ", file);
-                if (this.localFiles.indexOf(file) === -1) {
+                if (this.fileTable.indexOf(file) === -1) {
                     let split = file.split('.');
                     let filename = Date.now() + '_' + split[0].substr(split[0].length - 8) + '.' + split[split.length-1];
                     db.createFile(filename, (err, result) => {
@@ -61,7 +72,7 @@ class FileSync extends events.EventEmitter {
                     done();
                 } else {
                     result.rows.forEach((row) => {
-                        this.localFiles.push(row.name);
+                        this.fileTable.push(row.name);
                         i++;
                         if ( i >= result.rows.length ) {
                             done();

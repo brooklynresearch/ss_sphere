@@ -144,10 +144,10 @@ var createFile = function(name, cb) {
     });
 }
 
-var deleteFile = function(id, cb) {
+var deleteFile = function(name, cb) {
     var query = squel.delete()
                 .from("files")
-                .where("id = ?", id)
+                .where("name = ?", name)
                 .toParam();
 
     dbClient.query({text: query.text, values: query.values}, function(err, result) {

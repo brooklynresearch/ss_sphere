@@ -120,13 +120,15 @@ var sendSocketBroadcast = function(sockEvent, msg) {
 
 var sendUdpCommand = function(cmd) {
     let broadcast = process.env.BROADCAST_ADDR;
-    for( var i = 0; i < 10; i++) {
-        console.log("Sending Command: ", cmd);
-        udpBroadcaster.send(cmd, 55555, broadcast, (err) => {
-            if (err) {
-                console.log("ERROR on Send Udp Command: ", err);
-            }
-        });
+    for( var i = 0; i < 10; i++ ) {
+        setTimeout(() => {
+            console.log("Sending Command: ", cmd);
+            udpBroadcaster.send(cmd, 55555, broadcast, (err) => {
+                if (err) {
+                    console.log("ERROR on Send Udp Command: ", err);
+                }
+            });
+        }, 1);
     }
 }
 

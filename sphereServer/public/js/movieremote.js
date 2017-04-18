@@ -18,3 +18,18 @@ sndParamsBtn.onclick = function() {
     xhr.open("GET", "sendparams");
     xhr.send();
 };
+
+var hideDebugBtn = document.getElementById('hide-debug');
+hideDebugBtn.onclick = function() {
+	var hxr = new HMLHttpRequest();
+	xhr.open("GET", "hidedebug");
+	xhr.send();
+};
+
+
+var darkBtn = document.getElementById('toggle-dark');
+hideDebugBtn.onclick = function() {
+	var hxr = new HMLHttpRequest();
+	xhr.open("GET", "dark");
+	xhr.send();
+};

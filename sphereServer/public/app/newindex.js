@@ -13,17 +13,6 @@ var app = {
 
     homeLoaded: function() {
 
-        var localURLs    = [
-            cordova.file.dataDirectory,
-            cordova.file.documentsDirectory,
-            cordova.file.externalApplicationStorageDirectory,
-            cordova.file.externalCacheDirectory,
-            cordova.file.externalRootDirectory,
-            cordova.file.externalDataDirectory,
-            cordova.file.sharedDirectory,
-            cordova.file.syncedDataDirectory
-        ];
-
         var devicePosition;
         var deviceParameters;
         var parametersTable;
@@ -34,27 +23,6 @@ var app = {
 
         var canvas;
         var player;
-
-        // testing vars
-        var testJSON = {
-            '0101':
-                {
-                    'lat': 44.55,
-                    'long': 40,
-                    'fov': 6.3
-                },
-
-            '0102':
-                {
-                    'lat': 44.55,
-                    'long': 48.1,
-                    'fov': 6.3
-                }                
-
-        };
-
-        parametersTable = testJSON;
-        devicePosition = '0101';
 
         function newPositionParameters(canvas, json){
             console.log(devicePosition);
@@ -89,11 +57,8 @@ var app = {
             console.log("position ", data);
             console.log(data);
             console.log(typeof(data));
-            if(data.length == 4){
-                devicePosition = data;
-            }
             document.getElementById("position-debug").innerHTML = "Position: " + data;
-            newPositionParameters(canvas, parametersTable);
+
         });
         socket.on('newpos', function(data) {
             console.log("New position ", data);
@@ -174,6 +139,27 @@ var app = {
                 );
             });
         });
+        socket.on('dark', function(data) {
+            // receive from server new parameters for posTable variable
+            console.log("dark: ", data);
+            var blackOut = document.getElementById("black-out");
+            if(data === true){
+                blackOut.style.backgroundColor = 'black';
+            }
+            else{
+                blackOut.style.backgroundColor = 'transparent';
+            }
+        });
+        socket.on('hidedebug', function(data) {
+            console.log("hidedebug: ", data);
+            var debugElement = document.getElementById("position-debug");
+            if(data === true){
+                debugElement.style.visibility = 'hidden';
+            }
+            else{
+                debugElement.style.visibility = 'visible';
+            }
+        });
 
         var arrayBufferToString = function(buf) {
             var str= '';
@@ -247,29 +233,6 @@ var app = {
             });
         });
 
-        // currentVideo to load, could be an index for an array of video names
-        // likely will want to figure out a way to load from camera resources rather than www assets folder
-        // as we'll have to save new ones anyhow as they come in
-        var currentVideo;
-        // variable later for tablet position placement
-        var targetFile = "dummy";
-        var targetEntry;
-        // write test
-
-        function writeLog(str) {
-            if(!logOb) return;
-            var log = str + " [" + (new Date()) + "]\n";
-            console.log("going to log "+log);
-            logOb.createWriter(function(fileWriter) {
-                
-                fileWriter.seek(fileWriter.length);
-                
-                var blob = new Blob([log], {type:'text/plain'});
-                fileWriter.write(blob);
-                console.log("ok, in theory i worked");
-            });
-        }
-
         window.resolveLocalFileSystemURL(cordova.file.dataDirectory, function(dir){
             console.log("got main dir",dir)
             dir.getFile("log.txt", {create:true}, function(file) {
@@ -280,59 +243,6 @@ var app = {
         });
 
         function isMobile() {
-
-            // file reading test
-
-            var index = 0;
-            var i;
-            var statusStr = "";
-            
-
-            var addFileEntry = function (entry) {
-                var dirReader = entry.createReader();
-                dirReader.readEntries(
-                    function (entries) {
-                        var fileStr = "";
-                        var i;
-                        for (i = 0; i < entries.length; i++) {
-                            if (entries[i].isDirectory === true) {
-                                // Recursive -- call back into this subdirectory
-                                addFileEntry(entries[i]);
-                            } else {
-                                fileStr += (entries[i].fullPath + "<br>"); // << replace with something useful
-
-                                if(fileStr == "/storage/emulated/0/Movies/sphere/DYNE_FinalOutput_Gear360_H264_3840x1920.mp4<br>"){
-
-                                    targetFile = entries[i].fullPath;
-                                    targetEntry = (entries[i]);
-                                }
-
-                                index++;
-                            }
-                        }
-                        // add this directory's contents to the status
-                        statusStr += fileStr;
-                        // display the file list in #results
-                        if (statusStr.length > 0) {
-                            $("#results").html(statusStr);
-                        } 
-                    },
-                    function (error) {
-                        console.log("readEntries error: " + error.code);
-                        statusStr += "<p>readEntries error: " + error.code + "</p>";
-                    }
-                );
-            };
-            var addError = function (error) {
-                console.log("getDirectory error: " + error.code);
-                statusStr += "<p>getDirectory error: " + error.code + ", " + error.message + "</p>";
-            };
-            for (i = 0; i < localURLs.length; i++) {
-                if (localURLs[i] === null || localURLs[i].length === 0) {
-                    continue; // skip blank / non-existent paths for this platform
-                }
-                // window.resolveLocalFileSystemURL(localURLs[i], addFileEntry, addError);
-            }
 
             // Panorama player check
 

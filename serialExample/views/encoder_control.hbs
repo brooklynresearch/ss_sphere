@@ -1,0 +1,17 @@
+<h1>{{title}} Page</h1>
+
+<p>Enter a value between 0 and whatever.  This adjusts the encoder callback value in milliseconds</p>
+<input type="text" value="30" id="timing"><button id="timing-btn">TIME</button><br /><br />
+
+<p>Enter a value between 1 and whatever.  This adjusts how many steps the encoder makes it registers a new step<p>
+<input type="text" value="10" id="sensitivity"><button id="resolution-btn">RESOLUTION</button><br /><br />
+
+<p>Enter a value between 1 and a lot.  This adjust how many total steps there are in a full revolution around the sphere</p>
+<input type="text" value="36000" id="maxsteps"><button id="maxsteps-btn">MAX STEPS</button><br /><br />
+
+<br />
+<br />
+<p> This prints to the console the current position, timing, step resolution, and maximum steps</p>
+<button id="getStatus-btn">GET STATUS</button>
+
+<script src="js/encoderStatus.js"></script>

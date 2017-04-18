@@ -118,27 +118,64 @@ var app = {
             //Load the video and start playing
             var videoGrab = document.getElementById("videojs-panorama-player_html5_api");
             console.log(videoGrab);
-            videoGrab.src = "/storage/emulated/0/Movies/sphere/" + data;
+            videoGrab.src = "/storage/emulated/0/Android/data/com.ss.sphere/files/" + data;
             // should this emit something to server and have server check
             // if everyone got the switch video notice before a udp play send?
             player.play();
+        });
+
+        socket.on('filelist', function(data) {
+            console.log("Got file list");
+            let serverFiles = data.map(function(f) {return f.name});
+            window.resolveLocalFileSystemURL(cordova.file.externalDataDirectory, function(dir){
+                let reader = dir.createReader();
+                reader.readEntries(function(entries) {
+                    console.log("Entries: ", entries);
+                    serverFiles.forEach(function(file) {
+                        if (entries.indexOf(file) === -1) {
+                            var ft = new FileTransfer();
+                            console.log("Downloading " + file + "...");
+                            ft.download("http://192.168.1.200:3000/moviefiles/" + file, dir.fullPath + file, function(file) {
+                                    console.log("Download Complete: ", file.toURI());
+                                },
+                                function(err) {
+                                    console.log("Error Downloading File: ", err);
+                                }
+                            );
+                        }
+                    });
+                });
+            });
         });
         // for testing and calibration
         socket.on('newtable', function(data) {
             // receive from server new parameters for posTable variable
             console.log("Recv new table: ", data);
-            if(canvas && devicePosition){
+            if(canvas && devicePosition) {
                 // should be a json object
                 parametersTable = data;
                 newPositionParameters(canvas, parametersTable);
             }
-
-            else{
+            else {
                 console.log("nothing to assign");
             }
-
         });
- 
+        socket.on('file', function(url) {
+            var fileUrl = url;
+            var filename = fileUrl.split('/').pop();
+            window.resolveLocalFileSystemURL(cordova.file.externalDataDirectory, function(dir) {
+                console.log("Downloading...");
+                var fileTransfer = new FileTransfer();
+                fileTransfer.download(fileUrl, dir.fullPath + filename, function(file) {
+                        console.log("Download Complete: ", file.toURI());
+                    },
+                    function(err) {
+                        console.log("Error Downloading File: ", err);
+                    }
+                );
+            });
+        });
+
         var arrayBufferToString = function(buf) {
             var str= '';
             var ui8= new Uint8Array(buf);
@@ -241,7 +278,6 @@ var app = {
                 logOb = file;
                 writeLog("App started");          
             });
-
         });
 
         function isMobile() {

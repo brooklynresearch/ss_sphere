@@ -123,11 +123,11 @@ var deletePhone = function(phoneIpAddress, cb) {
     });
 }
 
-var createFile = function(name, url, runtime, cb) {
+var createFile = function(name, cb) {
     var query = squel.insert()
                 .into("files")
                 .set("name", name)
-                .set("url", url)
+                .set("url", "")
                 .set("runtime", -1)
                 .set("active", false)
                 .set("selected", false)
@@ -176,7 +176,7 @@ var getFiles = function(cb) {
 
 }
 
-var clearTable = function(cb) {
+var clearPhones = function(cb) {
     var query = squel.delete()
                 .from("phones")
                 .toParam();
@@ -184,6 +184,21 @@ var clearTable = function(cb) {
     dbClient.query({text: query.text, values: query.values}, function(err, result) {
         if(err) {
             console.log("DB ERROR: deleting phones ", err.message);
+            cb(err, null);
+        } else {
+            cb(null, result);
+        }
+    });
+}
+
+var clearFiles = function(cb) {
+    var query = squel.delete()
+                .from("files")
+                .toParam();
+
+    dbClient.query({text: query.text, values: query.values}, function(err, result) {
+        if(err) {
+            console.log("DB ERROR: deleting files ", err.message);
             cb(err, null);
         } else {
             cb(null, result);
@@ -207,7 +222,8 @@ module.exports = {
     createFile: createFile,
     getFiles: getFiles,
     deleteFile: deleteFile,
-    clearTable: clearTable,
+    clearPhones: clearPhones,
+    clearFiles: clearFiles,
     disconnect: disconnect
 }
 

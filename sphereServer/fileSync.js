@@ -1,11 +1,14 @@
+var fs = require('fs');
 var db = require('./db');
-
+var events = require('events');
+var socket = require('./socket');
 
 class FileSync extends events.EventEmitter {
     constructor() {
         super();
+        db.useTestDatabase();
         this.updateHour;
-        this.localFiles;
+        this.localFiles = [];
         this.remoteFiles;
     }
 
@@ -29,11 +32,42 @@ class FileSync extends events.EventEmitter {
         });
     }
 
-    getLocalFiles(done) {
+    saveLocalFiles() {
+        fs.readdir('./public/moviefiles/', (err, files) => {
+            var i = 0;
+            files.forEach((file) => {
+                console.log("File: ", file);
+                if (this.localFiles.indexOf(file) === -1) {
+                    let split = file.split('.');
+                    let filename = Date.now() + '_' + split[0].substr(split[0].length - 8) + '.' + split[split.length-1];
+                    db.createFile(filename, (err, result) => {
+                        if (err) {
+                            console.log("ERROR saving file: ", err.message);
+                        } else {
+                            console.log("New File: " , result.rows[0].name);
+                            fs.renameSync('./public/moviefiles/'+file, './public/moviefiles/'+result.rows[0].name);
+                        }
+                    });
+                }
+            });
+        });
+    }
+
+    getSavedFiles(done) {
         db.getFiles((err, result) => {
+            var i = 0;
             if (!err) {
-                this.localFiles = result.rows;
-                done();
+                if (result.rows.length === 0) {
+                    done();
+                } else {
+                    result.rows.forEach((row) => {
+                        this.localFiles.push(row.name);
+                        i++;
+                        if ( i >= result.rows.length ) {
+                            done();
+                        }
+                    });
+                }
             }
         });
     }
@@ -54,7 +88,12 @@ class FileSync extends events.EventEmitter {
     downloadFromCMS(url, done) {
 
     }
+
+    sendDownloadLink(url) {
+        console.log("Broadcasting url: ", url);
+        socket.sendSocketBroadcast("file", url);
+    }
 }
 
-module.exports = new FileSync;
+module.exports.FileSync = new FileSync;
 

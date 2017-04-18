@@ -71,6 +71,18 @@ var startListeners = function(io) {
             }
         });
 
+        db.getFiles((err, result) => {
+            if (err) {
+                console.log("Error reading file table: ", err.message);
+            } else {
+                let jsonData = result.rows.map(function(r) {
+                    return {id: r.id, name: r.name, active: r.active, selected: r.selected}
+                });
+                console.log("Sending File List");
+                socket.emit('filelist', jsonData);
+            }
+        });
+
         socket.on('register position', function(msg) {
             let pos = msg;
             db.updatePhonePosition(ipAddress, pos, function(err, result) {
@@ -92,7 +104,11 @@ var startListeners = function(io) {
 
             // emit this to all the devices in order to tell them to play
             io.emit('switch video', msg);
-
+        });
+        socket.on('newfile', function(url) {
+            console.log("sending URL: ", url);
+            sendSocketBroadcast("file", url);
+            //socket.emit('ACK', 'newfile');
         });
     });
 }
@@ -114,9 +130,14 @@ var sendUdpCommand = function(cmd) {
     }
 }
 
+var stop = function() {
+    ioInstance.close();
+}
+
 module.exports = {
     startListeners: startListeners,
     sendUdpCommand: sendUdpCommand,
-    sendSocketBroadcast: sendSocketBroadcast
+    sendSocketBroadcast: sendSocketBroadcast,
+    stop: stop
 }
 

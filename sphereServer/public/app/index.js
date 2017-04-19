@@ -96,8 +96,11 @@ var app = {
         });
         socket.on('switch video', function(data) {
             //Load the video and start playing
+            player.pause();
+            
             if(currentVideo !== data){
-                videoGrab.src = "/storage/emulated/0/Android/data/com.ss.sphere/files/" + data;
+
+                player.src("/storage/emulated/0/Android/data/com.ss.sphere/files/" + data);
                 currentVideo = data;
             }
             player.currentTime(0);

@@ -20,6 +20,7 @@ var io = require('socket.io')(8080);
 var socketModule;
 
 var fileSync = require('./fileSync').FileSync;
+fileSync.setUpdateHour("22");
 fileSync.getSavedFiles(() => {
     fileSync.saveLocalFiles();
     socketModule = require('./socket');

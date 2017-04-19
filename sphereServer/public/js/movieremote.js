@@ -32,7 +32,7 @@ hideDebugBtn.onclick = function() {
 
 
 var darkBtn = document.getElementById('toggle-dark');
-hideDebugBtn.onclick = function() {
+darkBtn.onclick = function() {
   console.log("dark");
 	var xhr = new XMLHttpRequest();
 	xhr.open("GET", "dark");

@@ -1,0 +1,8 @@
+{
+  "name": "SPHERE",
+  "theme_color": "#9E9E9E",
+  "background_color": "#9E9E9E",
+  "start_url": "/controller",
+  "display": "standalone",
+  "orientation": "portrait"
+}

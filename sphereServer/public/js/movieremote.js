@@ -1,3 +1,5 @@
+console.log("movieremote");
+
 var playBtn = document.getElementById('play-btn');
 playBtn.onclick = function() {
   var xhr = new XMLHttpRequest();
@@ -21,15 +23,19 @@ sndParamsBtn.onclick = function() {
 
 var hideDebugBtn = document.getElementById('hide-debug');
 hideDebugBtn.onclick = function() {
-	var hxr = new XMLHttpRequest();
+  console.log("hide-debug");
+	var xhr = new XMLHttpRequest();
 	xhr.open("GET", "hidedebug");
 	xhr.send();
+  console.log("hidedebug");
 };
 
 
 var darkBtn = document.getElementById('toggle-dark');
 hideDebugBtn.onclick = function() {
-	var hxr = new XMLHttpRequest();
+  console.log("dark");
+	var xhr = new XMLHttpRequest();
 	xhr.open("GET", "dark");
 	xhr.send();
+
 };

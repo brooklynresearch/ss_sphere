@@ -21,7 +21,7 @@ sndParamsBtn.onclick = function() {
 
 var hideDebugBtn = document.getElementById('hide-debug');
 hideDebugBtn.onclick = function() {
-	var hxr = new HMLHttpRequest();
+	var hxr = new XMLHttpRequest();
 	xhr.open("GET", "hidedebug");
 	xhr.send();
 };
@@ -29,7 +29,7 @@ hideDebugBtn.onclick = function() {
 
 var darkBtn = document.getElementById('toggle-dark');
 hideDebugBtn.onclick = function() {
-	var hxr = new HMLHttpRequest();
+	var hxr = new XMLHttpRequest();
 	xhr.open("GET", "dark");
 	xhr.send();
 };

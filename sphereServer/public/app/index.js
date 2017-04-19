@@ -189,6 +189,15 @@ var app = {
                 debugElement.style.visibility = 'visible';
             }
         });
+        socket.on('reload', function(data) {
+            
+            let timeout = Math.random() * 1000 * 1; // sometime in next 8.3 mins
+            console.log("reloading in: " + timeout);
+            setTimeout(function(){
+                location.reload();
+            }, timeout);
+        });
+
 
         var arrayBufferToString = function(buf) {
             var str= '';

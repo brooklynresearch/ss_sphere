@@ -76,7 +76,7 @@ var startListeners = function(io) {
                 console.log("Error reading file table: ", err.message);
             } else {
                 let jsonData = result.rows.map(function(r) {
-                    return {id: r.id, name: r.name, active: r.active, selected: r.selected}
+                    return {id: r.id, name: r.name, active: r.active, selected: r.selected, size: r.size}
                 });
                 console.log("Sending File List");
                 socket.emit('filelist', jsonData);
@@ -101,9 +101,13 @@ var startListeners = function(io) {
             console.log("set video");
 
             // set an internal variable to this new set video if it is new
-
+            var delay = 2000;
             // emit this to all the devices in order to tell them to play
             io.emit('switch video', msg);
+            setTimeout(function() {
+                sendUdpCommand('play');
+            }, delay);
+
         });
         socket.on('newfile', function(url) {
             console.log("sending URL: ", url);
@@ -120,13 +124,15 @@ var sendSocketBroadcast = function(sockEvent, msg) {
 
 var sendUdpCommand = function(cmd) {
     let broadcast = process.env.BROADCAST_ADDR;
-    for( var i = 0; i < 10; i++) {
-        console.log("Sending Command: ", cmd);
-        udpBroadcaster.send(cmd, 55555, broadcast, (err) => {
-            if (err) {
-                console.log("ERROR on Send Udp Command: ", err);
-            }
-        });
+    for( var i = 0; i < 10; i++ ) {
+        setTimeout(() => {
+            console.log("Sending Command: ", cmd);
+            udpBroadcaster.send(cmd, 55555, broadcast, (err) => {
+                if (err) {
+                    console.log("ERROR on Send Udp Command: ", err);
+                }
+            });
+        }, 1);
     }
 }
 

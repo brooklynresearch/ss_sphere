@@ -43,6 +43,8 @@ app.use('/moviecontrol', index);
 app.use('/play', index);
 app.use('/pause', index);
 app.use('/sendparams', index);
+app.use('/hidedebug', index);
+app.use('/dark', index);
 app.use('/controller', routeController);
 
 // catch 404 and forward to error handler

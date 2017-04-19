@@ -14,9 +14,17 @@ jQuery(function() {
         });
 
         // in case there is a new order of images we need to
-        socket.on('order', function(msg) {
+        socket.on('fileList', function(msg) {
         	console.log("order received");
         	console.log(msg);
+
+        	var selectCount = 0;
+
+        	// for(var i=0; i < 3; ++i){
+        	// 	var index = 1 + 1;
+        	// 	$('#vid-0'+index).attr('data-id', msg['']['name']);
+        	// 	$('#vid-0'+index).css('background-image', 'url(' + msg[i]['img'] + ')');
+        	// }
         });
     }
 

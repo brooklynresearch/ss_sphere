@@ -123,12 +123,13 @@ var deletePhone = function(phoneIpAddress, cb) {
     });
 }
 
-var createFile = function(name, cb) {
+var createFile = function(name, size, cb) {
     var query = squel.insert()
                 .into("files")
                 .set("name", name)
                 .set("url", "")
                 .set("runtime", -1)
+                .set("size", size)
                 .set("active", false)
                 .set("selected", false)
                 .returning('*')
@@ -144,10 +145,10 @@ var createFile = function(name, cb) {
     });
 }
 
-var deleteFile = function(id, cb) {
+var deleteFile = function(name, cb) {
     var query = squel.delete()
                 .from("files")
-                .where("id = ?", id)
+                .where("name = ?", name)
                 .toParam();
 
     dbClient.query({text: query.text, values: query.values}, function(err, result) {

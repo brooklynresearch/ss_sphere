@@ -8,7 +8,7 @@ class FileSync extends events.EventEmitter {
         super();
         db.useTestDatabase();
         this.updateHour;
-        this.localFiles = [];
+        this.fileTable = [];
         this.remoteFiles;
     }
 
@@ -34,20 +34,40 @@ class FileSync extends events.EventEmitter {
 
     saveLocalFiles() {
         fs.readdir('./public/moviefiles/', (err, files) => {
-            var i = 0;
-            files.forEach((file) => {
-                console.log("File: ", file);
-                if (this.localFiles.indexOf(file) === -1) {
-                    let split = file.split('.');
-                    let filename = Date.now() + '_' + split[0].substr(split[0].length - 8) + '.' + split[split.length-1];
-                    db.createFile(filename, (err, result) => {
+            // Delete old files from db
+            this.fileTable.forEach((tfile) => {
+                if (files.indexOf(tfile) === -1) {
+                    db.deleteFile(tfile, (err, result) => {
                         if (err) {
-                            console.log("ERROR saving file: ", err.message);
+                            console.log("ERROR deleting from db: ", tfile);
                         } else {
-                            console.log("New File: " , result.rows[0].name);
-                            fs.renameSync('./public/moviefiles/'+file, './public/moviefiles/'+result.rows[0].name);
+                            console.log("Deleted from db: ", tfile);
                         }
                     });
+                }
+            });
+            // Save new files in db
+            files.forEach((file) => {
+                console.log("File: ", file);
+                if (this.fileTable.indexOf(file) === -1) {
+                    let split = file.split('.');
+                    let filename = Date.now() + '_' + split[0].substr(split[0].length - 8) + '.' + split[split.length-1];
+                    let stats = fs.statSync('./public/moviefiles/' + file);
+                    let size = stats.size;
+                    console.log("size", size);
+                    console.log("ds chec: ", filename.includes(".DS_Store"));
+                    if(!filename.includes(".DS_Store")){
+
+                        db.createFile(filename, size, (err, result) => {
+                            if (err) {
+                                console.log("ERROR saving file: ", err.message);
+                            } else {
+                                console.log("New File: " , result.rows[0].name);
+                                console.log("Size in bytes: " , result.rows[0].size);
+                                fs.renameSync('./public/moviefiles/'+file, './public/moviefiles/'+result.rows[0].name);
+                            }
+                        });
+                    }
                 }
             });
         });
@@ -61,7 +81,7 @@ class FileSync extends events.EventEmitter {
                     done();
                 } else {
                     result.rows.forEach((row) => {
-                        this.localFiles.push(row.name);
+                        this.fileTable.push(row.name);
                         i++;
                         if ( i >= result.rows.length ) {
                             done();

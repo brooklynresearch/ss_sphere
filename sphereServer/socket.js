@@ -101,7 +101,7 @@ var startListeners = function(io) {
             console.log("set video");
 
             // set an internal variable to this new set video if it is new
-            var delay = 3000;
+            var delay = 30000;
             // emit this to all the devices in order to tell them to play
             io.emit('switch video', msg);
             setTimeout(function() {
@@ -132,7 +132,7 @@ var sendUdpCommand = function(cmd) {
                     console.log("ERROR on Send Udp Command: ", err);
                 }
             });
-        }, 1);
+        }, 2);
     }
 }
 

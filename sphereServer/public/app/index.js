@@ -23,6 +23,7 @@ var app = {
 
         var canvas;
         var player;
+        var videoGrab;
 
         var devicePosition = "0101";
         var assetServer = "http://192.168.1.200:8081";
@@ -95,12 +96,20 @@ var app = {
         });
         socket.on('switch video', function(data) {
             //Load the video and start playing
-            var videoGrab = document.getElementById("videojs-panorama-player_html5_api");
-            videoGrab.src = "/storage/emulated/0/Android/data/com.ss.sphere/files/" + data;
+            if(currentVideo !== data){
+                videoGrab.src = "/storage/emulated/0/Android/data/com.ss.sphere/files/" + data;
+                currentVideo = data;
+            }
+            player.currentTime(0);
+            player.play();
+            setTimeout(function(){
+                player.pause();
+            }, 1000);
+
             // should this emit something to server and have server check
             // if everyone got the switch video notice before a udp play send?
-            player.play();
-            player.pause();
+            // player.play();
+            // player.pause();
         });
 
         socket.on('filelist', function(data) {
@@ -308,6 +317,7 @@ var app = {
                     player.pause();
                     console.log("is ready");
                     canvas = player.getChild('Canvas');
+                    videoGrab = document.getElementById("videojs-panorama-player_html5_api");
                 });
 
             }(window, window.videojs));

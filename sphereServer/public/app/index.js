@@ -61,6 +61,8 @@ var app = {
                     },
                     function(err) {
                         console.log("Error Downloading File: ", err);
+                        console.log("Trying again...");
+                        downloadFile(filename, size, dir);
                     }
                 );
             }, timeout);

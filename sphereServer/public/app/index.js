@@ -25,6 +25,7 @@ var app = {
         var player;
 
         var devicePosition = "0101";
+        var assetServer = "http://192.168.1.200:8081";
 
         function newPositionParameters(canvas, json){
             console.log(devicePosition);
@@ -41,19 +42,22 @@ var app = {
             console.log(canvas);
         }
 
-        function downloadFile(filename, size) {
+        function downloadFile(filename, size, dir) {
             let ft = new FileTransfer();
-            let timeout = Math.random() * 1000 * 5000; // sometime in next 8.3 mins
+            let timeout = Math.random() * 1000 * 200; // sometime in next 8.3 mins
             console.log("Downloading " + filename + " in " + timeout + " ms...");
             setTimeout(function() {
                 console.log("Downloading " + filename + "...");
-                ft.download("http://192.168.1.200:3000/moviefiles/" + filename, dir.fullPath + filename, function(newFile) {
+                ft.download(assetServer + "/moviefiles/" + filename, dir.fullPath + filename, function(newFile) {
                         console.log("Download Complete: ", newFile.toURL());
-                        if (newFile.size !== size) {
-                            console.log("Bad File Size! Got ", newFile.size);
-                            console.log("Trying again...");
-                            downloadFile(file, size);
-                        }
+                        console.log("Size should be ", size);
+                        newFile.file(function(f) {
+                            if (f.size !== size) {
+                                console.log("Bad File Size! Got ", newFile.size);
+                                console.log("Trying again...");
+                                downloadFile(filename, size, dir);
+                            }
+                        });
                     },
                     function(err) {
                         console.log("Error Downloading File: ", err);
@@ -128,7 +132,7 @@ var app = {
                     console.log("Entries: ", entryNames);
                     data.forEach(function(fileObj) {
                         if (entryNames.indexOf(fileObj.name) === -1) {
-                            downloadFile(fileObj.name, fileObj.size); 
+                            downloadFile(fileObj.name, fileObj.size, dir);
                         }
                     });
                 });

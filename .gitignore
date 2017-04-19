@@ -46,3 +46,4 @@ sphere/www/chcp.json
 
 sphere/www/chcp.manifest
 sphereServer/public/moviefiles/*
+staticServe/node_modules/*

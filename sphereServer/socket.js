@@ -10,10 +10,21 @@ var ioInstance;
 var startListeners = function(io) {
 
     ioInstance = io;
+    // var oscServer = require('./oscServer').OscServer;
     var serialServer = require('./serialServer').SerialServer;
 
     udpBroadcaster = dgram.createSocket('udp4');
     let broadcast = process.env.BROADCAST_ADDR;
+
+    // oscServer.on('osc', (oscMessage) => {
+    //     let encoderValue = oscMessage.args[0];
+    //     console.log("UDP BROADCAST: ", encoderValue);
+    //     udpBroadcaster.send(encoderValue.toString(), 55555, '192.168.1.255', (err) => {
+    //         if (err) {
+    //             console.log("ERROR on broadcast: ", err);
+    //         }
+    //     });
+    // });
 
     serialServer.on('serial', (data) => {
         console.log("got serial");
@@ -90,9 +101,13 @@ var startListeners = function(io) {
             console.log("set video");
 
             // set an internal variable to this new set video if it is new
-
+            var delay = 2000;
             // emit this to all the devices in order to tell them to play
             io.emit('switch video', msg);
+            setTimeout(function() {
+                sendUdpCommand('play');
+            }, delay);
+
         });
         socket.on('newfile', function(url) {
             console.log("sending URL: ", url);
@@ -109,13 +124,15 @@ var sendSocketBroadcast = function(sockEvent, msg) {
 
 var sendUdpCommand = function(cmd) {
     let broadcast = process.env.BROADCAST_ADDR;
-    for( var i = 0; i < 10; i++) {
-        console.log("Sending Command: ", cmd);
-        udpBroadcaster.send(cmd, 55555, broadcast, (err) => {
-            if (err) {
-                console.log("ERROR on Send Udp Command: ", err);
-            }
-        });
+    for( var i = 0; i < 10; i++ ) {
+        setTimeout(() => {
+            console.log("Sending Command: ", cmd);
+            udpBroadcaster.send(cmd, 55555, broadcast, (err) => {
+                if (err) {
+                    console.log("ERROR on Send Udp Command: ", err);
+                }
+            });
+        }, 1);
     }
 }
 

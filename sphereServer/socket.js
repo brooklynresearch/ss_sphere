@@ -101,9 +101,13 @@ var startListeners = function(io) {
             console.log("set video");
 
             // set an internal variable to this new set video if it is new
-
+            var delay = 2000;
             // emit this to all the devices in order to tell them to play
             io.emit('switch video', msg);
+            setTimeout(function() {
+                sendUdpCommand('play');
+            }, delay);
+
         });
         socket.on('newfile', function(url) {
             console.log("sending URL: ", url);

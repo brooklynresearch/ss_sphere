@@ -41,6 +41,27 @@ var app = {
             console.log(canvas);
         }
 
+        function downloadFile(filename, size) {
+            let ft = new FileTransfer();
+            let timeout = Math.random() * 1000 * 5000; // sometime in next 8.3 mins
+            console.log("Downloading " + filename + " in " + timeout + " ms...");
+            setTimeout(function() {
+                console.log("Downloading " + filename + "...");
+                ft.download("http://192.168.1.200:3000/moviefiles/" + filename, dir.fullPath + filename, function(newFile) {
+                        console.log("Download Complete: ", newFile.toURL());
+                        if (newFile.size !== size) {
+                            console.log("Bad File Size! Got ", newFile.size);
+                            console.log("Trying again...");
+                            downloadFile(file, size);
+                        }
+                    },
+                    function(err) {
+                        console.log("Error Downloading File: ", err);
+                    }
+                );
+            }, timeout);
+        }
+
         document.body.style.background = "rgb(0,0,0)";
 
         var serveraddress = 'http://192.168.1.200:8080';
@@ -105,17 +126,9 @@ var app = {
                     // Download any new server files
                     let entryNames = entries.map(function(e) {return e.name});
                     console.log("Entries: ", entryNames);
-                    serverFiles.forEach(function(file) {
-                        if (entryNames.indexOf(file) === -1) {
-                            var ft = new FileTransfer();
-                            console.log("Downloading " + file + "...");
-                            ft.download("http://192.168.1.200:3000/moviefiles/" + file, dir.fullPath + file, function(file) {
-                                    console.log("Download Complete: ", file.toURI());
-                                },
-                                function(err) {
-                                    console.log("Error Downloading File: ", err);
-                                }
-                            );
+                    data.forEach(function(fileObj) {
+                        if (entryNames.indexOf(fileObj.name) === -1) {
+                            downloadFile(fileObj.name, fileObj.size); 
                         }
                     });
                 });

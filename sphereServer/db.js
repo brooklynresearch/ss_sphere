@@ -123,12 +123,13 @@ var deletePhone = function(phoneIpAddress, cb) {
     });
 }
 
-var createFile = function(name, cb) {
+var createFile = function(name, size, cb) {
     var query = squel.insert()
                 .into("files")
                 .set("name", name)
                 .set("url", "")
                 .set("runtime", -1)
+                .set("size", size)
                 .set("active", false)
                 .set("selected", false)
                 .returning('*')

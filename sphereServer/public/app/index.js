@@ -28,18 +28,14 @@ var app = {
         var assetServer = "http://192.168.1.200:8081";
 
         function newPositionParameters(canvas, json){
-            console.log(devicePosition);
             var parameters = json[devicePosition];
             deviceParameters = parameters;
-            console.log("parameters");
-            console.log(parameters);
             // this needs to change to actual equation taking into account current encoder readings
             canvas.lon = convertToRange(encoderPosition, [0, encoderRange], [0, 360.0]) - 180.0 + parameters['long'];
             canvas.lat = parameters['lat'];
             canvas.camera.fov = parameters['fov'];
             canvas.camera.updateProjectionMatrix();
             console.log("updated position parameters for: " + devicePosition);
-            console.log(canvas);
         }
 
         function downloadFile(filename, size, dir) {
@@ -84,8 +80,6 @@ var app = {
         });
         socket.on('pos', function(data) {
             console.log("position ", data);
-            console.log(data);
-            console.log(typeof(data));
             if(data.length == 4){
                 devicePosition = data;
                 if(parametersTable && canvas){
@@ -102,12 +96,10 @@ var app = {
         socket.on('switch video', function(data) {
             //Load the video and start playing
             var videoGrab = document.getElementById("videojs-panorama-player_html5_api");
-            console.log(videoGrab);
             videoGrab.src = "/storage/emulated/0/Android/data/com.ss.sphere/files/" + data;
             // should this emit something to server and have server check
             // if everyone got the switch video notice before a udp play send?
             player.play();
-            player.currentTime(1);
             player.pause();
         });
 
@@ -143,7 +135,7 @@ var app = {
         // for testing and calibration
         socket.on('newtable', function(data) {
             // receive from server new parameters for posTable variable
-            console.log("Recv new table: ", data);
+            console.log("Recv new table");
             if(canvas && devicePosition) {
                 // should be a json object
                 parametersTable = data;
@@ -255,11 +247,6 @@ var app = {
                         //let converted = convertToRange(data, [0,36000], [0,255]);
                         var posData = parseInt(data);
                         encoderPosition = posData;
-
-                        console.log("inside conversion");
-
-                        console.log(convertToRange(posData, [0, encoderRange], [0, 360.0]));
-                        console.log(deviceParameters);
                         // should be a mapping of encoder range to 360 then subtract 180
                         let converted = convertToRange(posData, [0, encoderRange], [0, 360.0]) - 180.0 + deviceParameters['long'];
                         console.log(converted)
@@ -321,8 +308,6 @@ var app = {
                     player.pause();
                     console.log("is ready");
                     canvas = player.getChild('Canvas');
-                    console.log(canvas);
-
                 });
 
             }(window, window.videojs));
@@ -330,9 +315,6 @@ var app = {
             // Assignment and debug block
 
             jQuery(function() {
-
-                console.log("Within JQuery");
-
                 currentPos = 1234; //If you are seeing this on the front something is wrong
 
                 function getPosition() {

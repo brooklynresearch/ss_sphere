@@ -1,5 +1,4 @@
 
-
 html {
 }
 
@@ -73,11 +72,11 @@ body {
     background-size: cover;
     background-repeat: no-repeat;
     background-position: center;
-    opacity: .5;
+    opacity: 0.5;
 }
 
 .video:active {
-    opacity: .5;
+    opacity: 1;
 }
 
 #confirm-wrap {
@@ -159,6 +158,6 @@ body {
 }
 
 .disabled {
-    opacity: .2;
+    opacity: 0.5;
     pointer-events: none;
 }

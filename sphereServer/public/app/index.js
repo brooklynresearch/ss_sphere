@@ -27,6 +27,11 @@ var app = {
 
         var devicePosition = "0101";
         var assetServer = "http://192.168.1.200:8081";
+        var stillsFile = "1492567292838_injected.mp4";
+        var currentVideo = "1492567292838_injected.mp4";
+
+        var debugElement = document.getElementById("position-debug");
+        debugElement.style.visibility = 'hidden';
 
         function newPositionParameters(canvas, json){
             var parameters = json[devicePosition];
@@ -97,7 +102,7 @@ var app = {
         socket.on('switch video', function(data) {
             //Load the video and start playing
             player.pause();
-            
+
             if(currentVideo !== data){
 
                 player.src("/storage/emulated/0/Android/data/com.ss.sphere/files/" + data);
@@ -107,6 +112,12 @@ var app = {
             player.play();
             setTimeout(function(){
                 player.pause();
+                // player.currentTime(10);
+
+                // setTimeout(function(){
+                //     player.pause();
+
+                // }, 1000);
             }, 1000);
 
             // should this emit something to server and have server check
@@ -185,7 +196,7 @@ var app = {
         });
         socket.on('hidedebug', function(data) {
             console.log("hidedebug: ", data);
-            var debugElement = document.getElementById("position-debug");
+            debugElement = document.getElementById("position-debug");
             if(data === true){
                 debugElement.style.visibility = 'hidden';
             }
@@ -200,6 +211,24 @@ var app = {
             setTimeout(function(){
                 location.reload();
             }, timeout);
+        });
+        socket.on('frame', function(data) {
+            // actually seconds in
+            console.log('frame data: ', data);
+            var selectedFrame = parseInt(data);
+            player.pause();
+            console.log(selectedFrame);
+            player.currentTime(selectedFrame);
+            player.play();
+            setTimeout(function(){
+                player.pause();
+                // player.currentTime(10);
+
+                // setTimeout(function(){
+                //     player.pause();
+
+                // }, 1000);
+            }, 2000);
         });
 
 
@@ -241,7 +270,7 @@ var app = {
                 switch(data) {
                     case 'play':
                         if(canvas) {
-                            player.play();
+                            // player.play();
                         }
                         if (socket) {
                             socket.emit('ACK', "play");
@@ -316,6 +345,7 @@ var app = {
 
                 player.ready(function(){
                     player.width(screen.width), player.height(screen.height);
+                    player.src("/storage/emulated/0/Android/data/com.ss.sphere/files/" + stillsFile);
                     player.play();
                     player.pause();
                     console.log("is ready");

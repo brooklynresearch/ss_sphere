@@ -101,12 +101,13 @@ var startListeners = function(io) {
             console.log("set video");
 
             // set an internal variable to this new set video if it is new
-            var delay = 30000;
+            // var delay = 30000;
             // emit this to all the devices in order to tell them to play
-            io.emit('switch video', msg);
-            setTimeout(function() {
-                sendUdpCommand('play');
-            }, delay);
+            // io.emit('switch video', msg);
+            io.emit('frame', msg);
+            // setTimeout(function() {
+            //     sendUdpCommand('play');
+            // }, delay);
 
         });
         socket.on('newfile', function(url) {

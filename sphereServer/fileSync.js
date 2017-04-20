@@ -17,7 +17,6 @@ class FileSync extends events.EventEmitter {
 
     setUpdateHour(updateHour) {
         console.log("Setting File Sync Update Hour: ", updateHour);
-        //startClock(this.checkForUpdates);
         var job = schedule.scheduleJob('* ' + updateHour + ' * * *', () => {
             this.checkForUpdates();
         });

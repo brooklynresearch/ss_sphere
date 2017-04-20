@@ -72,6 +72,25 @@ var app = {
 
         document.body.style.background = "rgb(0,0,0)";
 
+        var lastFrameCmd;
+
+        function changeFrame(selectedFrame) {
+            player.pause();
+            console.log(selectedFrame);
+            player.currentTime(selectedFrame);
+            player.play();
+            setTimeout(function(){
+                player.pause();
+                // player.currentTime(10);
+
+                // setTimeout(function(){
+                //     player.pause();
+
+                // }, 1000);
+            }, 2000);
+
+        }
+
         var serveraddress = 'http://192.168.1.200:8080';
         var socket = new io.connect(serveraddress, {
           'reconnection': true,
@@ -213,22 +232,13 @@ var app = {
             }, timeout);
         });
         socket.on('frame', function(data) {
-            // actually seconds in
-            console.log('frame data: ', data);
-            var selectedFrame = parseInt(data);
-            player.pause();
-            console.log(selectedFrame);
-            player.currentTime(selectedFrame);
-            player.play();
-            setTimeout(function(){
-                player.pause();
-                // player.currentTime(10);
-
-                // setTimeout(function(){
-                //     player.pause();
-
-                // }, 1000);
-            }, 2000);
+            if (data !== lastFrameCmd) {
+                lastFrameCmd = data;
+                // actually seconds in
+                console.log('frame data: ', data);
+                var selectedFrame = parseInt(data);
+                changeFrame(selectedFrame);
+            }
         });
 
 
@@ -267,34 +277,47 @@ var app = {
                 let data = arrayBufferToString(message.data);
                 console.log("got command: " + data);
 
-                switch(data) {
-                    case 'play':
-                        if(canvas) {
-                            // player.play();
-                        }
-                        if (socket) {
-                            socket.emit('ACK', "play");
-                        }
-                        break;
-                    case 'pause':
-                        if (canvas) {
-                            player.pause();
-                        }
-                        if (socket) {
-                            socket.emit('ACK', "pause");
-                        }
-                        break;
-                    default:
-                        //let converted = convertToRange(data, [0,36000], [0,255]);
-                        var posData = parseInt(data);
-                        encoderPosition = posData;
-                        // should be a mapping of encoder range to 360 then subtract 180
-                        let converted = convertToRange(posData, [0, encoderRange], [0, 360.0]) - 180.0 + deviceParameters['long'];
-                        console.log(converted)
+                if (data[0] === 'f') {
+                    let frameCmd = data.substr(1);
+                    if (frameCmd !== lastFrameCmd) {
+                        lastFrameCmd = frameCmd;
+                        console.log('frame data: ', frameCmd);
+                        var selectedFrame = parseInt(frameCmd);
+                        changeFrame(selectedFrame);
+                    }
+                }
 
-                        if(canvas) {
-                            canvas.lon = converted;
-                        }
+                else {
+
+                    switch(data) {
+                        case 'play':
+                            if(canvas) {
+                                // player.play();
+                            }
+                            if (socket) {
+                                socket.emit('ACK', "play");
+                            }
+                            break;
+                        case 'pause':
+                            if (canvas) {
+                                player.pause();
+                            }
+                            if (socket) {
+                                socket.emit('ACK', "pause");
+                            }
+                            break;
+                        default:
+                            //let converted = convertToRange(data, [0,36000], [0,255]);
+                            var posData = parseInt(data);
+                            encoderPosition = posData;
+                            // should be a mapping of encoder range to 360 then subtract 180
+                            let converted = convertToRange(posData, [0, encoderRange], [0, 360.0]) - 180.0 + deviceParameters['long'];
+                            console.log(converted)
+
+                            if(canvas) {
+                                canvas.lon = converted;
+                            }
+                    }
                 }
             });
         });

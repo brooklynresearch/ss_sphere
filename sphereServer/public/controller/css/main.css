@@ -62,6 +62,10 @@ body {
     background-image: url(CentralPark_01.jpg);
 }
 
+#vid-04 {
+    background-image: url(brightness.svg);
+}
+
 .video {
     height: 136px;
     width: 136px;

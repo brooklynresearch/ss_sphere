@@ -51,7 +51,7 @@ jQuery(function() {
 		$('.video').on('click', function(event) {
 			newVid = $(this).attr('data-id');
 			$('.view-mode').addClass('disabled');
-			$('#message').text('Activate video '+newVid+' ?');
+			$('#message').text('Activate video '+ $(this).attr('data-name') +' ?');
 			$('#confirm-wrap').fadeIn('fast', function() {
 				$('#confirm').off();
 				$('#confirm').on('click', function(event) {

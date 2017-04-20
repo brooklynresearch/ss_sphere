@@ -206,7 +206,7 @@ var app = {
             // receive from server new parameters for posTable variable
             console.log("dark: ", data);
             var blackOut = document.getElementById("black-out");
-            if(data === true){
+            if(data === 'true'){
                 blackOut.style.backgroundColor = 'black';
             }
             else{
@@ -280,6 +280,13 @@ var app = {
                 if (data[0] === 'f') {
                     let frameCmd = data.substr(1);
                     if (frameCmd !== lastFrameCmd) {
+                        if (frameCmd === '-0'){
+                            var blackOut = document.getElementById("black-out");
+                            blackOut.style.backgroundColor = 'black';
+                        } else if (frameCmd === '+0') {
+                            var blackOut = document.getElementById("black-out");
+                            blackOut.style.backgroundColor = 'transparent';
+                        }
                         lastFrameCmd = frameCmd;
                         console.log('frame data: ', frameCmd);
                         var selectedFrame = parseInt(frameCmd);

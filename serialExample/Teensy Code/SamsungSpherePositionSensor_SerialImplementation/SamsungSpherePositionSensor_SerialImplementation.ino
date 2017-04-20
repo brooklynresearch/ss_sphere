@@ -53,7 +53,7 @@ long maxStepsAddress = 4;
 long encoderResolutionAddress = 8;
 
 uint32_t TIME_INTERVAL = 40;
-uint32_t FULL_ROTATION = 75477;
+uint32_t FULL_ROTATION = 39000;
 uint32_t STEP_RESOLUTION = 10;
 uint32_t lastRecordedTiming = 0;
 

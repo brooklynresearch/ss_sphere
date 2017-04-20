@@ -19,7 +19,7 @@ var app = {
         var currentVideo;
 
         var encoderPosition = 0;
-        var encoderRange = 36000;
+        var encoderRange = 39000;
 
         var canvas;
         var player;

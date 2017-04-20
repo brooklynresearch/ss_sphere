@@ -27,8 +27,8 @@ var app = {
 
         var devicePosition = "0101";
         var assetServer = "http://192.168.1.200:8081";
-        var stillsFile = "1492567292838_injected.mp4";
-        var currentVideo = "1492567292838_injected.mp4";
+        var stillsFile = "1492712901828_injected.mp4";
+        var currentVideo = "1492712901828_injected.mp4";
 
         var debugElement = document.getElementById("position-debug");
         debugElement.style.visibility = 'hidden';

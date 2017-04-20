@@ -105,6 +105,7 @@ var startListeners = function(io) {
             // emit this to all the devices in order to tell them to play
             // io.emit('switch video', msg);
             io.emit('frame', msg);
+            sendUdpCommand("f"+msg);
             // setTimeout(function() {
             //     sendUdpCommand('play');
             // }, delay);

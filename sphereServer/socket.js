@@ -29,7 +29,7 @@ var startListeners = function(io) {
     serialServer.on('serial', (data) => {
         console.log("got serial");
         console.log(data);
-        let encoderValue = data;
+        let encoderValue = 39000 - data;
         console.log("UDP BROADCAST: ", encoderValue);
         udpBroadcaster.send(encoderValue.toString(), 55555, broadcast, (err) => {
             if (err) {
@@ -96,17 +96,30 @@ var startListeners = function(io) {
             socket.disconnect(true);
         });
 
-        // controller has set a new video
+        // controller has set a new videoo
+        var dark = false;
         socket.on('set video', function(msg) {
             console.log("set video");
-
-            // set an internal variable to this new set video if it is new
-            var delay = 2000;
-            // emit this to all the devices in order to tell them to play
-            io.emit('switch video', msg);
-            setTimeout(function() {
-                sendUdpCommand('play');
-            }, delay);
+            if (msg === '-1') {
+                dark = !dark
+                if (dark){
+                    sendSocketBroadcast("dark", "true");
+                    sendUdpCommand("f"+"-0");
+                } else {
+                    sendSocketBroadcast("dark", "false");
+                    sendUdpCommand("f"+"+0");
+                }
+            } else {
+                // set an internal variable to this new set video if it is new
+                // var delay = 30000;
+                // emit this to all the devices in order to tell them to play
+                // io.emit('switch video', msg);
+                io.emit('frame', msg);
+                sendUdpCommand("f"+msg);
+                // setTimeout(function() {
+                //     sendUdpCommand('play');
+                // }, delay);
+            }
 
         });
         socket.on('newfile', function(url) {
@@ -132,7 +145,7 @@ var sendUdpCommand = function(cmd) {
                     console.log("ERROR on Send Udp Command: ", err);
                 }
             });
-        }, 1);
+        }, 2);
     }
 }
 

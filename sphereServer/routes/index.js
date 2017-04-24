@@ -58,5 +58,11 @@ router.get('/dark', function(req, res, next) {
   res.end();
 });
 
+router.get('/reload', function(req, res, next) {
+  console.log("reload");
+  socketCmd.sendSocketBroadcast('reload', 0);
+  res.end();
+});
+
 module.exports = router;
 

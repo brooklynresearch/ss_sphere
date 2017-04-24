@@ -19,27 +19,29 @@ var app = {
         var currentVideo;
 
         var encoderPosition = 0;
-        var encoderRange = 36000;
+        var encoderRange = 39000;
 
         var canvas;
         var player;
+        var videoGrab;
 
         var devicePosition = "0101";
         var assetServer = "http://192.168.1.200:8081";
+        var stillsFile = "1492712901828_injected.mp4";
+        var currentVideo = "1492712901828_injected.mp4";
+
+        var debugElement = document.getElementById("position-debug");
+        debugElement.style.visibility = 'hidden';
 
         function newPositionParameters(canvas, json){
-            console.log(devicePosition);
             var parameters = json[devicePosition];
             deviceParameters = parameters;
-            console.log("parameters");
-            console.log(parameters);
             // this needs to change to actual equation taking into account current encoder readings
             canvas.lon = convertToRange(encoderPosition, [0, encoderRange], [0, 360.0]) - 180.0 + parameters['long'];
             canvas.lat = parameters['lat'];
             canvas.camera.fov = parameters['fov'];
             canvas.camera.updateProjectionMatrix();
             console.log("updated position parameters for: " + devicePosition);
-            console.log(canvas);
         }
 
         function downloadFile(filename, size, dir) {
@@ -70,6 +72,25 @@ var app = {
 
         document.body.style.background = "rgb(0,0,0)";
 
+        var lastFrameCmd;
+
+        function changeFrame(selectedFrame) {
+            player.pause();
+            console.log(selectedFrame);
+            player.currentTime(selectedFrame);
+            player.play();
+            setTimeout(function(){
+                player.pause();
+                // player.currentTime(10);
+
+                // setTimeout(function(){
+                //     player.pause();
+
+                // }, 1000);
+            }, 2000);
+
+        }
+
         var serveraddress = 'http://192.168.1.200:8080';
         var socket = new io.connect(serveraddress, {
           'reconnection': true,
@@ -84,8 +105,6 @@ var app = {
         });
         socket.on('pos', function(data) {
             console.log("position ", data);
-            console.log(data);
-            console.log(typeof(data));
             if(data.length == 4){
                 devicePosition = data;
                 if(parametersTable && canvas){
@@ -101,14 +120,29 @@ var app = {
         });
         socket.on('switch video', function(data) {
             //Load the video and start playing
-            var videoGrab = document.getElementById("videojs-panorama-player_html5_api");
-            console.log(videoGrab);
-            videoGrab.src = "/storage/emulated/0/Android/data/com.ss.sphere/files/" + data;
+            player.pause();
+
+            if(currentVideo !== data){
+
+                player.src("/storage/emulated/0/Android/data/com.ss.sphere/files/" + data);
+                currentVideo = data;
+            }
+            player.currentTime(0);
+            player.play();
+            setTimeout(function(){
+                player.pause();
+                // player.currentTime(10);
+
+                // setTimeout(function(){
+                //     player.pause();
+
+                // }, 1000);
+            }, 1000);
+
             // should this emit something to server and have server check
             // if everyone got the switch video notice before a udp play send?
-            player.play();
-            player.currentTime(1);
-            player.pause();
+            // player.play();
+            // player.pause();
         });
 
         socket.on('filelist', function(data) {
@@ -143,7 +177,7 @@ var app = {
         // for testing and calibration
         socket.on('newtable', function(data) {
             // receive from server new parameters for posTable variable
-            console.log("Recv new table: ", data);
+            console.log("Recv new table");
             if(canvas && devicePosition) {
                 // should be a json object
                 parametersTable = data;
@@ -172,7 +206,7 @@ var app = {
             // receive from server new parameters for posTable variable
             console.log("dark: ", data);
             var blackOut = document.getElementById("black-out");
-            if(data === true){
+            if(data === 'true'){
                 blackOut.style.backgroundColor = 'black';
             }
             else{
@@ -181,7 +215,7 @@ var app = {
         });
         socket.on('hidedebug', function(data) {
             console.log("hidedebug: ", data);
-            var debugElement = document.getElementById("position-debug");
+            debugElement = document.getElementById("position-debug");
             if(data === true){
                 debugElement.style.visibility = 'hidden';
             }
@@ -189,6 +223,24 @@ var app = {
                 debugElement.style.visibility = 'visible';
             }
         });
+        socket.on('reload', function(data) {
+            
+            let timeout = Math.random() * 1000 * 1; // sometime in next 8.3 mins
+            console.log("reloading in: " + timeout);
+            setTimeout(function(){
+                location.reload();
+            }, timeout);
+        });
+        socket.on('frame', function(data) {
+            if (data !== lastFrameCmd) {
+                lastFrameCmd = data;
+                // actually seconds in
+                console.log('frame data: ', data);
+                var selectedFrame = parseInt(data);
+                changeFrame(selectedFrame);
+            }
+        });
+
 
         var arrayBufferToString = function(buf) {
             var str= '';
@@ -225,39 +277,54 @@ var app = {
                 let data = arrayBufferToString(message.data);
                 console.log("got command: " + data);
 
-                switch(data) {
-                    case 'play':
-                        if(canvas) {
-                            player.play();
+                if (data[0] === 'f') {
+                    let frameCmd = data.substr(1);
+                    if (frameCmd !== lastFrameCmd) {
+                        if (frameCmd === '-0'){
+                            var blackOut = document.getElementById("black-out");
+                            blackOut.style.backgroundColor = 'black';
+                        } else if (frameCmd === '+0') {
+                            var blackOut = document.getElementById("black-out");
+                            blackOut.style.backgroundColor = 'transparent';
                         }
-                        if (socket) {
-                            socket.emit('ACK', "play");
-                        }
-                        break;
-                    case 'pause':
-                        if (canvas) {
-                            player.pause();
-                        }
-                        if (socket) {
-                            socket.emit('ACK', "pause");
-                        }
-                        break;
-                    default:
-                        //let converted = convertToRange(data, [0,36000], [0,255]);
-                        var posData = parseInt(data);
-                        encoderPosition = posData;
+                        lastFrameCmd = frameCmd;
+                        console.log('frame data: ', frameCmd);
+                        var selectedFrame = parseInt(frameCmd);
+                        changeFrame(selectedFrame);
+                    }
+                }
 
-                        console.log("inside conversion");
+                else {
 
-                        console.log(convertToRange(posData, [0, encoderRange], [0, 360.0]));
-                        console.log(deviceParameters);
-                        // should be a mapping of encoder range to 360 then subtract 180
-                        let converted = convertToRange(posData, [0, encoderRange], [0, 360.0]) - 180.0 + deviceParameters['long'];
-                        console.log(converted)
+                    switch(data) {
+                        case 'play':
+                            if(canvas) {
+                                // player.play();
+                            }
+                            if (socket) {
+                                socket.emit('ACK', "play");
+                            }
+                            break;
+                        case 'pause':
+                            if (canvas) {
+                                player.pause();
+                            }
+                            if (socket) {
+                                socket.emit('ACK', "pause");
+                            }
+                            break;
+                        default:
+                            //let converted = convertToRange(data, [0,36000], [0,255]);
+                            var posData = parseInt(data);
+                            encoderPosition = posData;
+                            // should be a mapping of encoder range to 360 then subtract 180
+                            let converted = convertToRange(posData, [0, encoderRange], [0, 360.0]) - 180.0 + deviceParameters['long'];
+                            console.log(converted)
 
-                        if(canvas) {
-                            canvas.lon = converted;
-                        }
+                            if(canvas) {
+                                canvas.lon = converted;
+                            }
+                    }
                 }
             });
         });
@@ -308,12 +375,12 @@ var app = {
 
                 player.ready(function(){
                     player.width(screen.width), player.height(screen.height);
+                    player.src("/storage/emulated/0/Android/data/com.ss.sphere/files/" + stillsFile);
                     player.play();
                     player.pause();
                     console.log("is ready");
                     canvas = player.getChild('Canvas');
-                    console.log(canvas);
-
+                    videoGrab = document.getElementById("videojs-panorama-player_html5_api");
                 });
 
             }(window, window.videojs));
@@ -321,9 +388,6 @@ var app = {
             // Assignment and debug block
 
             jQuery(function() {
-
-                console.log("Within JQuery");
-
                 currentPos = 1234; //If you are seeing this on the front something is wrong
 
                 function getPosition() {

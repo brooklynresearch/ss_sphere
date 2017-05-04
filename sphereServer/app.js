@@ -48,6 +48,7 @@ app.use('/dark', index);
 app.use('/reload', index);
 app.use('/frame', index);
 app.use('/controller', routeController);
+app.use('/newconfig', routeController);
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

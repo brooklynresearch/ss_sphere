@@ -233,6 +233,9 @@ var app = {
         });
         socket.on('frame', function(data) {
             if (data !== lastFrameCmd) {
+                var blackOut = document.getElementById("black-out");
+                blackOut.style.backgroundColor = 'transparent';
+
                 lastFrameCmd = data;
                 // actually seconds in
                 console.log('frame data: ', data);
@@ -240,7 +243,6 @@ var app = {
                 changeFrame(selectedFrame);
             }
         });
-
 
         var arrayBufferToString = function(buf) {
             var str= '';
@@ -280,17 +282,21 @@ var app = {
                 if (data[0] === 'f') {
                     let frameCmd = data.substr(1);
                     if (frameCmd !== lastFrameCmd) {
+                        lastFrameCmd = frameCmd;
                         if (frameCmd === '-0'){
                             var blackOut = document.getElementById("black-out");
                             blackOut.style.backgroundColor = 'black';
                         } else if (frameCmd === '+0') {
                             var blackOut = document.getElementById("black-out");
                             blackOut.style.backgroundColor = 'transparent';
+                        } else {
+                            var blackOut = document.getElementById("black-out");
+                            blackOut.style.backgroundColor = 'transparent';
+
+                            console.log('frame data: ', frameCmd);
+                            var selectedFrame = parseInt(frameCmd);
+                            changeFrame(selectedFrame);
                         }
-                        lastFrameCmd = frameCmd;
-                        console.log('frame data: ', frameCmd);
-                        var selectedFrame = parseInt(frameCmd);
-                        changeFrame(selectedFrame);
                     }
                 }
 

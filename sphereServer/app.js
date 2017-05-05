@@ -48,7 +48,11 @@ app.use('/dark', index);
 app.use('/reload', index);
 app.use('/frame', index);
 app.use('/controller', routeController);
-app.use('/newconfig', routeController);
+app.use('/newconfig', (req, res, next) => {
+    console.log("Got /newconfig");
+    fileSync.saveLocalFiles();
+    res.end();
+});
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

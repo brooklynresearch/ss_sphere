@@ -81,14 +81,7 @@ var app = {
             player.play();
             setTimeout(function(){
                 player.pause();
-                // player.currentTime(10);
-
-                // setTimeout(function(){
-                //     player.pause();
-
-                // }, 1000);
             }, 2000);
-
         }
 
         var serveraddress = 'http://192.168.1.200:8080';
@@ -112,7 +105,6 @@ var app = {
                 }
             }
             document.getElementById("position-debug").innerHTML = "Position: " + data;
-            
         });
         socket.on('newpos', function(data) {
             console.log("New position ", data);
@@ -131,18 +123,7 @@ var app = {
             player.play();
             setTimeout(function(){
                 player.pause();
-                // player.currentTime(10);
-
-                // setTimeout(function(){
-                //     player.pause();
-
-                // }, 1000);
             }, 1000);
-
-            // should this emit something to server and have server check
-            // if everyone got the switch video notice before a udp play send?
-            // player.play();
-            // player.pause();
         });
 
         socket.on('filelist', function(data) {
@@ -299,37 +280,27 @@ var app = {
                         }
                     }
                 }
+                else if (data === 'play') {
+                    if(canvas) {
+                        // player.play();
+                    }
+                }
+                else if ( data === 'pause') {
 
+                    if (canvas) {
+                        player.pause();
+                    }
+                }
                 else {
+                    //let converted = convertToRange(data, [0,36000], [0,255]);
+                    var posData = parseInt(data);
+                    encoderPosition = posData;
+                    // should be a mapping of encoder range to 360 then subtract 180
+                    let converted = convertToRange(posData, [0, encoderRange], [0, 360.0]) - 180.0 + deviceParameters['long'];
+                    console.log(converted)
 
-                    switch(data) {
-                        case 'play':
-                            if(canvas) {
-                                // player.play();
-                            }
-                            if (socket) {
-                                socket.emit('ACK', "play");
-                            }
-                            break;
-                        case 'pause':
-                            if (canvas) {
-                                player.pause();
-                            }
-                            if (socket) {
-                                socket.emit('ACK', "pause");
-                            }
-                            break;
-                        default:
-                            //let converted = convertToRange(data, [0,36000], [0,255]);
-                            var posData = parseInt(data);
-                            encoderPosition = posData;
-                            // should be a mapping of encoder range to 360 then subtract 180
-                            let converted = convertToRange(posData, [0, encoderRange], [0, 360.0]) - 180.0 + deviceParameters['long'];
-                            console.log(converted)
-
-                            if(canvas) {
-                                canvas.lon = converted;
-                            }
+                    if(canvas) {
+                        canvas.lon = converted;
                     }
                 }
             });
@@ -398,7 +369,6 @@ var app = {
                     $('#pos-col').text(col);
                 }
 
-
                 function initSecret() {
 
                     var tapCount = 0;
@@ -425,7 +395,6 @@ var app = {
                 function initAssign() {
 
                     var newPos = '';
-                    
                     $('#re-assn').click(function(event) {
                         newPos = ''
                         $('.view-mode').hide();
@@ -435,7 +404,6 @@ var app = {
                         $('#pos-col').text("__");
                     });
 
-                    
                     $('.key').click(function(event) {
 
                         if (newPos.length < 4) {
@@ -483,9 +451,7 @@ var app = {
                         $('.view-mode').show();
                         $('.assn-mode').hide();
                     });     
-
                 }
-
 
                 function initDebug() {
                     $('#debug').click(function(event) {
@@ -493,13 +459,11 @@ var app = {
                     });
                 }
 
-
                 function initRefresh() {
                     $('.refresh').click(function(event) {
                         //So Refreshing!
                     });
                 }
-                
 
                 function init() {
                     getPosition();
@@ -508,12 +472,8 @@ var app = {
                     // initDebug();
                     // initRefresh();
                 }
-
-
                 init();
-
             });
-
         },
 
     // Update DOM on a Received Event

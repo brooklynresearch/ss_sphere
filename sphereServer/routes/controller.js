@@ -3,7 +3,7 @@ var router = express.Router();
 var fs = require('fs');
 const exec = require('child_process').exec;
 
-/* GET home page. */
+/* GET controller page. */
 router.get('/', function(req, res, next) {
 
     exec("cat ./videofile.config | grep -e NAMES -e POSITIONS | sed -e 's/[=\"]/ /g' | awk '{print $2}'",

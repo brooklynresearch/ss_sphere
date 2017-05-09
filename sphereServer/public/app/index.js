@@ -1,4 +1,19 @@
 var app = {
+
+    // GLOBALS
+    canvas: null,
+    stillsFile: "1492712901828_injected.mp4",
+    currentVideo: "1492712901828_injected.mp4",
+    lastFrameCmd: null,
+    blackOut: null,
+    socket: null,
+    parametersTable: null,
+    deviceParameters: null,
+    devicePosition: "0101",
+    encoderPosition: 0,
+    encoderRange: 39000,
+    assetServer: "http://192.168.1.200:8081",
+
     initialize: function() {
         document.addEventListener('deviceready', this.onDeviceReady.bind(this), false);
     },
@@ -12,27 +27,13 @@ var app = {
     },
 
     homeLoaded: function() {
-
-        var deviceParameters;
-        var parametersTable;
-
-        var encoderPosition = 0;
-        var encoderRange = 39000;
-
-        var canvas;
         var player;
 
         document.body.style.background = "rgb(0,0,0)";
         var debugElement = document.getElementById("position-debug");
         debugElement.style.visibility = 'hidden';
 
-        var devicePosition = "0101";
-        var assetServer = "http://192.168.1.200:8081";
-        var stillsFile = "1492712901828_injected.mp4";
-        var currentVideo = "1492712901828_injected.mp4";
-
-        var lastFrameCmd;
-        var blackOut = document.getElementById("black-out");
+        this.blackOut = document.getElementById("black-out");
 
         this.startWebsocket();
         this.startUdp();
@@ -47,9 +48,9 @@ var app = {
     startWebsocket: function() {
 
         var serveraddress = 'http://192.168.1.200:8080';
-        var socket = new io.connect(serveraddress, {
+        this.socket = new io.connect(serveraddress, {
           'reconnection': true,
-          'reconnectionDelay': 500,
+          'reconnectionDelay': 1000,
           'reconnectionDelayMax': 1000,
           'reconnectionAttempts': 999
         });
@@ -58,9 +59,9 @@ var app = {
             let ft = new FileTransfer();
             let timeout = Math.random() * 1000 * 200; // sometime in next 8.3 mins
             console.log("Downloading " + filename + " in " + timeout + " ms...");
-            setTimeout(function() {
+            setTimeout(() => {
                 console.log("Downloading " + filename + "...");
-                ft.download(assetServer + "/moviefiles/" + filename, dir.fullPath + filename,
+                ft.download(this.assetServer + "/moviefiles/" + filename, dir.fullPath + filename,
                     function(newFile) {
                         console.log("Download Complete: ", newFile.toURL());
                         console.log("Size should be ", size);
@@ -82,24 +83,24 @@ var app = {
         }
 
         // WEBSOCKET MESSAGE LISTENERS
-        socket.on('connect', () => {
+        this.socket.on('connect', () => {
             console.log("Connected to sphereserver");
         });
-        socket.on('pos', (data) => {
+        this.socket.on('pos', (data) => {
             console.log("position ", data);
             if(data.length == 4){
-                devicePosition = data;
-                if(parametersTable && canvas){
-                    this.newPositionParameters(canvas, parametersTable);
+                this.devicePosition = data;
+                if(this.parametersTable && this.canvas){
+                    this.newPositionParameters(this.canvas, this.parametersTable);
                 }
             }
             document.getElementById("position-debug").innerHTML = "Position: " + data;
         });
-        socket.on('newpos', function(data) {
+        this.socket.on('newpos', function(data) {
             console.log("New position ", data);
             document.getElementById("position-debug").innerHTML = "Position: " + data;
         });
-        socket.on('switch video', function(data) {
+        this.socket.on('switch video', function(data) {
             //Load the video and start playing
             player.pause();
 
@@ -114,7 +115,7 @@ var app = {
             }, 1000);
         });
 
-        socket.on('filelist', function(data) {
+        this.socket.on('filelist', function(data) {
             console.log("Got file list", data);
             let serverFiles = data.map(function(f) {return f.name;});
             window.resolveLocalFileSystemURL(cordova.file.externalDataDirectory, function(dir){
@@ -144,19 +145,19 @@ var app = {
             });
         });
         // for testing and calibration
-        socket.on('newtable', (data) => {
+        this.socket.on('newtable', (data) => {
             // receive from server new parameters for posTable variable
             console.log("Recv new table");
-            if(canvas && devicePosition) {
+            if(this.canvas && this.devicePosition) {
                 // should be a json object
-                parametersTable = data;
-                this.newPositionParameters(canvas, parametersTable);
+                this.parametersTable = data;
+                this.newPositionParameters(this.canvas, this.parametersTable);
             }
             else {
                 console.log("nothing to assign");
             }
         });
-        socket.on('file', function(url) {
+        this.socket.on('file', (url) => {
             var fileUrl = url;
             var filename = fileUrl.split('/').pop();
             window.resolveLocalFileSystemURL(cordova.file.externalDataDirectory, function(dir) {
@@ -171,17 +172,17 @@ var app = {
                 );
             });
         });
-        socket.on('dark', function(data) {
+        this.socket.on('dark', (data) => {
             // receive from server new parameters for posTable variable
             console.log("dark: ", data);
             if(data === 'true'){
-                blackOut.style.backgroundColor = 'black';
+                this.blackOut.style.backgroundColor = 'black';
             }
             else{
-                blackOut.style.backgroundColor = 'transparent';
+                this.blackOut.style.backgroundColor = 'transparent';
             }
         });
-        socket.on('hidedebug', function(data) {
+        this.socket.on('hidedebug', function(data) {
             console.log("hidedebug: ", data);
             debugElement = document.getElementById("position-debug");
             if(data === true){
@@ -191,7 +192,7 @@ var app = {
                 debugElement.style.visibility = 'visible';
             }
         });
-        socket.on('reload', function(data) {
+        this.socket.on('reload', function(data) {
 
             let timeout = Math.random() * 1000 * 1; // sometime in next 8.3 mins
             console.log("reloading in: " + timeout);
@@ -199,11 +200,11 @@ var app = {
                 location.reload();
             }, timeout);
         });
-        socket.on('frame', (data) => {
-            if (data !== lastFrameCmd) {
-                blackOut.style.backgroundColor = 'transparent';
+        this.socket.on('frame', (data) => {
+            if (data !== this.lastFrameCmd) {
+                this.blackOut.style.backgroundColor = 'transparent';
 
-                lastFrameCmd = data;
+                this.lastFrameCmd = data;
                 // actually seconds in
                 console.log('frame data: ', data);
                 var selectedFrame = parseInt(data);
@@ -238,15 +239,15 @@ var app = {
                 let data = arrayBufferToString(message.data);
                 console.log("got command: " + data);
 
-                if (data[0] === 'f' && data.substr[1] !== lastFrameCmd) {
+                if (data[0] === 'f' && data.substr[1] !== this.lastFrameCmd) {
                     let frameCmd = data.substr(1);
-                    lastFrameCmd = frameCmd;
+                    this.lastFrameCmd = frameCmd;
                     if (frameCmd === '-0'){
-                        blackOut.style.backgroundColor = 'black';
+                        this.blackOut.style.backgroundColor = 'black';
                     } else if (frameCmd === '+0') {
-                        blackOut.style.backgroundColor = 'transparent';
+                        this.blackOut.style.backgroundColor = 'transparent';
                     } else {
-                        blackOut.style.backgroundColor = 'transparent';
+                        this.blackOut.style.backgroundColor = 'transparent';
                         console.log('frame data: ', frameCmd);
                         var selectedFrame = parseInt(frameCmd);
                         this.changeFrame(selectedFrame);
@@ -256,18 +257,18 @@ var app = {
                         // player.play();
                     }
                 } else if ( data === 'pause') {
-                    if (canvas) {
+                    if (this.canvas) {
                         player.pause();
                     }
                 } else {
                     var posData = parseInt(data);
                     encoderPosition = posData;
                     // should be a mapping of encoder range to 360 then subtract 180
-                    let converted = this.convertToRange(posData, [0, encoderRange], [0, 360.0]) - 180.0 + deviceParameters['long'];
+                    let converted = this.convertToRange(posData, [0, this.encoderRange], [0, 360.0]) - 180.0 + this.deviceParameters['long'];
                     console.log(converted);
 
-                    if(canvas) {
-                        canvas.lon = converted;
+                    if(this.canvas) {
+                        this.canvas.lon = converted;
                     }
                 }
             });
@@ -280,11 +281,10 @@ var app = {
      */
     startVideoPlayer: function() {
 
-        (function(window, videojs) {
-            player = window.player = videojs('videojs-panorama-player', {}, function () {
+            player = window.player = window.videojs('videojs-panorama-player', {}, function () {
                 window.addEventListener("resize", function () {
-                    canvas = player.getChild('Canvas');
-                    if(canvas) canvas.handleResize();
+                    this.canvas = player.getChild('Canvas');
+                    if(this.canvas) this.canvas.handleResize();
                 });
             });
 
@@ -313,21 +313,21 @@ var app = {
                 VREnable: false,
                 showNotice: false,
                 callback: function () {
-                    if(!isMobile()) player.play();
+                    //player.play();
                 }
             });
 
-            player.ready(function(){
+            player.ready(() => {
                 player.width(screen.width);
                 player.height(screen.height);
-                player.src("/storage/emulated/0/Android/data/com.ss.sphere/files/" + stillsFile);
+                player.src("/storage/emulated/0/Android/data/com.ss.sphere/files/" + this.stillsFile);
                 player.play();
                 player.pause();
                 console.log("is ready");
-                canvas = player.getChild('Canvas');
+                this.canvas = player.getChild('Canvas');
             });
 
-        }(window, window.videojs));
+
     }, // END VIDEOPLAYER
 //=============================================================================
 
@@ -347,14 +347,14 @@ var app = {
     },
 
     newPositionParameters: function(canvas, json){
-        var parameters = json[devicePosition];
-        deviceParameters = parameters;
+        var parameters = json[this.devicePosition];
+        this.deviceParameters = parameters;
         // this needs to change to actual equation taking into account current encoder readings
-        canvas.lon = this.convertToRange(encoderPosition, [0, encoderRange], [0, 360.0]) - 180.0 + parameters['long'];
-        canvas.lat = parameters['lat'];
-        canvas.camera.fov = parameters['fov'];
-        canvas.camera.updateProjectionMatrix();
-        console.log("updated position parameters for: " + devicePosition);
+        this.canvas.lon = this.convertToRange(this.encoderPosition, [0, this.encoderRange], [0, 360.0]) - 180.0 + parameters['long'];
+        this.canvas.lat = parameters['lat'];
+        this.canvas.camera.fov = parameters['fov'];
+        this.canvas.camera.updateProjectionMatrix();
+        console.log("updated position parameters for: " + this.devicePosition);
     },
 
     changeFrame: function(selectedFrame) {
@@ -373,7 +373,8 @@ var app = {
      */
     startUI: function() {
         // Assignment and debug block
-        jQuery(function() {
+        jQuery(() => {
+            var that = this;
             currentPos = 1234; //If you are seeing this on the front something is wrong
 
             function getPosition() {
@@ -439,16 +440,16 @@ var app = {
                 $('#confirm').click((event) => {
                     if (newPos.length == 4) { //Don't conirm with incomplete position
                         //Send the new position somewhere
-                        socket.emit('register position', newPos);
+                        that.socket.emit('register position', newPos);
                         //Can add an ajax loader and confirm if needed
                         currentPos = newPos;
-                        devicePosition = currentPos;
+                        that.devicePosition = currentPos;
                         //maybe on success you confirm with?:
                         getPosition();
 
                         // provided we have a table
-                        if(parametersTable && canvas){
-                            this.newPositionParameters(canvas, parametersTable);
+                        if(that.parametersTable && that.canvas){
+                            that.newPositionParameters(that.canvas, that.parametersTable);
                         }
                         //then:
                         $('.view-mode').show();

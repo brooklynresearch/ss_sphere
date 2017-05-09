@@ -82,7 +82,7 @@ var app = {
         }
 
         // WEBSOCKET MESSAGE LISTENERS
-        socket.on('connect', function() {
+        socket.on('connect', () => {
             console.log("Connected to sphereserver");
         });
         socket.on('pos', (data) => {
@@ -192,7 +192,7 @@ var app = {
             }
         });
         socket.on('reload', function(data) {
-            
+
             let timeout = Math.random() * 1000 * 1; // sometime in next 8.3 mins
             console.log("reloading in: " + timeout);
             setTimeout(function(){
@@ -300,7 +300,7 @@ var app = {
             loadSign[0].parentNode.removeChild(loadSign[0]);
 
             player.panorama({
-                clickToToggle: (!isMobile()),
+                clickToToggle: false,
                 autoMobileOrientation: false,
                 initFov: 30,
                 maxFov: 60,

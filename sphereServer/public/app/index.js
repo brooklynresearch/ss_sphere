@@ -84,6 +84,17 @@ var app = {
             }, timeout);
         }
 
+        function deleteFile(fileEntry) {
+            fileEntry.remove(function() {
+                console.log("Removed file: ", fileEntry.name);
+            }, function(error) {
+                console.log("Error removing " + fileEntry.name + ": ", error);
+            }, function() {
+                // File does not exist
+                console.log("Error on delete. File not found: ", fileEntry.name);
+            });
+        }
+
         // WEBSOCKET MESSAGE LISTENERS
         this.socket.on('connect', () => {
             console.log("Connected to sphereserver");
@@ -123,15 +134,21 @@ var app = {
             window.resolveLocalFileSystemURL(cordova.file.externalDataDirectory, function(dir){
                 let reader = dir.createReader();
                 reader.readEntries(function(entries) {
-                    // Delete local files not on the list
                     entries.forEach(function(entry) {
+                        // Delete local files not on the list
                         if (serverFiles.indexOf(entry.name) === -1) {
-                            entry.remove(function() {
-                                console.log("Removed file: ", entry.name);
-                            }, function(error) {
-                                console.log("Error removing file: ", entry.name);
-                            }, function() {
-                                // File does not exist
+                            deleteFile(entry);
+                        // Delete past incomplete downloads
+                        } else if (serverFiles.indexOf(entry.name)) {
+                            let index = serverFiles.indexOf(entry.name);
+                            let correctSize = serverfiles[index].size;
+                            entry.file(function(f) {
+                                if (f.size !== correctSize) {
+                                    deleteFile(entry);
+                                    let filename = serverFiles[index].name;
+                                    // give it another go
+                                    downloadFile(filename, correctSize, dir);
+                                }
                             });
                         }
                     });

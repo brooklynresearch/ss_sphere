@@ -70,6 +70,8 @@ var app = {
                                 console.log("Bad File Size! Got ", newFile.size);
                                 console.log("Trying again...");
                                 downloadFile(filename, size, dir);
+                            } else {
+                                location.reload();
                             }
                         });
                     },

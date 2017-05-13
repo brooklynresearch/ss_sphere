@@ -6,7 +6,8 @@ var app = {
     currentVideo: "1492712901828_injected.mp4",
     lastFrameCmd: null,
     blackOut: null,
-    socket: null,
+    webSocket: null,
+    udpSocket: null,
     parametersTable: null,
     deviceParameters: null,
     devicePosition: "0101",
@@ -48,7 +49,7 @@ var app = {
     startWebsocket: function() {
 
         var serveraddress = 'http://192.168.1.200:8080';
-        this.socket = new io.connect(serveraddress, {
+        var socket = new io.connect(serveraddress, {
           'reconnection': true,
           'reconnectionDelay': 1000,
           'reconnectionDelayMax': 1000,
@@ -96,10 +97,11 @@ var app = {
         }
 
         // WEBSOCKET MESSAGE LISTENERS
-        this.socket.on('connect', () => {
+        socket.on('connect', () => {
             console.log("Connected to sphereserver");
+            this.webSocket = socket;
         });
-        this.socket.on('pos', (data) => {
+        socket.on('pos', (data) => {
             console.log("position ", data);
             if(data.length == 4){
                 this.devicePosition = data;
@@ -109,11 +111,11 @@ var app = {
             }
             document.getElementById("position-debug").innerHTML = "Position: " + data;
         });
-        this.socket.on('newpos', function(data) {
+        socket.on('newpos', function(data) {
             console.log("New position ", data);
             document.getElementById("position-debug").innerHTML = "Position: " + data;
         });
-        this.socket.on('switch video', function(data) {
+        socket.on('switch video', function(data) {
             //Load the video and start playing
             player.pause();
 
@@ -128,7 +130,7 @@ var app = {
             }, 1000);
         });
 
-        this.socket.on('filelist', function(data) {
+        socket.on('filelist', function(data) {
             console.log("Got file list", data);
             let serverFiles = data.map(function(f) {return f.name;});
             window.resolveLocalFileSystemURL(cordova.file.externalDataDirectory, function(dir){
@@ -164,7 +166,7 @@ var app = {
             });
         });
         // for testing and calibration
-        this.socket.on('newtable', (data) => {
+        socket.on('newtable', (data) => {
             // receive from server new parameters for posTable variable
             console.log("Recv new table");
             if(this.canvas && this.devicePosition) {
@@ -176,7 +178,7 @@ var app = {
                 console.log("nothing to assign");
             }
         });
-        this.socket.on('file', (url) => {
+        socket.on('file', (url) => {
             var fileUrl = url;
             var filename = fileUrl.split('/').pop();
             window.resolveLocalFileSystemURL(cordova.file.externalDataDirectory, function(dir) {
@@ -191,7 +193,7 @@ var app = {
                 );
             });
         });
-        this.socket.on('dark', (data) => {
+        socket.on('dark', (data) => {
             // receive from server new parameters for posTable variable
             console.log("dark: ", data);
             if(data === 'true'){
@@ -201,7 +203,7 @@ var app = {
                 this.blackOut.style.backgroundColor = 'transparent';
             }
         });
-        this.socket.on('hidedebug', function(data) {
+        socket.on('hidedebug', function(data) {
             console.log("hidedebug: ", data);
             debugElement = document.getElementById("position-debug");
             if(data === true){
@@ -211,7 +213,7 @@ var app = {
                 debugElement.style.visibility = 'visible';
             }
         });
-        this.socket.on('reload', function(data) {
+        socket.on('reload', function(data) {
 
             let timeout = Math.random() * 1000 * 1; // sometime in next 8.3 mins
             console.log("reloading in: " + timeout);
@@ -219,7 +221,7 @@ var app = {
                 location.reload();
             }, timeout);
         });
-        this.socket.on('frame', (data) => {
+        socket.on('frame', (data) => {
             if (data !== this.lastFrameCmd) {
                 this.blackOut.style.backgroundColor = 'transparent';
 
@@ -229,6 +231,9 @@ var app = {
                 var selectedFrame = parseInt(data);
                 this.changeFrame(selectedFrame);
             }
+        });
+        socket.on('sleep', (data) => {
+            this.activateSleepMode(parseInt(data));
         });
     }, // END WEBSOCKET
 //=============================================================================
@@ -249,6 +254,7 @@ var app = {
 
         chrome.sockets.udp.create({}, (createInfo) => {
             let socketId = createInfo.socketId;
+            this.udpSocket = socketId;
             console.log("CREATED UDP socket: ", socketId);
             chrome.sockets.udp.bind(socketId, "0.0.0.0", 55555, function(result) {
                 console.log("Bind UDP: ", result);
@@ -388,6 +394,31 @@ var app = {
 //=============================================================================
 
     /**
+     * BEGIN SLEEP MODE
+     */
+    activateSleepMode: function(sleepTime) {
+        console.log("Entering Sleep Mode");
+
+        // close websocket connection
+        this.webSocket.disconnect();
+
+        // close udp listener
+        chrome.sockets.udp.close(this.udpSocket, null);
+
+        // black screen
+        this.blackOut.style.backgroundColor = 'black';
+
+        setTimeout(() => {
+            console.log("Waking up from Sleep Mode");
+            this.blackOut.style.backgroundColor = 'transparent';
+            this.startSocket();
+            this.startUdp();
+        }, sleepTime);
+
+    },// END SLEEP MODE
+//=============================================================================
+
+    /**
      * BEIGN UI
      */
     startUI: function() {
@@ -459,7 +490,7 @@ var app = {
                 $('#confirm').click((event) => {
                     if (newPos.length == 4) { //Don't conirm with incomplete position
                         //Send the new position somewhere
-                        that.socket.emit('register position', newPos);
+                        that.webSocket.emit('register position', newPos);
                         //Can add an ajax loader and confirm if needed
                         currentPos = newPos;
                         that.devicePosition = currentPos;

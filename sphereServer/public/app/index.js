@@ -139,15 +139,17 @@ var app = {
                     entries.forEach(function(entry) {
                         // Delete local files not on the list
                         if (serverFiles.indexOf(entry.name) === -1) {
+                            console.log("Not on filelist: ", entry.name);
                             deleteFile(entry);
                         // Delete past incomplete downloads
-                        } else if (serverFiles.indexOf(entry.name)) {
+                        } else if (serverFiles.indexOf(entry.name) >= 0) {
                             let index = serverFiles.indexOf(entry.name);
-                            let correctSize = serverfiles[index].size;
+                            let correctSize = data[index].size;
                             entry.file(function(f) {
                                 if (f.size !== correctSize) {
+                                    console.log("Wrong filesize: ", entry.name);
                                     deleteFile(entry);
-                                    let filename = serverFiles[index].name;
+                                    let filename = serverFiles[index];
                                     // give it another go
                                     downloadFile(filename, correctSize, dir);
                                 }
@@ -233,7 +235,8 @@ var app = {
             }
         });
         socket.on('sleep', (data) => {
-            this.activateSleepMode(parseInt(data));
+            console.log("Sleep command: ", data)
+            this.activateSleepMode(parseInt(data)*1000);
         });
     }, // END WEBSOCKET
 //=============================================================================
@@ -397,7 +400,10 @@ var app = {
      * BEGIN SLEEP MODE
      */
     activateSleepMode: function(sleepTime) {
-        console.log("Entering Sleep Mode");
+        console.log("Entering Sleep Mode ", sleepTime);
+        
+        // black screen
+        this.blackOut.style.backgroundColor = 'black';
 
         // close websocket connection
         this.webSocket.disconnect();
@@ -405,13 +411,12 @@ var app = {
         // close udp listener
         chrome.sockets.udp.close(this.udpSocket, null);
 
-        // black screen
-        this.blackOut.style.backgroundColor = 'black';
+
 
         setTimeout(() => {
             console.log("Waking up from Sleep Mode");
             this.blackOut.style.backgroundColor = 'transparent';
-            this.startSocket();
+            this.startWebsocket();
             this.startUdp();
         }, sleepTime);
 

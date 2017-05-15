@@ -13,7 +13,7 @@ var app = {
     devicePosition: "0101",
     encoderPosition: 0,
     encoderRange: 39000,
-    assetServer: "http://192.168.1.200:8081",
+    
 
     initialize: function() {
         document.addEventListener('deviceready', this.onDeviceReady.bind(this), false);
@@ -57,12 +57,15 @@ var app = {
         });
 
         function downloadFile(filename, size, dir) {
+            let assetServer = "http://192.168.1.200:8081";
+
             let ft = new FileTransfer();
             let timeout = Math.random() * 1000 * 200; // sometime in next 8.3 mins
             console.log("Downloading " + filename + " in " + timeout + " ms...");
             setTimeout(() => {
                 console.log("Downloading " + filename + "...");
-                ft.download(this.assetServer + "/moviefiles/" + filename, dir.fullPath + filename,
+                console.log("Asset Server: ", assetServer);
+                ft.download(assetServer + "/moviefiles/" + filename, dir.fullPath + filename,
                     function(newFile) {
                         console.log("Download Complete: ", newFile.toURL());
                         console.log("Size should be ", size);

@@ -64,5 +64,11 @@ router.get('/reload', function(req, res, next) {
   res.end();
 });
 
+router.get('/sleep', function(req, res, next) {
+    console.log("Sending sleep command", req.query);
+    socketCmd.sendSocketBroadcast('sleep', req.query.time);
+    res.end();
+});
+
 module.exports = router;
 

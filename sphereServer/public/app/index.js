@@ -1,4 +1,20 @@
 var app = {
+
+    // GLOBALS
+    canvas: null,
+    stillsFile: "1492712901828_injected.mp4",
+    currentVideo: "1492712901828_injected.mp4",
+    lastFrameCmd: null,
+    blackOut: null,
+    webSocket: null,
+    udpSocket: null,
+    parametersTable: null,
+    deviceParameters: null,
+    devicePosition: "0101",
+    encoderPosition: 0,
+    encoderRange: 39000,
+    
+
     initialize: function() {
         document.addEventListener('deviceready', this.onDeviceReady.bind(this), false);
     },
@@ -12,45 +28,45 @@ var app = {
     },
 
     homeLoaded: function() {
-
-        var devicePosition;
-        var deviceParameters;
-        var parametersTable;
-        var currentVideo;
-
-        var encoderPosition = 0;
-        var encoderRange = 39000;
-
-        var canvas;
         var player;
-        var videoGrab;
 
-        var devicePosition = "0101";
-        var assetServer = "http://192.168.1.200:8081";
-        var stillsFile = "1492712901828_injected.mp4";
-        var currentVideo = "1492712901828_injected.mp4";
-
+        document.body.style.background = "rgb(0,0,0)";
         var debugElement = document.getElementById("position-debug");
         debugElement.style.visibility = 'hidden';
 
-        function newPositionParameters(canvas, json){
-            var parameters = json[devicePosition];
-            deviceParameters = parameters;
-            // this needs to change to actual equation taking into account current encoder readings
-            canvas.lon = convertToRange(encoderPosition, [0, encoderRange], [0, 360.0]) - 180.0 + parameters['long'];
-            canvas.lat = parameters['lat'];
-            canvas.camera.fov = parameters['fov'];
-            canvas.camera.updateProjectionMatrix();
-            console.log("updated position parameters for: " + devicePosition);
-        }
+        this.blackOut = document.getElementById("black-out");
+
+        this.startWebsocket();
+        this.startUdp();
+        this.startVideoPlayer();
+        this.startUI();
+    },
+//=============================================================================
+
+    /**
+     * BEGIN WEBSOCKET
+     */
+    startWebsocket: function() {
+
+        var serveraddress = 'http://192.168.1.200:8080';
+        var socket = new io.connect(serveraddress, {
+          'reconnection': true,
+          'reconnectionDelay': 1000,
+          'reconnectionDelayMax': 1000,
+          'reconnectionAttempts': 999
+        });
 
         function downloadFile(filename, size, dir) {
+            let assetServer = "http://192.168.1.200:8081";
+
             let ft = new FileTransfer();
             let timeout = Math.random() * 1000 * 200; // sometime in next 8.3 mins
             console.log("Downloading " + filename + " in " + timeout + " ms...");
-            setTimeout(function() {
+            setTimeout(() => {
                 console.log("Downloading " + filename + "...");
-                ft.download(assetServer + "/moviefiles/" + filename, dir.fullPath + filename, function(newFile) {
+                console.log("Asset Server: ", assetServer);
+                ft.download(assetServer + "/moviefiles/" + filename, dir.fullPath + filename,
+                    function(newFile) {
                         console.log("Download Complete: ", newFile.toURL());
                         console.log("Size should be ", size);
                         newFile.file(function(f) {
@@ -58,6 +74,8 @@ var app = {
                                 console.log("Bad File Size! Got ", newFile.size);
                                 console.log("Trying again...");
                                 downloadFile(filename, size, dir);
+                            } else {
+                                location.reload();
                             }
                         });
                     },
@@ -70,49 +88,31 @@ var app = {
             }, timeout);
         }
 
-        document.body.style.background = "rgb(0,0,0)";
-
-        var lastFrameCmd;
-
-        function changeFrame(selectedFrame) {
-            player.pause();
-            console.log(selectedFrame);
-            player.currentTime(selectedFrame);
-            player.play();
-            setTimeout(function(){
-                player.pause();
-                // player.currentTime(10);
-
-                // setTimeout(function(){
-                //     player.pause();
-
-                // }, 1000);
-            }, 2000);
-
+        function deleteFile(fileEntry) {
+            fileEntry.remove(function() {
+                console.log("Removed file: ", fileEntry.name);
+            }, function(error) {
+                console.log("Error removing " + fileEntry.name + ": ", error);
+            }, function() {
+                // File does not exist
+                console.log("Error on delete. File not found: ", fileEntry.name);
+            });
         }
 
-        var serveraddress = 'http://192.168.1.200:8080';
-        var socket = new io.connect(serveraddress, {
-          'reconnection': true,
-          'reconnectionDelay': 500,
-          'reconnectionDelayMax': 1000,
-          'reconnectionAttempts': 999
-        });
-
-        // WEBSOCKET
-        socket.on('connect', function() {
+        // WEBSOCKET MESSAGE LISTENERS
+        socket.on('connect', () => {
             console.log("Connected to sphereserver");
+            this.webSocket = socket;
         });
-        socket.on('pos', function(data) {
+        socket.on('pos', (data) => {
             console.log("position ", data);
             if(data.length == 4){
-                devicePosition = data;
-                if(parametersTable && canvas){
-                    newPositionParameters(canvas, parametersTable);
+                this.devicePosition = data;
+                if(this.parametersTable && this.canvas){
+                    this.newPositionParameters(this.canvas, this.parametersTable);
                 }
             }
             document.getElementById("position-debug").innerHTML = "Position: " + data;
-            
         });
         socket.on('newpos', function(data) {
             console.log("New position ", data);
@@ -123,7 +123,6 @@ var app = {
             player.pause();
 
             if(currentVideo !== data){
-
                 player.src("/storage/emulated/0/Android/data/com.ss.sphere/files/" + data);
                 currentVideo = data;
             }
@@ -131,40 +130,37 @@ var app = {
             player.play();
             setTimeout(function(){
                 player.pause();
-                // player.currentTime(10);
-
-                // setTimeout(function(){
-                //     player.pause();
-
-                // }, 1000);
             }, 1000);
-
-            // should this emit something to server and have server check
-            // if everyone got the switch video notice before a udp play send?
-            // player.play();
-            // player.pause();
         });
 
         socket.on('filelist', function(data) {
             console.log("Got file list", data);
-            let serverFiles = data.map(function(f) {return f.name});
+            let serverFiles = data.map(function(f) {return f.name;});
             window.resolveLocalFileSystemURL(cordova.file.externalDataDirectory, function(dir){
                 let reader = dir.createReader();
                 reader.readEntries(function(entries) {
-                    // Delete local files not on the list
                     entries.forEach(function(entry) {
+                        // Delete local files not on the list
                         if (serverFiles.indexOf(entry.name) === -1) {
-                            entry.remove(function() {
-                                console.log("Removed file: ", entry.name);
-                            }, function(error) {
-                                console.log("Error removing file: ", entry.name);
-                            }, function() {
-                                // File does not exist
+                            console.log("Not on filelist: ", entry.name);
+                            deleteFile(entry);
+                        // Delete past incomplete downloads
+                        } else if (serverFiles.indexOf(entry.name) >= 0) {
+                            let index = serverFiles.indexOf(entry.name);
+                            let correctSize = data[index].size;
+                            entry.file(function(f) {
+                                if (f.size !== correctSize) {
+                                    console.log("Wrong filesize: ", entry.name);
+                                    deleteFile(entry);
+                                    let filename = serverFiles[index];
+                                    // give it another go
+                                    downloadFile(filename, correctSize, dir);
+                                }
                             });
                         }
                     });
                     // Download any new server files
-                    let entryNames = entries.map(function(e) {return e.name});
+                    let entryNames = entries.map(function(e) {return e.name;});
                     console.log("Entries: ", entryNames);
                     data.forEach(function(fileObj) {
                         if (entryNames.indexOf(fileObj.name) === -1) {
@@ -175,19 +171,19 @@ var app = {
             });
         });
         // for testing and calibration
-        socket.on('newtable', function(data) {
+        socket.on('newtable', (data) => {
             // receive from server new parameters for posTable variable
             console.log("Recv new table");
-            if(canvas && devicePosition) {
+            if(this.canvas && this.devicePosition) {
                 // should be a json object
-                parametersTable = data;
-                newPositionParameters(canvas, parametersTable);
+                this.parametersTable = data;
+                this.newPositionParameters(this.canvas, this.parametersTable);
             }
             else {
                 console.log("nothing to assign");
             }
         });
-        socket.on('file', function(url) {
+        socket.on('file', (url) => {
             var fileUrl = url;
             var filename = fileUrl.split('/').pop();
             window.resolveLocalFileSystemURL(cordova.file.externalDataDirectory, function(dir) {
@@ -202,15 +198,14 @@ var app = {
                 );
             });
         });
-        socket.on('dark', function(data) {
+        socket.on('dark', (data) => {
             // receive from server new parameters for posTable variable
             console.log("dark: ", data);
-            var blackOut = document.getElementById("black-out");
             if(data === 'true'){
-                blackOut.style.backgroundColor = 'black';
+                this.blackOut.style.backgroundColor = 'black';
             }
             else{
-                blackOut.style.backgroundColor = 'transparent';
+                this.blackOut.style.backgroundColor = 'transparent';
             }
         });
         socket.on('hidedebug', function(data) {
@@ -224,23 +219,35 @@ var app = {
             }
         });
         socket.on('reload', function(data) {
-            
+
             let timeout = Math.random() * 1000 * 1; // sometime in next 8.3 mins
             console.log("reloading in: " + timeout);
             setTimeout(function(){
                 location.reload();
             }, timeout);
         });
-        socket.on('frame', function(data) {
-            if (data !== lastFrameCmd) {
-                lastFrameCmd = data;
+        socket.on('frame', (data) => {
+            if (data !== this.lastFrameCmd) {
+                this.blackOut.style.backgroundColor = 'transparent';
+
+                this.lastFrameCmd = data;
                 // actually seconds in
                 console.log('frame data: ', data);
                 var selectedFrame = parseInt(data);
-                changeFrame(selectedFrame);
+                this.changeFrame(selectedFrame);
             }
         });
+        socket.on('sleep', (data) => {
+            console.log("Sleep command: ", data)
+            this.activateSleepMode(parseInt(data)*1000);
+        });
+    }, // END WEBSOCKET
+//=============================================================================
 
+    /**
+     * BEGIN UDP LISTENER
+     */
+    startUdp: function() {
 
         var arrayBufferToString = function(buf) {
             var str= '';
@@ -249,278 +256,286 @@ var app = {
                 str= str+String.fromCharCode(ui8[i]);
             }
             return str;
-        }
+        };
 
-        var convertToRange = function(value, srcRange, dstRange){
-            // value is outside source range return
-            if (value < srcRange[0] || value > srcRange[1]){
-                return NaN; 
-            }
-
-            var srcMax = srcRange[1] - srcRange[0],
-            dstMax = dstRange[1] - dstRange[0],
-            adjValue = value - srcRange[0];
-
-            return (adjValue * dstMax / srcMax) + dstRange[0];
-        }
-
-        // UDP Listener
-
-        chrome.sockets.udp.create({}, function(createInfo) {
+        chrome.sockets.udp.create({}, (createInfo) => {
             let socketId = createInfo.socketId;
+            this.udpSocket = socketId;
             console.log("CREATED UDP socket: ", socketId);
             chrome.sockets.udp.bind(socketId, "0.0.0.0", 55555, function(result) {
                 console.log("Bind UDP: ", result);
             });
-            chrome.sockets.udp.onReceive.addListener(function(message) {
+            chrome.sockets.udp.onReceive.addListener((message) => {
 
                 let data = arrayBufferToString(message.data);
                 console.log("got command: " + data);
 
-                if (data[0] === 'f') {
+                if (data[0] === 'f' && data.substr[1] !== this.lastFrameCmd) {
                     let frameCmd = data.substr(1);
-                    if (frameCmd !== lastFrameCmd) {
-                        if (frameCmd === '-0'){
-                            var blackOut = document.getElementById("black-out");
-                            blackOut.style.backgroundColor = 'black';
-                        } else if (frameCmd === '+0') {
-                            var blackOut = document.getElementById("black-out");
-                            blackOut.style.backgroundColor = 'transparent';
-                        }
-                        lastFrameCmd = frameCmd;
+                    this.lastFrameCmd = frameCmd;
+                    if (frameCmd === '-0'){
+                        this.blackOut.style.backgroundColor = 'black';
+                    } else if (frameCmd === '+0') {
+                        this.blackOut.style.backgroundColor = 'transparent';
+                    } else {
+                        this.blackOut.style.backgroundColor = 'transparent';
                         console.log('frame data: ', frameCmd);
                         var selectedFrame = parseInt(frameCmd);
-                        changeFrame(selectedFrame);
+                        this.changeFrame(selectedFrame);
                     }
-                }
+                } else if (data === 'play') {
+                    if(canvas) {
+                        // player.play();
+                    }
+                } else if ( data === 'pause') {
+                    if (this.canvas) {
+                        player.pause();
+                    }
+                } else {
+                    var posData = parseInt(data);
+                    encoderPosition = posData;
+                    // should be a mapping of encoder range to 360 then subtract 180
+                    let converted = this.convertToRange(posData, [0, this.encoderRange], [0, 360.0]) - 180.0 + this.deviceParameters['long'];
+                    console.log(converted);
 
-                else {
-
-                    switch(data) {
-                        case 'play':
-                            if(canvas) {
-                                // player.play();
-                            }
-                            if (socket) {
-                                socket.emit('ACK', "play");
-                            }
-                            break;
-                        case 'pause':
-                            if (canvas) {
-                                player.pause();
-                            }
-                            if (socket) {
-                                socket.emit('ACK', "pause");
-                            }
-                            break;
-                        default:
-                            //let converted = convertToRange(data, [0,36000], [0,255]);
-                            var posData = parseInt(data);
-                            encoderPosition = posData;
-                            // should be a mapping of encoder range to 360 then subtract 180
-                            let converted = convertToRange(posData, [0, encoderRange], [0, 360.0]) - 180.0 + deviceParameters['long'];
-                            console.log(converted)
-
-                            if(canvas) {
-                                canvas.lon = converted;
-                            }
+                    if(this.canvas) {
+                        this.canvas.lon = converted;
                     }
                 }
             });
         });
+    },// END UDP LISTENER
+//=============================================================================
 
-        function isMobile() {
+    /**
+     * BEGIN VIDEOPLAYER
+     */
+    startVideoPlayer: function() {
 
-            // Panorama player check
-
-            var check = false;
-            (function(a){if(/(android|bb\d+|meego).+mobile|avantgo|bada\/|blackberry|blazer|compal|elaine|fennec|hiptop|iemobile|ip(hone|od)|iris|kindle|lge |maemo|midp|mmp|mobile.+firefox|netfront|opera m(ob|in)i|palm( os)?|phone|p(ixi|re)\/|plucker|pocket|psp|series(4|6)0|symbian|treo|up\.(browser|link)|vodafone|wap|windows ce|xda|xiino|android|ipad|playbook|silk/i.test(a)||/1207|6310|6590|3gso|4thp|50[1-6]i|770s|802s|a wa|abac|ac(er|oo|s\-)|ai(ko|rn)|al(av|ca|co)|amoi|an(ex|ny|yw)|aptu|ar(ch|go)|as(te|us)|attw|au(di|\-m|r |s )|avan|be(ck|ll|nq)|bi(lb|rd)|bl(ac|az)|br(e|v)w|bumb|bw\-(n|u)|c55\/|capi|ccwa|cdm\-|cell|chtm|cldc|cmd\-|co(mp|nd)|craw|da(it|ll|ng)|dbte|dc\-s|devi|dica|dmob|do(c|p)o|ds(12|\-d)|el(49|ai)|em(l2|ul)|er(ic|k0)|esl8|ez([4-7]0|os|wa|ze)|fetc|fly(\-|_)|g1 u|g560|gene|gf\-5|g\-mo|go(\.w|od)|gr(ad|un)|haie|hcit|hd\-(m|p|t)|hei\-|hi(pt|ta)|hp( i|ip)|hs\-c|ht(c(\-| |_|a|g|p|s|t)|tp)|hu(aw|tc)|i\-(20|go|ma)|i230|iac( |\-|\/)|ibro|idea|ig01|ikom|im1k|inno|ipaq|iris|ja(t|v)a|jbro|jemu|jigs|kddi|keji|kgt( |\/)|klon|kpt |kwc\-|kyo(c|k)|le(no|xi)|lg( g|\/(k|l|u)|50|54|\-[a-w])|libw|lynx|m1\-w|m3ga|m50\/|ma(te|ui|xo)|mc(01|21|ca)|m\-cr|me(rc|ri)|mi(o8|oa|ts)|mmef|mo(01|02|bi|de|do|t(\-| |o|v)|zz)|mt(50|p1|v )|mwbp|mywa|n10[0-2]|n20[2-3]|n30(0|2)|n50(0|2|5)|n7(0(0|1)|10)|ne((c|m)\-|on|tf|wf|wg|wt)|nok(6|i)|nzph|o2im|op(ti|wv)|oran|owg1|p800|pan(a|d|t)|pdxg|pg(13|\-([1-8]|c))|phil|pire|pl(ay|uc)|pn\-2|po(ck|rt|se)|prox|psio|pt\-g|qa\-a|qc(07|12|21|32|60|\-[2-7]|i\-)|qtek|r380|r600|raks|rim9|ro(ve|zo)|s55\/|sa(ge|ma|mm|ms|ny|va)|sc(01|h\-|oo|p\-)|sdk\/|se(c(\-|0|1)|47|mc|nd|ri)|sgh\-|shar|sie(\-|m)|sk\-0|sl(45|id)|sm(al|ar|b3|it|t5)|so(ft|ny)|sp(01|h\-|v\-|v )|sy(01|mb)|t2(18|50)|t6(00|10|18)|ta(gt|lk)|tcl\-|tdg\-|tel(i|m)|tim\-|t\-mo|to(pl|sh)|ts(70|m\-|m3|m5)|tx\-9|up(\.b|g1|si)|utst|v400|v750|veri|vi(rg|te)|vk(40|5[0-3]|\-v)|vm40|voda|vulc|vx(52|53|60|61|70|80|81|83|85|98)|w3c(\-| )|webc|whit|wi(g |nc|nw)|wmlb|wonu|x700|yas\-|your|zeto|zte\-/i.test(a.substr(0,4)))check = true})(navigator.userAgent||navigator.vendor||window.opera);
-                return check;
-            }
-            (function(window, videojs) {
-                player = window.player = videojs('videojs-panorama-player', {}, function () {
-                    window.addEventListener("resize", function () {
-                        canvas = player.getChild('Canvas');
-                        if(canvas) canvas.handleResize();
-                    });
+            player = window.player = window.videojs('videojs-panorama-player', {}, function () {
+                window.addEventListener("resize", function () {
+                    this.canvas = player.getChild('Canvas');
+                    if(this.canvas) this.canvas.handleResize();
                 });
+            });
 
-                var videoElement = document.getElementById("videojs-panorama-player");
-                var width = videoElement.offsetWidth;
-                var height = videoElement.offsetHeight;
-                console.log(width, height);
-                player.width(width), player.height(height);
+            var videoElement = document.getElementById("videojs-panorama-player");
+            var width = videoElement.offsetWidth;
+            var height = videoElement.offsetHeight;
+            console.log(width, height);
+            player.width(width);
+            player.height(height);
 
-                // remove loading sign element
-                var loadSign = document.getElementsByClassName("vjs-loading-spinner");
-                loadSign[0].parentNode.removeChild(loadSign[0]);
+            // remove loading sign element
+            var loadSign = document.getElementsByClassName("vjs-loading-spinner");
+            loadSign[0].parentNode.removeChild(loadSign[0]);
 
-                player.panorama({
-                    clickToToggle: (!isMobile()),
-                    autoMobileOrientation: false,
-                    initFov: 30,
-                    maxFov: 60,
-                    minFov: 5,
-                    initLat: 20,
-                    initLon: 10,
-                    // clickAndDrag: false, // this disables all camera movement, instead, we should have a transparent div covering the entire thing
-                    backToVerticalCenter: false,
-                    backToHorizonCenter: false,
-                    VREnable: false,
-                    showNotice: false,
-                    callback: function () {
-                        if(!isMobile()) player.play();
+            player.panorama({
+                clickToToggle: false,
+                autoMobileOrientation: false,
+                initFov: 30,
+                maxFov: 60,
+                minFov: 5,
+                initLat: 20,
+                initLon: 10,
+                // clickAndDrag: false, // this disables all camera movement, instead, we should have a transparent div covering the entire thing
+                backToVerticalCenter: false,
+                backToHorizonCenter: false,
+                VREnable: false,
+                showNotice: false,
+                callback: function () {
+                    //player.play();
+                }
+            });
+
+            player.ready(() => {
+                player.width(screen.width);
+                player.height(screen.height);
+                player.src("/storage/emulated/0/Android/data/com.ss.sphere/files/" + this.stillsFile);
+                player.play();
+                player.pause();
+                console.log("is ready");
+                this.canvas = player.getChild('Canvas');
+            });
+
+
+    }, // END VIDEOPLAYER
+//=============================================================================
+
+    /**
+     * BEGIN SHARED UTILITIES
+     */
+    convertToRange: function(value, srcRange, dstRange){
+        // value is outside source range return
+        if (value < srcRange[0] || value > srcRange[1]){
+            return NaN;
+        }
+        var srcMax = srcRange[1] - srcRange[0],
+        dstMax = dstRange[1] - dstRange[0],
+        adjValue = value - srcRange[0];
+
+        return (adjValue * dstMax / srcMax) + dstRange[0];
+    },
+
+    newPositionParameters: function(canvas, json){
+        var parameters = json[this.devicePosition];
+        this.deviceParameters = parameters;
+        // this needs to change to actual equation taking into account current encoder readings
+        this.canvas.lon = this.convertToRange(this.encoderPosition, [0, this.encoderRange], [0, 360.0]) - 180.0 + parameters['long'];
+        this.canvas.lat = parameters['lat'];
+        this.canvas.camera.fov = parameters['fov'];
+        this.canvas.camera.updateProjectionMatrix();
+        console.log("updated position parameters for: " + this.devicePosition);
+    },
+
+    changeFrame: function(selectedFrame) {
+        player.pause();
+        console.log(selectedFrame);
+        player.currentTime(selectedFrame);
+        player.play();
+        setTimeout(function(){
+            player.pause();
+        }, 2000);
+    },// END SHARED UTILITIES
+//=============================================================================
+
+    /**
+     * BEGIN SLEEP MODE
+     */
+    activateSleepMode: function(sleepTime) {
+        console.log("Entering Sleep Mode ", sleepTime);
+        
+        // black screen
+        this.blackOut.style.backgroundColor = 'black';
+
+        // close websocket connection
+        this.webSocket.disconnect();
+
+        // close udp listener
+        chrome.sockets.udp.close(this.udpSocket, null);
+
+
+
+        setTimeout(() => {
+            console.log("Waking up from Sleep Mode");
+            this.blackOut.style.backgroundColor = 'transparent';
+            this.startWebsocket();
+            this.startUdp();
+        }, sleepTime);
+
+    },// END SLEEP MODE
+//=============================================================================
+
+    /**
+     * BEIGN UI
+     */
+    startUI: function() {
+        // Assignment and debug block
+        jQuery(() => {
+            var that = this;
+            currentPos = 1234; //If you are seeing this on the front something is wrong
+
+            function getPosition() {
+                // something that gets a posiiton in a four digit format: 0101 for row 1 column 01 or somehting you prefer.
+                var pos = String(currentPos); //replace currentPos here with what you get
+                var row = pos.substring(0,2);
+                var col = pos.slice(-2);
+
+                $('#pos-row').text(row);
+                $('#pos-col').text(col);
+            }
+
+            function initSecret() {
+
+                var tapCount = 0;
+
+                $('#hidden-btn').click(function(event) {
+                    tapCount ++;
+                    if (tapCount == 3) {
+                        $('#re-assn-wrap').fadeIn('fast', function() {
+                            tapCount = 0;
+                            $('#hidden-btn').hide();
+                        });
                     }
                 });
 
-                player.ready(function(){
-                    player.width(screen.width), player.height(screen.height);
-                    player.src("/storage/emulated/0/Android/data/com.ss.sphere/files/" + stillsFile);
-                    player.play();
-                    player.pause();
-                    console.log("is ready");
-                    canvas = player.getChild('Canvas');
-                    videoGrab = document.getElementById("videojs-panorama-player_html5_api");
+                $('#exit').click(function(event) {
+                    $('#re-assn-wrap').fadeOut('fast', function() {
+                        $('#hidden-btn').show();
+                    });
+                });
+            }
+
+            function initAssign() {
+
+                var newPos = '';
+                $('#re-assn').click(function(event) {
+                    newPos = '';
+                    $('.view-mode').hide();
+                    $('.assn-mode').show();
+
+                    $('#pos-row').text("__");
+                    $('#pos-col').text("__");
                 });
 
-            }(window, window.videojs));
+                $('.key').click(function(event) {
 
-            // Assignment and debug block
+                    if (newPos.length < 4) {
 
-            jQuery(function() {
-                currentPos = 1234; //If you are seeing this on the front something is wrong
-
-                function getPosition() {
-                    // something that gets a posiiton in a four digit format: 0101 for row 1 column 01 or somehting you prefer.
-                    var pos = String(currentPos); //replace currentPos here with what you get
-                    var row = pos.substring(0,2);
-                    var col = pos.slice(-2);
-
-                    $('#pos-row').text(row);
-                    $('#pos-col').text(col);
-                }
-
-
-                function initSecret() {
-
-                    var tapCount = 0;
-
-                    $('#hidden-btn').click(function(event) {
-                        tapCount ++;
-                        if (tapCount == 3) {
-                            $('#re-assn-wrap').fadeIn('fast', function() {
-                                tapCount = 0;
-                                $('#hidden-btn').hide();
-                            });
+                        var input = $(this).attr('data-id');
+                        newPos += input;
+                        console.log(newPos);
+                        if (newPos.length < 3) {
+                            $('#pos-row').text(newPos);
                         }
-
-                    });
-
-                    $('#exit').click(function(event) {
-                        $('#re-assn-wrap').fadeOut('fast', function() {
-                                $('#hidden-btn').show();
-                            });
-                    });
-                }
-
-
-                function initAssign() {
-
-                    var newPos = '';
-                    
-                    $('#re-assn').click(function(event) {
-                        newPos = ''
-                        $('.view-mode').hide();
-                        $('.assn-mode').show();
-
-                        $('#pos-row').text("__");
-                        $('#pos-col').text("__");
-                    });
-
-                    
-                    $('.key').click(function(event) {
-
-                        if (newPos.length < 4) {
-
-                            var input = $(this).attr('data-id');
-                            newPos += input;
-                            console.log(newPos);
-                            if (newPos.length < 3) {
-                                $('#pos-row').text(newPos);
-                            }
-                            else {
-                                var newCol = newPos.substr(2);
-                                $('#pos-col').text(newCol);
-                            }
-
+                        else {
+                            var newCol = newPos.substr(2);
+                            $('#pos-col').text(newCol);
                         }
-                    });
+                    }
+                });
 
-                    $('#confirm').click(function(event) {
-                        if (newPos.length == 4) { //Don't conirm with incomplete position
-                            //Send the new position somewhere
-                            socket.emit('register position', newPos);
-                            //Can add an ajax loader and confirm if needed
-                            currentPos = newPos;
-                            devicePosition = currentPos;
-                            //maybe on success you confirm with?:
-                            getPosition();
+                $('#confirm').click((event) => {
+                    if (newPos.length == 4) { //Don't conirm with incomplete position
+                        //Send the new position somewhere
+                        that.webSocket.emit('register position', newPos);
+                        //Can add an ajax loader and confirm if needed
+                        currentPos = newPos;
+                        that.devicePosition = currentPos;
+                        //maybe on success you confirm with?:
+                        getPosition();
 
-                            // provided we have a table
-                            if(parametersTable && canvas){
-                                newPositionParameters(canvas, parametersTable);
-                            }
-                            //then:
-                            $('.view-mode').show();
-                            $('.assn-mode').hide();
+                        // provided we have a table
+                        if(that.parametersTable && that.canvas){
+                            that.newPositionParameters(that.canvas, that.parametersTable);
                         }
-                    });
-
-                    $('#cancel').click(function(event) {
-
-                        newPos = '';
-
-                        getPosition(); //in case input was not completed revert back to current position
-
+                        //then:
                         $('.view-mode').show();
                         $('.assn-mode').hide();
-                    });     
+                    }
+                });
 
-                }
+                $('#cancel').click(function(event) {
 
+                    newPos = '';
+                    getPosition(); //in case input was not completed revert back to current position
+                    $('.view-mode').show();
+                    $('.assn-mode').hide();
+                });
+            }
 
-                function initDebug() {
-                    $('#debug').click(function(event) {
-                        //The world is your oyster
-                    });
-                }
-
-
-                function initRefresh() {
-                    $('.refresh').click(function(event) {
-                        //So Refreshing!
-                    });
-                }
-                
-
-                function init() {
-                    getPosition();
-                    initSecret();
-                    initAssign();
-                    // initDebug();
-                    // initRefresh();
-                }
-
-
-                init();
-
-            });
-
-        },
+            function init() {
+                getPosition();
+                initSecret();
+                initAssign();
+            }
+            init();
+        });
+    },// END UI
+//=============================================================================
 
     // Update DOM on a Received Event
     receivedEvent: function(id) {
-
         console.log('Received Event: ' + id);
     }
 };

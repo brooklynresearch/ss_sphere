@@ -103,10 +103,10 @@ var startListeners = function(io) {
             if (msg === '-1') {
                 dark = !dark
                 if (dark){
-                    sendSocketBroadcast("dark", "true");
+                    //sendSocketBroadcast("dark", "true");
                     sendUdpCommand("f"+"-0");
                 } else {
-                    sendSocketBroadcast("dark", "false");
+                    //sendSocketBroadcast("dark", "false");
                     sendUdpCommand("f"+"+0");
                 }
             } else {
@@ -114,7 +114,7 @@ var startListeners = function(io) {
                 // var delay = 30000;
                 // emit this to all the devices in order to tell them to play
                 // io.emit('switch video', msg);
-                io.emit('frame', msg);
+                //io.emit('frame', msg);
                 sendUdpCommand("f"+msg);
                 // setTimeout(function() {
                 //     sendUdpCommand('play');

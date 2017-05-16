@@ -48,15 +48,15 @@ class FileSync extends events.EventEmitter {
             files.forEach((file) => {
                 console.log("File: ", file);
                 if (this.fileTable.indexOf(file) === -1) {
-                    let split = file.split('.');
-                    let filename = Date.now() + '_' + split[0].substr(split[0].length - 8) + '.' + split[split.length-1];
+                    //let split = file.split('.');
+                    //let filename = Date.now() + '_' + split[0].substr(split[0].length - 8) + '.' + split[split.length-1];
                     let stats = fs.statSync('./public/moviefiles/' + file);
                     let size = stats.size;
                     console.log("size", size);
-                    console.log("ds chec: ", filename.includes(".DS_Store"));
-                    if(!filename.includes(".DS_Store")){
+                    console.log("ds check: ", file.includes(".DS_Store"));
+                    if(!file.includes(".DS_Store")){
 
-                        db.createFile(filename, size, (err, result) => {
+                        db.createFile(file, size, (err, result) => {
                             if (err) {
                                 console.log("ERROR saving file: ", err.message);
                             } else {

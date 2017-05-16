@@ -39,20 +39,22 @@ jQuery(function() {
 
 		var current = vid;
 
-		$('#vid-0'+vid).addClass('active').siblings().removeClass('active');
-
+		$('[data-id="' + vid + '"]').addClass('active').siblings().removeClass('active');
+		console.log("emitting set video");
 		socket.emit('set video', current);
 		        
 	}
 
 	function initVids() {
 		var newVid;
-		$('.video').click(function(event) {
+		$('.video').off();
+		$('.video').on('click', function(event) {
 			newVid = $(this).attr('data-id');
 			$('.view-mode').addClass('disabled');
-			$('#message').text('Activate video '+newVid+' ?');
+			$('#message').text('Activate video '+ $(this).attr('data-name') +' ?');
 			$('#confirm-wrap').fadeIn('fast', function() {
-				$('#confirm').click(function(event) {
+				$('#confirm').off();
+				$('#confirm').on('click', function(event) {
 					//Send command to switch the video 
 					setCurrent(newVid); //fire this on a confirmed switch
 					currentVid = newVid; //fire this on a confirmed switch
@@ -60,7 +62,8 @@ jQuery(function() {
 						$('.view-mode').removeClass('disabled');
 					});
 				});
-				$('#cancel').click(function(event) {
+				$('#cancel').off();
+				$('#cancel').on('click', function(event) {
 					$('#confirm-wrap').fadeOut('fast', function() {
 						$('.view-mode').removeClass('disabled');
 					});

@@ -39,3 +39,12 @@ darkBtn.onclick = function() {
 	xhr.send();
 
 };
+
+var reloadBtn = document.getElementById('reload');
+reloadBtn.onclick = function() {
+  console.log("reload");
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", "reload");
+  xhr.send();
+
+};

@@ -74,18 +74,14 @@ class FileSync extends events.EventEmitter {
     getSavedFiles(done) {
         db.getFiles((err, result) => {
             var i = 0;
-            if (!err) {
-                if (result.rows.length === 0) {
-                    done();
-                } else {
-                    result.rows.forEach((row) => {
-                        this.fileTable.push(row.name);
-                        i++;
-                        if ( i >= result.rows.length ) {
-                            done();
-                        }
-                    });
-                }
+            if (!err && result.rows.length != 0) {
+                result.rows.forEach((row) => {
+                    this.fileTable.push(row.name);
+                    i++;
+                    if ( i >= result.rows.length ) {
+                        done();
+                    }
+                });
             }
         });
     }

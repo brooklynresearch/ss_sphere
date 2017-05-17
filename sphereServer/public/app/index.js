@@ -163,6 +163,7 @@ var app = {
                     // Set current video file and start downloading any new ones
                     let entryNames = entries.map(function(e) {return e.name;});
                     console.log("Entries: ", entryNames);
+                    this.stillsFile = this.currentVideo; //In case nothing set 'selected'
                     data.forEach(function(fileObj) {
                         if (fileObj.selected) {
                             this.stillsFile = fileObj.name;

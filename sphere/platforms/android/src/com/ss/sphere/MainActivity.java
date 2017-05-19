@@ -20,6 +20,7 @@
 package com.ss.sphere;
 
 import android.os.Bundle;
+import android.view.WindowManager;
 import org.apache.cordova.*;
 
 public class MainActivity extends CordovaActivity
@@ -38,4 +39,18 @@ public class MainActivity extends CordovaActivity
         // Set by <content src="index.html" /> in config.xml
         loadUrl(launchUrl);
     }
+
+    @Override
+    public void onAttachedToWindow() {
+    this.getWindow().setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN | 
+            WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD | 
+            WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED | 
+            WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON,
+            WindowManager.LayoutParams.FLAG_FULLSCREEN | 
+            WindowManager.LayoutParams.FLAG_DISMISS_KEYGUARD | 
+            WindowManager.LayoutParams.FLAG_SHOW_WHEN_LOCKED | 
+            WindowManager.LayoutParams.FLAG_TURN_SCREEN_ON);
+    }
+
 }
+

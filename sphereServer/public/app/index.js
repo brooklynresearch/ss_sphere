@@ -58,7 +58,7 @@ var app = {
             {
                 alarms: [{
                     type: 'onetime',
-                    time: {hour: 12, minute: 22},
+                    time: {hour: 10, minute: 00},
                     //extra: {},
                     message: "Alarm!"
                 }]
@@ -429,7 +429,9 @@ var app = {
     activateSleepMode: function(sleepTime) {
         console.log("Entering Sleep Mode ", sleepTime);
         
-        // black screen
+        navigator.app.exitApp();
+
+        /*// black screen
         this.blackOut.style.backgroundColor = 'black';
 
         // close websocket connection
@@ -445,7 +447,7 @@ var app = {
             this.blackOut.style.backgroundColor = 'transparent';
             this.startWebsocket();
             this.startUdp();
-        }, sleepTime);
+        }, sleepTime);*/
 
     },// END SLEEP MODE
 //=============================================================================

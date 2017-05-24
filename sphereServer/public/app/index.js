@@ -158,6 +158,9 @@ var app = {
                                 }
                                 else if (data[index].active) { // it should be loaded
                                     this.player.src("/storage/emulated/0/Android/data/com.ss.sphere/files/" + data[index].name);
+                                    console.log("Setting active video: ", data[index].name);
+                                    this.player.play();
+                                    this.player.pause();
                                 }
                             });
                         }
@@ -356,9 +359,9 @@ var app = {
             this.player.ready(() => {
                 this.player.width(screen.width);
                 this.player.height(screen.height);
-                this.player.src("/storage/emulated/0/Android/data/com.ss.sphere/files/" + this.stillsFile);
-                this.player.play();
-                this.player.pause();
+                //this.player.src("/storage/emulated/0/Android/data/com.ss.sphere/files/" + this.stillsFile);
+                //this.player.play();
+                //this.player.pause();
                 console.log("is ready");
                 this.canvas = this.player.getChild('Canvas');
             });
@@ -410,23 +413,7 @@ var app = {
     activateSleepMode: function(sleepTime) {
         console.log("Entering Sleep Mode ", sleepTime);
         
-        // black screen
-        this.blackOut.style.backgroundColor = 'black';
-
-        // close websocket connection
-        this.webSocket.disconnect();
-
-        // close udp listener
-        chrome.sockets.udp.close(this.udpSocket, null);
-
-
-
-        setTimeout(() => {
-            console.log("Waking up from Sleep Mode");
-            this.blackOut.style.backgroundColor = 'transparent';
-            this.startWebsocket();
-            this.startUdp();
-        }, sleepTime);
+        navigator.app.exitApp();
 
     },// END SLEEP MODE
 //=============================================================================

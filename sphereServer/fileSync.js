@@ -18,7 +18,7 @@ class FileSync extends events.EventEmitter {
 
     setUpdateHour(updateHour) {
         console.log("Setting File Sync Update Hour: ", updateHour);
-        var job = schedule.scheduleJob('30 ' + updateHour + ' * * *', () => {
+        var job = schedule.scheduleJob('35 ' + updateHour + ' * * *', () => {
             this.checkForUpdates();
         });
     }
@@ -150,16 +150,16 @@ class FileSync extends events.EventEmitter {
                         });
                     });
                 });
-            } else if (rfile.visible === true) {
-                db.setActive(rfile.file_name, (err, result) => {
-                    if (err) {
-                        console.log("ERROR setting file active: ", err.message);
-                    } else {
-                        console.log("File set active: ", result.rows);
-                        this.sendFileList();
-                    }
-                })
             }
+            // is this file the active one or not
+            db.setActive(rfile.file_name, rfile.visible, (err, result) => {
+                if (err) {
+                    console.log("ERROR setting file active: ", err.message);
+                } else {
+                    console.log("File set active: ", result.rows);
+                    this.sendFileList();
+                }
+            })
         });
     }
 

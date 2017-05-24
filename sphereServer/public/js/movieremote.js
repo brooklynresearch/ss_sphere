@@ -40,11 +40,19 @@ darkBtn.onclick = function() {
 
 };
 
-var reloadBtn = document.getElementById('reload');
+var reloadBtn = document.getElementById('refresh');
 reloadBtn.onclick = function() {
   console.log("reload");
   var xhr = new XMLHttpRequest();
   xhr.open("GET", "reload");
   xhr.send();
 
+};
+
+var sleepBtn = document.getElementById('sleep');
+sleepBtn.onclick = function() {
+  console.log("sleep");
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", "sleep?time=400");
+  xhr.send();
 };

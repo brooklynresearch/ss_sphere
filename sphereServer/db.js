@@ -145,10 +145,10 @@ var createFile = function(name, size, isActive, cb) {
     });
 }
 
-var setActive = function(name, cb) {
+var setActive = function(name, isActive, cb) {
     var query = squel.update()
                 .table("files")
-                .set("active", true)
+                .set("active", isActive)
                 .where("name = ?", name)
                 .returning("*")
                 .toParam();

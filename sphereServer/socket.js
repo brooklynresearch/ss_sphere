@@ -10,21 +10,10 @@ var ioInstance;
 var startListeners = function(io) {
 
     ioInstance = io;
-    // var oscServer = require('./oscServer').OscServer;
     var serialServer = require('./serialServer').SerialServer;
 
     udpBroadcaster = dgram.createSocket('udp4');
     let broadcast = process.env.BROADCAST_ADDR;
-
-    // oscServer.on('osc', (oscMessage) => {
-    //     let encoderValue = oscMessage.args[0];
-    //     console.log("UDP BROADCAST: ", encoderValue);
-    //     udpBroadcaster.send(encoderValue.toString(), 55555, '192.168.1.255', (err) => {
-    //         if (err) {
-    //             console.log("ERROR on broadcast: ", err);
-    //         }
-    //     });
-    // });
 
     serialServer.on('serial', (data) => {
         console.log("got serial");

@@ -13,12 +13,12 @@ class FileSync extends events.EventEmitter {
         db.useTestDatabase();
         this.fileTable = [];
         this.remoteFiles = [];
-        this.setUpdateHour('9');
+        //this.setUpdateHour('9');
     }
 
     setUpdateHour(updateHour) {
         console.log("Setting File Sync Update Hour: ", updateHour);
-        var job = schedule.scheduleJob('* ' + updateHour + ' * * *', () => {
+        var job = schedule.scheduleJob('0 ' + updateHour + ' * * *', () => {
             this.checkForUpdates();
         });
     }

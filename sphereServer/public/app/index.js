@@ -14,6 +14,7 @@ var app = {
     devicePosition: "0101",
     encoderPosition: 0,
     encoderRange: 39000,
+    player: null,
     
 
     initialize: function() {
@@ -29,7 +30,6 @@ var app = {
     },
 
     homeLoaded: function() {
-        var player;
 
         document.body.style.background = "rgb(0,0,0)";
         var debugElement = document.getElementById("position-debug");
@@ -134,13 +134,13 @@ var app = {
             }, 1000);
         });
 
-        socket.on('filelist', function(data) {
+        socket.on('filelist', (data) => {
             console.log("Got file list", data);
             let serverFiles = data.map(function(f) {return f.name;});
-            window.resolveLocalFileSystemURL(cordova.file.externalDataDirectory, function(dir){
+            window.resolveLocalFileSystemURL(cordova.file.externalDataDirectory, (dir) => {
                 let reader = dir.createReader();
-                reader.readEntries(function(entries) {
-                    entries.forEach(function(entry) {
+                reader.readEntries((entries) => {
+                    entries.forEach((entry) => {
                         // Delete local files not on the list
                         if (serverFiles.indexOf(entry.name) === -1) {
                             console.log("Not on filelist: ", entry.name);
@@ -164,15 +164,17 @@ var app = {
                     let entryNames = entries.map(function(e) {return e.name;});
                     console.log("Entries: ", entryNames);
                     this.stillsFile = this.currentVideo; //In case nothing set 'selected'
-                    data.forEach(function(fileObj) {
+                    this.startVideoPlayer();
+                    data.forEach((fileObj) => {
                         if (fileObj.selected) {
                             this.stillsFile = fileObj.name;
+                            this.startVideoPlayer();
                         }
                         if (entryNames.indexOf(fileObj.name) === -1) {
                             downloadFile(fileObj.name, fileObj.size, dir);
                         }
                         //Now we know which video to load
-                        this.startVideoPlayer();
+
                     });
                 });
             });

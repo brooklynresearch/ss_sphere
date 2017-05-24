@@ -18,7 +18,7 @@ class FileSync extends events.EventEmitter {
 
     setUpdateHour(updateHour) {
         console.log("Setting File Sync Update Hour: ", updateHour);
-        var job = schedule.scheduleJob('0 ' + updateHour + ' * * *', () => {
+        var job = schedule.scheduleJob('30 ' + updateHour + ' * * *', () => {
             this.checkForUpdates();
         });
     }
@@ -128,7 +128,7 @@ class FileSync extends events.EventEmitter {
                     console.log("Downloading File from CMS: ", fileUrl);
                     let end = fileUrl.split('/').pop();
                     let fname = end.split('?')[0];
-                    let isActive = rfile.active;
+                    let isActive = rfile.visible;
                     if (fname.includes("tmp")) {
                         fname = rfile.file_name + ".jpg";
                     }
@@ -150,12 +150,12 @@ class FileSync extends events.EventEmitter {
                         });
                     });
                 });
-            } else if (rfile.active) === true) {
-                db.setActive(rfile.name, (err, result) => {
+            } else if (rfile.visible === true) {
+                db.setActive(rfile.file_name, (err, result) => {
                     if (err) {
                         console.log("ERROR setting file active: ", err.message);
                     } else {
-                        console.log("File set active: ", rfile.name);
+                        console.log("File set active: ", result.rows);
                         this.sendFileList();
                     }
                 })

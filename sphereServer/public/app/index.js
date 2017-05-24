@@ -2,8 +2,8 @@ var app = {
 
     // GLOBALS
     canvas: null,
-    //stillsFile: "1492712901828_injected.mp4",
-    stillsFile: "",
+    stillsFile: "1492712901828_injected.mp4",
+    //stillsFile: "",
     currentVideo: "1492712901828_injected.mp4",
     lastFrameCmd: null,
     blackOut: null,
@@ -39,7 +39,7 @@ var app = {
 
         this.startWebsocket();
         this.startUdp();
-        //this.startVideoPlayer();
+        this.startVideoPlayer();
         this.startUI();
     },
 //=============================================================================
@@ -145,17 +145,19 @@ var app = {
                         if (serverFiles.indexOf(entry.name) === -1) {
                             console.log("Not on filelist: ", entry.name);
                             deleteFile(entry);
-                        // Delete past incomplete downloads
-                        } else if (serverFiles.indexOf(entry.name) >= 0) {
+                        } else if (serverFiles.indexOf(entry.name) >= 0) { // We have the file
                             let index = serverFiles.indexOf(entry.name);
                             let correctSize = data[index].size;
                             entry.file(function(f) {
-                                if (f.size !== correctSize) {
+                                if (f.size !== correctSize) { // Delete if incomplete
                                     console.log("Wrong filesize: ", entry.name);
                                     deleteFile(entry);
                                     let filename = serverFiles[index];
                                     // give it another go
                                     downloadFile(filename, correctSize, dir);
+                                }
+                                else if (data[index].active) { // it should be loaded
+                                    this.player.src("/storage/emulated/0/Android/data/com.ss.sphere/files/" + data[index].name);
                                 }
                             });
                         }
@@ -163,18 +165,12 @@ var app = {
                     // Set current video file and start downloading any new ones
                     let entryNames = entries.map(function(e) {return e.name;});
                     console.log("Entries: ", entryNames);
-                    this.stillsFile = this.currentVideo; //In case nothing set 'selected'
-                    this.startVideoPlayer();
+                    //this.stillsFile = this.currentVideo; //In case nothing set 'selected'
+                    //this.startVideoPlayer();
                     data.forEach((fileObj) => {
-                        if (fileObj.selected) {
-                            this.stillsFile = fileObj.name;
-                            this.startVideoPlayer();
-                        }
                         if (entryNames.indexOf(fileObj.name) === -1) {
                             downloadFile(fileObj.name, fileObj.size, dir);
                         }
-                        //Now we know which video to load
-
                     });
                 });
             });
@@ -321,9 +317,9 @@ var app = {
      */
     startVideoPlayer: function() {
 
-            player = window.player = window.videojs('videojs-panorama-player', {}, function () {
+            this.player = window.player = window.videojs('videojs-panorama-player', {}, function () {
                 window.addEventListener("resize", function () {
-                    this.canvas = player.getChild('Canvas');
+                    this.canvas = this.player.getChild('Canvas');
                     if(this.canvas) this.canvas.handleResize();
                 });
             });
@@ -332,14 +328,14 @@ var app = {
             var width = videoElement.offsetWidth;
             var height = videoElement.offsetHeight;
             console.log(width, height);
-            player.width(width);
-            player.height(height);
+            this.player.width(width);
+            this.player.height(height);
 
             // remove loading sign element
             var loadSign = document.getElementsByClassName("vjs-loading-spinner");
             loadSign[0].parentNode.removeChild(loadSign[0]);
 
-            player.panorama({
+            this.player.panorama({
                 clickToToggle: false,
                 autoMobileOrientation: false,
                 initFov: 30,
@@ -357,14 +353,14 @@ var app = {
                 }
             });
 
-            player.ready(() => {
-                player.width(screen.width);
-                player.height(screen.height);
-                player.src("/storage/emulated/0/Android/data/com.ss.sphere/files/" + this.stillsFile);
-                player.play();
-                player.pause();
+            this.player.ready(() => {
+                this.player.width(screen.width);
+                this.player.height(screen.height);
+                this.player.src("/storage/emulated/0/Android/data/com.ss.sphere/files/" + this.stillsFile);
+                this.player.play();
+                this.player.pause();
                 console.log("is ready");
-                this.canvas = player.getChild('Canvas');
+                this.canvas = this.player.getChild('Canvas');
             });
 
 
@@ -398,12 +394,12 @@ var app = {
     },
 
     changeFrame: function(selectedFrame) {
-        player.pause();
+        this.player.pause();
         console.log(selectedFrame);
-        player.currentTime(selectedFrame);
-        player.play();
+        this.player.currentTime(selectedFrame);
+        this.player.play();
         setTimeout(function(){
-            player.pause();
+            this.player.pause();
         }, 2000);
     },// END SHARED UTILITIES
 //=============================================================================
@@ -440,7 +436,7 @@ var app = {
      */
     startUI: function() {
         // Assignment and debug block
-        jQuery(() => {
+
             var that = this;
             currentPos = 1234; //If you are seeing this on the front something is wrong
 
@@ -539,7 +535,7 @@ var app = {
                 initAssign();
             }
             init();
-        });
+ 
     },// END UI
 //=============================================================================
 

@@ -13,6 +13,7 @@ class FileSync extends events.EventEmitter {
         db.useTestDatabase();
         this.fileTable = [];
         this.remoteFiles = [];
+        this.setUpdateHour('9');
     }
 
     setUpdateHour(updateHour) {

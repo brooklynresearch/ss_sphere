@@ -57,7 +57,7 @@ class FileSync extends events.EventEmitter {
                     console.log("ds check: ", file.includes(".DS_Store"));
                     if(!file.includes(".DS_Store")){
 
-                        db.createFile(file, size, (err, result) => {
+                        db.createFile(file, size, false, (err, result) => {
                             if (err) {
                                 console.log("ERROR saving file: ", err.message);
                             } else {
@@ -128,6 +128,7 @@ class FileSync extends events.EventEmitter {
                     console.log("Downloading File from CMS: ", fileUrl);
                     let end = fileUrl.split('/').pop();
                     let fname = end.split('?')[0];
+                    let isActive = rfile.active;
                     if (fname.includes("tmp")) {
                         fname = rfile.file_name + ".jpg";
                     }
@@ -135,7 +136,7 @@ class FileSync extends events.EventEmitter {
                         //console.log("Downloaded file from CMS: ", rfile.file_name);
                         let stats = fs.statSync('./public/moviefiles/' + fname);
                         let size = stats.size;
-                        db.createFile(fname, size, (err, result) => {
+                        db.createFile(fname, size, isActive, (err, result) => {
                             if (err) {
                                 console.log("ERROR saving file: ", err.message);
                             } else {
@@ -149,6 +150,15 @@ class FileSync extends events.EventEmitter {
                         });
                     });
                 });
+            } else if (rfile.active) === true) {
+                db.setActive(rfile.name, (err, result) => {
+                    if (err) {
+                        console.log("ERROR setting file active: ", err.message);
+                    } else {
+                        console.log("File set active: ", rfile.name);
+                        this.sendFileList();
+                    }
+                })
             }
         });
     }

@@ -41,6 +41,30 @@ var app = {
         this.startUdp();
         this.startVideoPlayer();
         this.startUI();
+
+        window.wakeuptimer.wakeup(
+            function(result) {
+                if (result.type === 'wakeup') {
+                    console.log("Wakeup alarm--", result.alarm_date);
+                } else if (result.type === 'set') {
+                    console.log("Wakeup alarm set--", result);
+                } else {
+                    console.log("Unknown type--", result.alarm_date);
+                    //navigator.app.exitApp();
+                }
+            }, 
+            function(err) {
+                console.log("wakeuptimer error", err);
+            }, 
+            {
+                alarms: [{
+                    type: 'onetime',
+                    time: {hour: 9, minute: 00},
+                    //extra: {},
+                    message: "Alarm!"
+                }]
+            }
+        );
     },
 //=============================================================================
 
@@ -412,7 +436,7 @@ var app = {
      */
     activateSleepMode: function(sleepTime) {
         console.log("Entering Sleep Mode ", sleepTime);
-        
+
         navigator.app.exitApp();
 
     },// END SLEEP MODE

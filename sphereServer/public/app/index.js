@@ -2,7 +2,8 @@ var app = {
 
     // GLOBALS
     canvas: null,
-    stillsFile: "1492712901828_injected.mp4",
+    //stillsFile: "1492712901828_injected.mp4",
+    stillsFile: "",
     currentVideo: "1492712901828_injected.mp4",
     lastFrameCmd: null,
     blackOut: null,
@@ -38,7 +39,7 @@ var app = {
 
         this.startWebsocket();
         this.startUdp();
-        this.startVideoPlayer();
+        //this.startVideoPlayer();
         this.startUI();
     },
 //=============================================================================
@@ -159,13 +160,19 @@ var app = {
                             });
                         }
                     });
-                    // Download any new server files
+                    // Set current video file and start downloading any new ones
                     let entryNames = entries.map(function(e) {return e.name;});
                     console.log("Entries: ", entryNames);
+                    this.stillsFile = this.currentVideo; //In case nothing set 'selected'
                     data.forEach(function(fileObj) {
+                        if (fileObj.selected) {
+                            this.stillsFile = fileObj.name;
+                        }
                         if (entryNames.indexOf(fileObj.name) === -1) {
                             downloadFile(fileObj.name, fileObj.size, dir);
                         }
+                        //Now we know which video to load
+                        this.startVideoPlayer();
                     });
                 });
             });

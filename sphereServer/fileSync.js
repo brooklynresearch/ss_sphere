@@ -18,7 +18,7 @@ class FileSync extends events.EventEmitter {
 
     setUpdateHour(updateHour) {
         console.log("Setting File Sync Update Hour: ", updateHour);
-        var job = schedule.scheduleJob('35 ' + updateHour + ' * * *', () => {
+        var job = schedule.scheduleJob('0 ' + updateHour + ' * * *', () => {
             this.checkForUpdates();
         });
     }
@@ -151,7 +151,7 @@ class FileSync extends events.EventEmitter {
                     });
                 });
             }
-            // is this file the active one or not
+            // Update all 'active' fields
             db.setActive(rfile.file_name, rfile.visible, (err, result) => {
                 if (err) {
                     console.log("ERROR setting file active: ", err.message);

@@ -14,6 +14,7 @@ var app = {
     devicePosition: "0101",
     encoderPosition: 0,
     encoderRange: 39000,
+    player: null,
     
 
     initialize: function() {
@@ -29,7 +30,6 @@ var app = {
     },
 
     homeLoaded: function() {
-        var player;
 
         document.body.style.background = "rgb(0,0,0)";
         var debugElement = document.getElementById("position-debug");
@@ -134,7 +134,7 @@ var app = {
             }, 1000);
         });
 
-        socket.on('filelist', function(data) {
+        socket.on('filelist', (data) => {
             console.log("Got file list", data);
             let serverFiles = data.map(function(f) {return f.name;});
             window.resolveLocalFileSystemURL(cordova.file.externalDataDirectory, function(dir){

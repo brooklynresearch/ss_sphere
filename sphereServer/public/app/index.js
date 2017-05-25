@@ -59,7 +59,7 @@ var app = {
             {
                 alarms: [{
                     type: 'onetime',
-                    time: {hour: 9, minute: 00},
+                    time: {hour: 9, minute: 30},
                     //extra: {},
                     message: "Alarm!"
                 }]
@@ -383,7 +383,7 @@ var app = {
             this.player.ready(() => {
                 this.player.width(screen.width);
                 this.player.height(screen.height);
-                //this.player.src("/storage/emulated/0/Android/data/com.ss.sphere/files/" + this.stillsFile);
+                this.player.src("/storage/emulated/0/Android/data/com.ss.sphere/files/" + this.stillsFile);
                 //this.player.play();
                 //this.player.pause();
                 console.log("is ready");

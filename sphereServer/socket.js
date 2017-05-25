@@ -92,10 +92,10 @@ var startListeners = function(io) {
             if (msg === '-1') {
                 dark = !dark
                 if (dark){
-                    //sendSocketBroadcast("dark", "true");
+                    sendSocketBroadcast("dark", "true");
                     sendUdpCommand("f"+"-0");
                 } else {
-                    //sendSocketBroadcast("dark", "false");
+                    sendSocketBroadcast("dark", "false");
                     sendUdpCommand("f"+"+0");
                 }
             } else {
@@ -103,7 +103,7 @@ var startListeners = function(io) {
                 // var delay = 30000;
                 // emit this to all the devices in order to tell them to play
                 // io.emit('switch video', msg);
-                //io.emit('frame', msg);
+                io.emit('frame', msg);
                 sendUdpCommand("f"+msg);
                 // setTimeout(function() {
                 //     sendUdpCommand('play');
@@ -126,7 +126,7 @@ var sendSocketBroadcast = function(sockEvent, msg) {
 
 var sendUdpCommand = function(cmd) {
     let broadcast = process.env.BROADCAST_ADDR;
-    for( var i = 0; i < 10; i++ ) {
+    for( var i = 0; i < 20; i++ ) {
         setTimeout(() => {
             console.log("Sending Command: ", cmd);
             udpBroadcaster.send(cmd, 55555, broadcast, (err) => {
@@ -134,7 +134,7 @@ var sendUdpCommand = function(cmd) {
                     console.log("ERROR on Send Udp Command: ", err);
                 }
             });
-        }, 2);
+        }, 5);
     }
 }
 

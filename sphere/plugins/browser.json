@@ -21,6 +21,12 @@
         },
         "cordova-plugin-insomnia": {
             "PACKAGE_NAME": "com.ss.sphere"
+        },
+        "cordova-hot-code-push-local-dev-addon": {
+            "PACKAGE_NAME": "com.ss.sphere"
+        },
+        "org.jk.cordova.wakeupplugin": {
+            "PACKAGE_NAME": "com.ss.sphere"
         }
     },
     "dependent_plugins": {

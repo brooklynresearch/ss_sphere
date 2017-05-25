@@ -1,13 +1,17 @@
 <?xml version='1.0' encoding='utf-8'?>
 <widget id="com.ss.sphere" version="1.0.0" xmlns="http://www.w3.org/ns/widgets" xmlns:cdv="http://cordova.apache.org/ns/1.0">
-    <feature name="ChromeSocketsUdp">
-        <param name="android-package" value="org.chromium.ChromeSocketsUdp" />
+    <feature name="HotCodePushLocalDevMode">
+        <param name="android-package" value="com.nordnetab.chcp.localdev.HotCodePushLocalDevPlugin" />
+        <param name="onload" value="true" />
     </feature>
     <feature name="File">
         <param name="android-package" value="org.apache.cordova.file.FileUtils" />
         <param name="onload" value="true" />
     </feature>
     <allow-navigation href="cdvfile:*" />
+    <feature name="FileTransfer">
+        <param name="android-package" value="org.apache.cordova.filetransfer.FileTransfer" />
+    </feature>
     <feature name="Insomnia">
         <param name="android-package" value="nl.xservices.plugins.Insomnia" />
     </feature>
@@ -19,8 +23,12 @@
         <param name="android-package" value="org.apache.cordova.whitelist.WhitelistPlugin" />
         <param name="onload" value="true" />
     </feature>
-    <feature name="FileTransfer">
-        <param name="android-package" value="org.apache.cordova.filetransfer.FileTransfer" />
+    <feature name="WakeupPlugin">
+        <param name="android-package" value="org.jk.cordova.wakeupplugin.WakeupPlugin" />
+        <param name="onload" value="true" />
+    </feature>
+    <feature name="ChromeSocketsUdp">
+        <param name="android-package" value="org.chromium.ChromeSocketsUdp" />
     </feature>
     <name>DisplaySphere</name>
     <description>

@@ -79,5 +79,14 @@
         },
         "is_top_level": true,
         "variables": {}
+    },
+    "org.jk.cordova.wakeupplugin": {
+        "source": {
+            "type": "git",
+            "url": "https://github.com/jkhax0r/cordova-plugin-wakeuptimer.git",
+            "subdir": "."
+        },
+        "is_top_level": true,
+        "variables": {}
     }
 }

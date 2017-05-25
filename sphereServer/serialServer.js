@@ -5,7 +5,7 @@ class SerialServer extends events.EventEmitter {
     constructor() {
         super();
         // Serial port module
-        var port = new SerialPort("/dev/tty.usbmodem2037431", function (err) {
+        var port = new SerialPort("/dev/tty.usbmodem2546061", function (err) {
           if (err) {
             return console.log('Error: ', err.message);
           }

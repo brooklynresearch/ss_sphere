@@ -42,6 +42,7 @@ var app = {
         this.startVideoPlayer();
         this.startUI();
 
+/*
         window.wakeuptimer.wakeup(
             function(result) {
                 if (result.type === 'wakeup') {
@@ -59,12 +60,12 @@ var app = {
             {
                 alarms: [{
                     type: 'onetime',
-                    time: {hour: 9, minute: 30},
+                    time: {hour: 4, minute: 20},
                     //extra: {},
                     message: "Alarm!"
                 }]
             }
-        );
+        );*/
     },
 //=============================================================================
 
@@ -77,8 +78,8 @@ var app = {
         var socket = new io.connect(serveraddress, {
           'reconnection': true,
           'reconnectionDelay': 1000,
-          'reconnectionDelayMax': 1000,
-          'reconnectionAttempts': 999
+          'reconnectionDelayMax': 5000,
+          'reconnectionAttempts': 9999
         });
 
         function downloadFile(filename, size, dir) {
@@ -252,11 +253,11 @@ var app = {
         });
         socket.on('reload', function(data) {
 
-            let timeout = Math.random() * 1000 * 1; // sometime in next 8.3 mins
-            console.log("reloading in: " + timeout);
-            setTimeout(function(){
+            //let timeout = Math.random() * 1000 * 1; // sometime in next 8.3 mins
+            //console.log("reloading in: " + timeout);
+            //setTimeout(function(){
                 location.reload();
-            }, timeout);
+            //}, timeout);
         });
         socket.on('frame', (data) => {
             if (data !== this.lastFrameCmd) {

@@ -126,7 +126,7 @@ var sendSocketBroadcast = function(sockEvent, msg) {
 
 var sendUdpCommand = function(cmd) {
     let broadcast = process.env.BROADCAST_ADDR;
-    for( var i = 0; i < 20; i++ ) {
+    for( var i = 0; i < 10; i++ ) {
         setTimeout(() => {
             console.log("Sending Command: ", cmd);
             udpBroadcaster.send(cmd, 55555, broadcast, (err) => {

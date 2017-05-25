@@ -1,18 +1,5 @@
 console.log("movieremote");
 
-var playBtn = document.getElementById('play-btn');
-playBtn.onclick = function() {
-  var xhr = new XMLHttpRequest();
-  xhr.open("GET", "play");
-  xhr.send();
-};
-
-var pauseBtn = document.getElementById('pause-btn');
-pauseBtn.onclick = function() {
-  var xhr = new XMLHttpRequest();
-  xhr.open("GET", "pause");
-  xhr.send();
-};
 
 var sndParamsBtn = document.getElementById('send-params');
 sndParamsBtn.onclick = function() {
@@ -30,23 +17,12 @@ hideDebugBtn.onclick = function() {
   console.log("hidedebug");
 };
 
-
-var darkBtn = document.getElementById('toggle-dark');
-darkBtn.onclick = function() {
-  console.log("dark");
-	var xhr = new XMLHttpRequest();
-	xhr.open("GET", "dark");
-	xhr.send();
-
-};
-
 var reloadBtn = document.getElementById('refresh');
 reloadBtn.onclick = function() {
   console.log("reload");
   var xhr = new XMLHttpRequest();
   xhr.open("GET", "reload");
   xhr.send();
-
 };
 
 var sleepBtn = document.getElementById('sleep');

@@ -326,7 +326,7 @@ var app = {
                     }
                 } else {
                     var posData = parseInt(data);
-                    encoderPosition = posData;
+                    this.encoderPosition = posData;
                     // should be a mapping of encoder range to 360 then subtract 180
                     let converted = this.convertToRange(posData, [0, this.encoderRange], [0, 360.0]) - 180.0 + this.deviceParameters['long'];
                     console.log(converted);

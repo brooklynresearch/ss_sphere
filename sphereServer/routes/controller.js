@@ -13,6 +13,7 @@ router.get('/', function(req, res, next) {
                 console.log("ERROR: ", err);
             }
             var lines = stdout.split('\n');
+               console.log(lines);
             var posStrings = lines[0].split(',');
             var names = lines[1].split(',');
 

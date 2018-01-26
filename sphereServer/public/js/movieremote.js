@@ -1,5 +1,18 @@
 console.log("movieremote");
 
+var playBtn = document.getElementById('play');
+playBtn.onclick = function() {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "play");
+    xhr.send();
+};
+
+var playBtn = document.getElementById('pause');
+playBtn.onclick = function() {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "pause");
+    xhr.send();
+};
 
 var sndParamsBtn = document.getElementById('send-params');
 sndParamsBtn.onclick = function() {

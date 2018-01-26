@@ -2,9 +2,9 @@ var app = {
 
     // GLOBALS
     canvas: null,
-    stillsFile: "1492712901828_injected.mp4",
+    stillsFile: "Final_Output_Gear_360_7_injected.mp4",
     //stillsFile: "",
-    currentVideo: "1492712901828_injected.mp4",
+    currentVideo: "Final_Output_Gear_360_7_injected.mp4",
     lastFrameCmd: null,
     blackOut: null,
     webSocket: null,
@@ -24,7 +24,7 @@ var app = {
     onDeviceReady: function() {
         this.receivedEvent('deviceready');
 
-        $(".app").load("http://192.168.1.200:3000/app/home.html", this.homeLoaded.bind(this));
+        $(".app").load("http://192.168.0.137:3000/app/home.html", this.homeLoaded.bind(this));
         StatusBar.hide();
         window.plugins.insomnia.keepAwake();
     },
@@ -74,7 +74,7 @@ var app = {
      */
     startWebsocket: function() {
 
-        var serveraddress = 'http://192.168.1.200:8080';
+        var serveraddress = 'http://192.168.0.137:8080';
         var socket = new io.connect(serveraddress, {
           'reconnection': true,
           'reconnectionDelay': 1000,
@@ -83,7 +83,7 @@ var app = {
         });
 
         function downloadFile(filename, size, dir) {
-            let assetServer = "http://192.168.1.200:8081";
+            let assetServer = "http://192.168.0.137:8081";
 
             let ft = new FileTransfer();
             let timeout = Math.random() * 1000 * 200; // sometime in next 8.3 mins
@@ -144,6 +144,16 @@ var app = {
             console.log("New position ", data);
             document.getElementById("position-debug").innerHTML = "Position: " + data;
         });
+        socket.on('play', function(data) {
+            //if(this.canvas) {
+                player.play();
+            //}
+        });
+        socket.on('pause', function(data) {
+            //if(this.canvas) {
+                player.pause();
+            //}
+        });
         socket.on('switch video', function(data) {
             //Load the video and start playing
             player.pause();
@@ -154,9 +164,9 @@ var app = {
             }
             player.currentTime(0);
             player.play();
-            setTimeout(function(){
-                player.pause();
-            }, 1000);
+            //setTimeout(function(){
+            //    player.pause();
+            //}, 1000);
         });
 
         socket.on('filelist', (data) => {
@@ -317,8 +327,8 @@ var app = {
                         this.changeFrame(selectedFrame);
                     }
                 } else if (data === 'play') {
-                    if(canvas) {
-                        // player.play();
+                    if(this.canvas) {
+                        player.play();
                     }
                 } else if ( data === 'pause') {
                     if (this.canvas) {
@@ -358,6 +368,8 @@ var app = {
             console.log(width, height);
             this.player.width(width);
             this.player.height(height);
+            this.player.loop(true);
+            this.player.preload(true);
 
             // remove loading sign element
             var loadSign = document.getElementsByClassName("vjs-loading-spinner");
@@ -385,8 +397,8 @@ var app = {
                 this.player.width(screen.width);
                 this.player.height(screen.height);
                 this.player.src("/storage/emulated/0/Android/data/com.ss.sphere/files/" + this.stillsFile);
-                //this.player.play();
-                //this.player.pause();
+                this.player.play();
+                this.player.pause();
                 console.log("is ready");
                 this.canvas = this.player.getChild('Canvas');
             });
@@ -426,9 +438,9 @@ var app = {
         console.log(selectedFrame);
         this.player.currentTime(selectedFrame);
         this.player.play();
-        setTimeout(function(){
-            this.player.pause();
-        }, 2000);
+        //setTimeout(function(){
+         //   this.player.pause();
+        //}, 2000);
     },// END SHARED UTILITIES
 //=============================================================================
 

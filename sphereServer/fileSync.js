@@ -32,6 +32,7 @@ class FileSync extends events.EventEmitter {
     }
 
     saveLocalFiles() {
+        console.log("Checking local files");
         fs.readdir('./public/moviefiles/', (err, files) => {
             // Delete old files from db
             this.fileTable.forEach((tfile) => {
@@ -73,6 +74,7 @@ class FileSync extends events.EventEmitter {
     }
 
     getSavedFiles(done) {
+        console.log("getting db files");
         db.getFiles((err, result) => {
             var i = 0;
             if (!err && result.rows.length != 0) {
@@ -83,6 +85,9 @@ class FileSync extends events.EventEmitter {
                         done();
                     }
                 });
+            }
+            else {
+                done();
             }
         });
     }

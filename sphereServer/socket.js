@@ -9,6 +9,8 @@ var ioInstance;
 
 var startListeners = function(io) {
 
+    console.log("Starting listeners");
+
     ioInstance = io;
     var serialServer = require('./serialServer').SerialServer;
 

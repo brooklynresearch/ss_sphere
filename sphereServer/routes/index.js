@@ -19,14 +19,16 @@ router.get('/moviecontrol', function(req, res, next) {
 /* GET play cmd */
 router.get('/play', function(req,res,next) {
   console.log("play");
-  socketCmd.sendUdpCommand("play");  
+  //socketCmd.sendUdpCommand("play");  
+  socketCmd.sendSocketBroadcast('play', 0);
   res.end();
 });
 
 router.get('/pause', function(req, res, next) {
-  console.log("paused");
-  socketCmd.sendUdpCommand("pause");
-  res.end();
+    console.log("pause");
+    //socketCmd.sendUdpCommand("pause");
+    socketCmd.sendSocketBroadcast('pause', 0);
+    res.end();
 });
 
 router.get('/sendparams', function(req, res, next) {

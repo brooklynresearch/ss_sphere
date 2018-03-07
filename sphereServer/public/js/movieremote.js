@@ -45,3 +45,12 @@ sleepBtn.onclick = function() {
   xhr.open("GET", "sleep?time=400");
   xhr.send();
 };
+
+var updateBtn = document.getElementById('update');
+updateBtn.onclick = function() {
+  console.log("update-apk button");
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", "update-apk");
+  xhr.send();
+};
+

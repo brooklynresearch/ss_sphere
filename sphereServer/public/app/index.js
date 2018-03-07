@@ -15,7 +15,8 @@ var app = {
     encoderPosition: 0,
     encoderRange: 39000,
     player: null,
-    
+    clockOffset: 0,
+    triggerTarget: 0,
 
     initialize: function() {
         document.addEventListener('deviceready', this.onDeviceReady.bind(this), false);
@@ -24,7 +25,7 @@ var app = {
     onDeviceReady: function() {
         this.receivedEvent('deviceready');
 
-        $(".app").load("http://192.168.0.137:3000/app/home.html", this.homeLoaded.bind(this));
+        $(".app").load("http://192.168.0.169:3000/app/home.html", this.homeLoaded.bind(this));
         StatusBar.hide();
         window.plugins.insomnia.keepAwake();
     },
@@ -41,31 +42,9 @@ var app = {
         this.startUdp();
         this.startVideoPlayer();
         this.startUI();
+        //this.startTimeSync();
+        //this.startTimer();
 
-/*
-        window.wakeuptimer.wakeup(
-            function(result) {
-                if (result.type === 'wakeup') {
-                    console.log("Wakeup alarm--", result.alarm_date);
-                } else if (result.type === 'set') {
-                    console.log("Wakeup alarm set--", result);
-                } else {
-                    console.log("Unknown type--", result.alarm_date);
-                    //navigator.app.exitApp();
-                }
-            }, 
-            function(err) {
-                console.log("wakeuptimer error", err);
-            }, 
-            {
-                alarms: [{
-                    type: 'onetime',
-                    time: {hour: 4, minute: 20},
-                    //extra: {},
-                    message: "Alarm!"
-                }]
-            }
-        );*/
     },
 //=============================================================================
 
@@ -74,7 +53,7 @@ var app = {
      */
     startWebsocket: function() {
 
-        var serveraddress = 'http://192.168.0.137:8080';
+        var serveraddress = 'http://192.168.0.169:8080';
         var socket = new io.connect(serveraddress, {
           'reconnection': true,
           'reconnectionDelay': 1000,
@@ -83,7 +62,7 @@ var app = {
         });
 
         function downloadFile(filename, size, dir) {
-            let assetServer = "http://192.168.0.137:8081";
+            let assetServer = "http://192.168.0.169:8081";
 
             let ft = new FileTransfer();
             let timeout = Math.random() * 1000 * 200; // sometime in next 8.3 mins
@@ -369,7 +348,7 @@ var app = {
             this.player.width(width);
             this.player.height(height);
             this.player.loop(true);
-            this.player.preload(true);
+            //this.player.preload(true);
 
             // remove loading sign element
             var loadSign = document.getElementsByClassName("vjs-loading-spinner");
@@ -407,6 +386,49 @@ var app = {
     }, // END VIDEOPLAYER
 //=============================================================================
 
+    /**
+     * BEGIN TIME SYNC
+     */
+
+    startTimeSync: function() {
+         setInterval(function() {
+            //measure our offset from reference clock
+            this.getClockOffset();
+        }, 500)
+    },
+
+    getClockOffset: function() {
+        cordova.plugins.sntp.getClockOffset(
+            (offset) => {
+                this.clockOffset = offset.offset;
+            },
+            (err) => {
+                console.log(err);
+            });
+    },
+
+    startTimer: function() {
+
+        function step(t) {
+            let ntpTime = window.performance.timing.navigationStart + window.performance.now() + this.clockOffset;
+
+            if (this.triggerTarget > 0 && ntpTime >= this.triggerTarget) {
+                console.log("TRIGGER");
+                if (app.playing) {
+                    this.player.pause();
+                    this.playing = false;
+                } else {
+                    this.player.play();
+                    this.playing = true;
+                }
+                this.triggerTarget = 0;
+            }
+            window.requestAnimationFrame(step)
+        }
+        window.requestAnimationFrame(step)
+    },
+
+//=============================================================================
     /**
      * BEGIN SHARED UTILITIES
      */

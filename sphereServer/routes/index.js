@@ -20,7 +20,7 @@ router.get('/moviecontrol', function(req, res, next) {
 router.get('/play', function(req,res,next) {
   console.log("play");
   //socketCmd.sendUdpCommand("play");  
-  socketCmd.sendSocketBroadcast('play', 0);
+  socketCmd.sendSocketBroadcast('toggle-play', {timestamp: Date.now(), delay: 2000});
   res.end();
 });
 
@@ -69,6 +69,12 @@ router.get('/reload', function(req, res, next) {
 router.get('/sleep', function(req, res, next) {
     console.log("Sending sleep command", req.query);
     socketCmd.sendSocketBroadcast('sleep', req.query.time);
+    res.end();
+});
+
+router.get('/update-apk', function(req, res, next) {
+    console.log("Sending update-apk command", req.query);
+    socketCmd.sendSocketBroadcast('update-apk');
     res.end();
 });
 

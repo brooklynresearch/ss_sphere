@@ -7,21 +7,28 @@ import android.app.ActivityManager;
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.DialogInterface;
 import android.content.Intent;
 import android.content.IntentFilter;
 import android.content.pm.PackageManager;
+import android.graphics.Color;
 import android.net.Uri;
 import android.os.Bundle;
 import android.os.Environment;
 import android.support.v4.app.ActivityCompat.OnRequestPermissionsResultCallback;
 import android.support.v4.content.FileProvider;
 import android.support.v7.app.ActionBar;
+import android.support.v7.app.AlertDialog;
+import android.text.InputType;
 import android.util.Log;
 import android.support.v4.app.ActivityCompat;
 import android.support.v7.app.AppCompatActivity;
 import android.util.Pair;
 import android.view.View;
+import android.view.Window;
 import android.view.WindowManager;
+import android.widget.Button;
+import android.widget.EditText;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -63,15 +70,32 @@ public class MainActivity extends AppCompatActivity
     String TAG = "sphere-native";
 
     //*******************************************
-    String SERVER_IP_ADDRESS = "192.168.0.137";
+    String SERVER_IP_ADDRESS = "192.168.1.123";
     //*******************************************
+
+    int btnCounter = 0;
+    private String spherePosition;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         activity = this;
         super.onCreate(savedInstanceState);
+        //Remove title bar
+        this.requestWindowFeature(Window.FEATURE_NO_TITLE);
         getWindow().addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON);
         setContentView(R.layout.activity_main);
+
+        final Button button = findViewById(R.id.secret_button);
+        button.setVisibility(View.VISIBLE);
+        button.setBackgroundColor(Color.TRANSPARENT);
+        button.setOnClickListener(v -> {
+            btnCounter++;
+            if (btnCounter == 5) {
+                Log.d(TAG, "Button Press");
+                btnCounter = 0;
+                showPositionDialog();
+            }
+        });
 
         disposables = new CompositeDisposable();
 
@@ -194,6 +218,7 @@ public class MainActivity extends AppCompatActivity
 
     @Override
     protected void onResume() {
+        this.getSupportActionBar().hide();
         super.onResume();
         timer.startSync();
 
@@ -220,6 +245,28 @@ public class MainActivity extends AppCompatActivity
         videoView.destroy();
         disposables.dispose();
         unregisterReceiver(onComplete);
+    }
+
+    private void showPositionDialog() {
+        final EditText positionTxt = new EditText(this);
+
+        // Set the default text to a link of the Queen
+        positionTxt.setHint("0101");
+        positionTxt.setInputType(InputType.TYPE_CLASS_NUMBER);
+
+        new AlertDialog.Builder(this)
+                .setTitle("Set Position")
+                .setMessage("Enter four digits to set phone position")
+                .setView(positionTxt)
+                .setPositiveButton("Save", (dialog, whichButton) -> {
+                    String position = positionTxt.getText().toString();
+                    Log.d(TAG, "Setting position: " + position);
+                    videoView.setSpherePosition(position);
+                })
+                .setNegativeButton("Cancel", (dialog, whichButton) -> {
+
+                })
+                .show();
     }
 
     private void togglePause() {
@@ -266,6 +313,8 @@ public class MainActivity extends AppCompatActivity
                     Log.e(TAG, "Error in trigger observer: " + e.getMessage());
                 }
             });
+        }).on("newtable", args -> {
+            videoView.setPositionTable( (JSONObject)args[0] );
         }).on("update-apk", args -> {
             Log.d(TAG, "CMD NEW APK");
             updateApk();
@@ -286,7 +335,7 @@ public class MainActivity extends AppCompatActivity
                 Pair<Float, Float> srcRange = new Pair<>(0.0f, 39000.0f);
                 Pair<Float,Float> dstRange = new Pair<>(0.0f, 360.0f);
                 float angle = convertToRange(i, srcRange, dstRange) - 180.0f;
-                Log.d(TAG, "Setting yaw: " + Float.toString(angle));
+                //Log.d(TAG, "Setting yaw: " + Float.toString(angle));
                 videoView.setYawAngle(angle);
             }
 

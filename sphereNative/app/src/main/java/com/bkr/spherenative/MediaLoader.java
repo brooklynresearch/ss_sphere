@@ -223,6 +223,7 @@ public class MediaLoader {
             mediaPlayer.setSurface(displaySurface);
             // Start playback.
             //mediaPlayer.setLooping(true);
+            mediaPlayer.setVolume(0,0);
             mediaPlayer.setOnCompletionListener((m) -> {
                 mediaPlayer.seekTo(0);
                 isPaused = true;

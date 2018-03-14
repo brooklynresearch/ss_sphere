@@ -14,6 +14,9 @@ import android.util.Log;
 import com.google.vr.sdk.base.Eye.Type;
 import com.bkr.spherenative.rendering.SceneRenderer;
 
+import org.json.JSONException;
+import org.json.JSONObject;
+
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
@@ -26,9 +29,18 @@ public final class MonoscopicView extends GLSurfaceView {
     //private SensorManager sensorManager;
     //private Sensor orientationSensor;
     //private PhoneOrientationListener phoneOrientationListener;
+    String TAG = "MonoscopicView";
 
     private MediaLoader mediaLoader;
     private Renderer renderer;
+
+    JSONObject positionTable;
+    String position;
+
+    //long and lat values in positionTable
+    float positionYaw = 10;
+    float positionPitch = 20;
+
     private boolean isPaused = true; // we start with video paused
 
     /** Inflates a standard GLSurfaceView. */
@@ -89,10 +101,26 @@ public final class MonoscopicView extends GLSurfaceView {
         mediaLoader.loadVideo(fileUri);
     }
 
-    public void setYawAngle(float angle) {
-        renderer.setYawOffset(angle);
+    public void setPositionTable(JSONObject table) {
+        positionTable = table;
+        Log.d(TAG, "position table: " + positionTable.toString());
     }
 
+    public void setSpherePosition(String pos) {
+        position = pos;
+        try {
+            JSONObject positionEntry = positionTable.getJSONObject(pos);
+            positionYaw += (float) positionEntry.getDouble("long");
+            positionPitch += (float) positionEntry.getDouble("lat");
+            renderer.setPitchOffset(positionPitch);
+        } catch (JSONException e) {
+            Log.e(TAG, "JSON Error: " + e.getMessage());
+        }
+    }
+
+    public void setYawAngle(float angle) {
+        renderer.setYawOffset(-positionYaw - angle);
+    }
 
     /**
      * Standard GL Renderer implementation. The notable code is the matrix multiplication in

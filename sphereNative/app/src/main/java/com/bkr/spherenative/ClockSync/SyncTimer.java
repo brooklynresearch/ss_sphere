@@ -1,6 +1,8 @@
-package com.bkr.spherenative;
+package com.bkr.spherenative.ClockSync;
 
 import android.util.Log;
+
+import com.bkr.spherenative.ClockSync.SntpClient;
 
 import java.util.concurrent.TimeUnit;
 
@@ -30,7 +32,7 @@ public class SyncTimer {
     }
 
     public void startSync() {
-        Observable<Long> interval = Observable.interval(POLL_INTERVAL, TimeUnit.SECONDS, Schedulers.newThread());
+        Observable<Long> interval = Observable.interval(POLL_INTERVAL, TimeUnit.SECONDS, Schedulers.io());
         interval.subscribe(new Observer<Long>() {
             @Override
             public void onSubscribe(Disposable d) {
@@ -67,7 +69,7 @@ public class SyncTimer {
 
     public void setTrigger(long targetTime, SingleObserver observer) {
         long serverTime = System.currentTimeMillis() + clockOffset;
-        Single<Long> timer = Single.timer(targetTime - serverTime, TimeUnit.MILLISECONDS, Schedulers.newThread());
+        Single<Long> timer = Single.timer(targetTime - serverTime, TimeUnit.MILLISECONDS, Schedulers.io());
         timer.observeOn(AndroidSchedulers.mainThread());
         timer.subscribe(observer);
     }

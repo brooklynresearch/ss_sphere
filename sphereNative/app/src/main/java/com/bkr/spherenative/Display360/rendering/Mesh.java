@@ -1,4 +1,4 @@
-package com.bkr.spherenative.rendering;
+package com.bkr.spherenative.Display360.rendering;
 
 /*
  * Copyright 2017 Google Inc. All Rights Reserved.
@@ -18,7 +18,7 @@ package com.bkr.spherenative.rendering;
 
 
         //import static com.google.vr.sdk.samples.video360.rendering.Utils.checkGlError;
-import static com.bkr.spherenative.rendering.Utils.checkGlError;
+import static com.bkr.spherenative.Display360.rendering.Utils.checkGlError;
 import android.opengl.GLES11Ext;
 import android.opengl.GLES20;
 import com.google.vr.sdk.base.Eye;

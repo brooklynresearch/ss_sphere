@@ -1,4 +1,4 @@
-package com.bkr.spherenative;
+package com.bkr.spherenative.Display360;
 
 import android.app.ActivityManager;
 import android.content.Context;
@@ -18,7 +18,8 @@ import android.widget.LinearLayout;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
-import com.bkr.spherenative.rendering.CanvasQuad;
+import com.bkr.spherenative.Display360.rendering.CanvasQuad;
+import com.bkr.spherenative.R;
 
 /**
  * Created by tarvu on 2/19/18.

@@ -1,10 +1,9 @@
-package com.bkr.spherenative.rendering;
+package com.bkr.spherenative.Display360.rendering;
 
 /**
  * Created by tarvu on 2/19/18.
  */
 import android.graphics.Canvas;
-import android.graphics.PointF;
 import android.graphics.Rect;
 import android.graphics.SurfaceTexture;
 import android.opengl.GLES11Ext;
@@ -15,7 +14,7 @@ import android.widget.FrameLayout;
 import java.nio.FloatBuffer;
 import java.util.concurrent.atomic.AtomicBoolean;
 
-import static com.bkr.spherenative.rendering.Utils.checkGlError;
+import static com.bkr.spherenative.Display360.rendering.Utils.checkGlError;
 
 /**
  * Renders a floating, textured, translucent quad in VR at a hardcoded distance.

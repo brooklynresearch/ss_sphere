@@ -1,4 +1,4 @@
-package com.bkr.spherenative;
+package com.bkr.spherenative.ClockSync;
 
 /*
  * Copyright (C) 2008 The Android Open Source Project

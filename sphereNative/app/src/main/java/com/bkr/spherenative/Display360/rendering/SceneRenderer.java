@@ -1,4 +1,4 @@
-package com.bkr.spherenative.rendering;
+package com.bkr.spherenative.Display360.rendering;
 
 /*
  * Copyright 2017 Google Inc. All Rights Reserved.
@@ -19,27 +19,19 @@ package com.bkr.spherenative.rendering;
 
 
 
-import static com.bkr.spherenative.rendering.Utils.checkGlError;
+import static com.bkr.spherenative.Display360.rendering.Utils.checkGlError;
 
 import android.content.Context;
-import android.graphics.PointF;
 import android.graphics.SurfaceTexture;
 import android.graphics.SurfaceTexture.OnFrameAvailableListener;
 import android.opengl.GLES20;
 import android.opengl.Matrix;
 import android.os.Handler;
-import android.os.Looper;
-import android.os.SystemClock;
 import android.support.annotation.AnyThread;
-import android.support.annotation.BinderThread;
-import android.support.annotation.MainThread;
 import android.support.annotation.Nullable;
 import android.util.Log;
-import android.util.Pair;
-import android.view.InputDevice;
 import android.view.MotionEvent;
 import android.view.Surface;
-import android.view.ViewGroup;
 //import com.google.vr.sdk.controller.Orientation;
 //import com.google.vr.sdk.samples.video360.VideoUiView;
 import java.util.concurrent.atomic.AtomicBoolean;

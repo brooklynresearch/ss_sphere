@@ -1,4 +1,4 @@
-package com.bkr.spherenative.rendering;
+package com.bkr.spherenative.Display360.rendering;
 
 /*
  * Copyright 2017 Google Inc. All Rights Reserved.

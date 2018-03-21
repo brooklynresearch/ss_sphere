@@ -1,4 +1,4 @@
-package com.bkr.spherenative;
+package com.bkr.spherenative.Display360;
 
 /*
  * Copyright 2017 Google Inc. All Rights Reserved.
@@ -29,13 +29,9 @@ import android.support.annotation.AnyThread;
 import android.support.annotation.MainThread;
 import android.util.Log;
 import android.view.Surface;
-import com.bkr.spherenative.rendering.Mesh;
-import com.bkr.spherenative.rendering.SceneRenderer;
+import com.bkr.spherenative.Display360.rendering.Mesh;
+import com.bkr.spherenative.Display360.rendering.SceneRenderer;
 
-import java.io.File;
-import java.io.FileNotFoundException;
-import java.io.IOException;
-import java.net.URLConnection;
 import java.security.InvalidParameterException;
 
 /**

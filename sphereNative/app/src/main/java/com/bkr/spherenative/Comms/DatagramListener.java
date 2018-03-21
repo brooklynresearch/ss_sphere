@@ -1,4 +1,4 @@
-package com.bkr.spherenative;
+package com.bkr.spherenative.Comms;
 
 import android.util.Log;
 
@@ -6,12 +6,14 @@ import java.net.DatagramPacket;
 import java.net.DatagramSocket;
 import java.net.Inet4Address;
 import java.net.InetAddress;
+import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.ObservableEmitter;
 import io.reactivex.ObservableOnSubscribe;
 import io.reactivex.Observer;
 import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
 import io.reactivex.functions.Cancellable;
 import io.reactivex.schedulers.Schedulers;
 
@@ -21,11 +23,9 @@ import io.reactivex.schedulers.Schedulers;
 
 public class DatagramListener {
     private String TAG = "DatagramListener";
-    private boolean keepListening;
 
     public void listen(Observer observer) {
         Log.d(TAG, "Starting datagram listener");
-        keepListening = true;
         Observable<Integer> stream = Observable.create(new ObservableOnSubscribe<Integer>() {
             @Override
             public void subscribe(ObservableEmitter<Integer> emitter) throws Exception {
@@ -38,7 +38,7 @@ public class DatagramListener {
                         }
                     }
                 });
-                while (keepListening) {
+                while (true) {
                     try {
                         //socket.setSoTimeout(1000);
                         byte[] recvBuf = new byte[15000];
@@ -52,16 +52,16 @@ public class DatagramListener {
                         emitter.onError(e);
                     }
                 }
-                socket.close();
             }
         });
-        stream.subscribeOn(Schedulers.io());
+        stream.subscribeOn(Schedulers.newThread());
         stream.observeOn(AndroidSchedulers.mainThread());
         stream.subscribe(observer);
+
     }
 
     public void stop() {
         Log.d(TAG, "Stopping datagram listener");
-        keepListening = false;
+        //socket is closed when the observer in controller is disposed of
     }
 }

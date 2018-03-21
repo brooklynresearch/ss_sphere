@@ -1,4 +1,4 @@
-package com.bkr.spherenative;
+package com.bkr.spherenative.Display360;
 
 import android.content.Context;
 import android.net.Uri;
@@ -12,7 +12,7 @@ import android.util.AttributeSet;
 import android.util.Log;
 
 import com.google.vr.sdk.base.Eye.Type;
-import com.bkr.spherenative.rendering.SceneRenderer;
+import com.bkr.spherenative.Display360.rendering.SceneRenderer;
 
 import org.json.JSONException;
 import org.json.JSONObject;

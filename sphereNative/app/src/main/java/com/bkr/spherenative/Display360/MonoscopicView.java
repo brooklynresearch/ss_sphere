@@ -93,12 +93,15 @@ public final class MonoscopicView extends GLSurfaceView {
         mediaLoader.destroy();
     }
 
-
     /** Parses the Intent and loads the appropriate media. */
 
     public void loadMedia(Uri fileUri) {
         Log.d("Monoscopic", fileUri.toString());
         mediaLoader.loadVideo(fileUri);
+    }
+
+    public void initVideoStream(String uri) {
+        mediaLoader.startStream(uri);
     }
 
     public void setPositionTable(JSONObject table) {

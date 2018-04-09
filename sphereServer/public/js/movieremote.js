@@ -14,6 +14,13 @@ playBtn.onclick = function() {
     xhr.send();
 };
 
+var testStreamBtn = document.getElementById('test-stream');
+testStreamBtn.onclick = function() {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "test-stream");
+    xhr.send();
+};
+
 var sndParamsBtn = document.getElementById('send-params');
 sndParamsBtn.onclick = function() {
     var xhr = new XMLHttpRequest();

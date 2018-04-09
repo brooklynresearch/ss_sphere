@@ -16,6 +16,7 @@ package com.bkr.spherenative.Display360;
  * limitations under the License.
  */
 
+import android.annotation.SuppressLint;
 import android.content.Context;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
@@ -27,12 +28,34 @@ import android.net.Uri;
 import android.os.AsyncTask;
 import android.support.annotation.AnyThread;
 import android.support.annotation.MainThread;
+import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.Surface;
+
+import com.bkr.spherenative.Comms.DatagramListener;
+import com.bkr.spherenative.Comms.VideoFrameListener;
 import com.bkr.spherenative.Display360.rendering.Mesh;
 import com.bkr.spherenative.Display360.rendering.SceneRenderer;
+import com.google.vr.ndk.base.DaydreamApi;
 
+import java.io.IOException;
 import java.security.InvalidParameterException;
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.HashMap;
+import java.util.LinkedList;
+import java.util.Map;
+import java.util.Queue;
+import java.util.Set;
+import java.util.concurrent.Callable;
+import java.util.concurrent.TimeUnit;
+
+import io.reactivex.Completable;
+import io.reactivex.CompletableObserver;
+import io.reactivex.Observable;
+import io.reactivex.android.schedulers.AndroidSchedulers;
+import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * MediaLoader takes an Intent from the user and loads the specified media file.
@@ -114,9 +137,7 @@ public class MediaLoader {
     // The displaySurface is configured after both GL initialization and media loading.
     private Surface displaySurface;
 
-    // The actual work of loading media happens on a background thread.
-    private VideoLoaderTask videoLoaderTask = new VideoLoaderTask();
-
+    private String rtpUri;
 
     public MediaLoader(Context context) {
         this.context = context;
@@ -126,6 +147,7 @@ public class MediaLoader {
      * Loads custom videos based on the Intent or load the default video. See the Javadoc for this
      * class for information on generating a custom intent via adb.
      */
+    @SuppressLint("CheckResult")
     public void loadVideo(Uri uri) {
         // Load the bitmap in a background thread to avoid blocking the UI thread. This operation can
         // take 100s of milliseconds.
@@ -133,7 +155,106 @@ public class MediaLoader {
         // Intent will ever be fired for a single Activity lifecycle.
         //mediaLoaderTask = new MediaLoaderTask(uiView);
         //Log.d(TAG, uri.toString());
-        videoLoaderTask.execute(uri);
+        //videoLoaderTask.execute(uri);
+        Completable loadMediaTask = Completable.fromCallable(() -> {
+            int stereoFormat = Mesh.MEDIA_MONOSCOPIC;
+
+            mesh = Mesh.createUvSphere(
+                    SPHERE_RADIUS_METERS, DEFAULT_SPHERE_ROWS, DEFAULT_SPHERE_COLUMNS,
+                    DEFAULT_SPHERE_VERTICAL_DEGREES, DEFAULT_SPHERE_HORIZONTAL_DEGREES,
+                    stereoFormat);
+
+            //Log.d(TAG, "IN doInBackground: " + fileLocation[0].toString());
+
+            try {
+                MediaPlayer mp = MediaPlayer.create(context, uri);
+                synchronized (MediaLoader.this) {
+                    // This needs to be synchronized with the methods that could clear mediaPlayer.
+                    mediaPlayer = mp;
+                }
+                //videoWidgetView.loadVideo(fileInformation[0].first, fileInformation[0].second);
+            } catch (InvalidParameterException e) {
+                // An error here is normally due to being unable to locate the file.
+                // Since this is a background thread, we need to switch to the main thread to show a toast.
+                Log.e(TAG, "Could not open video: " + e.getMessage());
+            }
+            displayWhenReady();
+            return true;
+        });
+        loadMediaTask.subscribeOn(Schedulers.io());
+        loadMediaTask.subscribe(new CompletableObserver() {
+            @Override
+            public void onSubscribe(Disposable d) {
+
+            }
+
+            @Override
+            public void onComplete() {
+                Log.d(TAG, "MediaLoader oncomplete");
+            }
+
+            @Override
+            public void onError(Throwable e) {
+                Log.e(TAG, e.getMessage());
+                e.printStackTrace();
+            }
+        });
+    }
+
+    public void startStream(String uri) {
+        rtpUri = uri;
+        mesh = Mesh.createUvSphere(
+                SPHERE_RADIUS_METERS, DEFAULT_SPHERE_ROWS, DEFAULT_SPHERE_COLUMNS,
+                DEFAULT_SPHERE_VERTICAL_DEGREES, DEFAULT_SPHERE_HORIZONTAL_DEGREES,
+                Mesh.MEDIA_MONOSCOPIC);
+
+        try {
+            //MediaPlayer mp = MediaPlayer.create(context, uri);
+            MediaPlayer mp = new MediaPlayer();
+            //mp.setDataSource(uri);
+            mp.setOnPreparedListener(MediaPlayer::start);
+            //mp.prepare();
+            synchronized (MediaLoader.this) {
+                // This needs to be synchronized with the methods that could clear mediaPlayer.
+                mediaPlayer = mp;
+            }
+            //videoWidgetView.loadVideo(fileInformation[0].first, fileInformation[0].second);
+        } catch (Exception e) {
+            // An error here is normally due to being unable to locate the file.
+            // Since this is a background thread, we need to switch to the main thread to show a toast.
+            Log.e(TAG, "Could not open video: " + e.getMessage());
+            //startStream(uri);
+        } /*catch (IOException e) {
+            Log.e(TAG, "Could not open stream: " + e.getMessage());
+        }*/
+        displayWhenReady();
+
+        /*
+
+        // 4k x 2k is a good default resolution for monoscopic panoramas.
+        displaySurface = sceneRenderer.createDisplay(
+                2 * DEFAULT_SURFACE_HEIGHT_PX, DEFAULT_SURFACE_HEIGHT_PX, mesh);
+
+        Queue<Bitmap> frames = new LinkedList<>();
+
+        Disposable di = Observable.interval(0,33, TimeUnit.MILLISECONDS) // ~30 fps
+                .subscribeOn(AndroidSchedulers.mainThread())
+                .subscribe(i -> {
+                    if (frames.peek() != null) {
+                        Canvas c = displaySurface.lockCanvas(null);
+                        c.drawBitmap(frames.remove(), 0, 0, null);
+                        displaySurface.unlockCanvasAndPost(c);
+                    } else {
+                        //Log.e(TAG, "Empty buffer");
+                    }
+                });
+
+        VideoFrameListener frameListener = new VideoFrameListener(33333, 3200000); // based on movie.mp4 packet size
+        Disposable d = frameListener.getStream().subscribe(packet -> {
+            byte[] frameData = packet.getData();
+            Bitmap bitmap = BitmapFactory.decodeByteArray(frameData, 0, frameData.length);
+            frames.add(bitmap);
+        });*/
     }
 
     public void togglePlayback() {
@@ -149,39 +270,6 @@ public class MediaLoader {
     public void onGlSceneReady(SceneRenderer sceneRenderer) {
         this.sceneRenderer = sceneRenderer;
         displayWhenReady();
-    }
-
-    /**
-     * Helper class to manage threading.
-     */
-    private class VideoLoaderTask extends AsyncTask<Uri, Void, Boolean> {
-
-        @Override
-        protected Boolean doInBackground(Uri... fileLocation) {
-            int stereoFormat = Mesh.MEDIA_MONOSCOPIC;
-
-            mesh = Mesh.createUvSphere(
-                    SPHERE_RADIUS_METERS, DEFAULT_SPHERE_ROWS, DEFAULT_SPHERE_COLUMNS,
-                    DEFAULT_SPHERE_VERTICAL_DEGREES, DEFAULT_SPHERE_HORIZONTAL_DEGREES,
-                    stereoFormat);
-
-            //Log.d(TAG, "IN doInBackground: " + fileLocation[0].toString());
-
-            try {
-                MediaPlayer mp = MediaPlayer.create(context, fileLocation[0]);
-                synchronized (MediaLoader.this) {
-                    // This needs to be synchronized with the methods that could clear mediaPlayer.
-                    mediaPlayer = mp;
-                }
-                //videoWidgetView.loadVideo(fileInformation[0].first, fileInformation[0].second);
-            } catch (InvalidParameterException e) {
-                // An error here is normally due to being unable to locate the file.
-                // Since this is a background thread, we need to switch to the main thread to show a toast.
-                Log.e(TAG, "Could not open video: " + e.getMessage());
-            }
-            displayWhenReady();
-            return true;
-        }
     }
 
     /**
@@ -202,7 +290,7 @@ public class MediaLoader {
         if (displaySurface != null) {
             // Avoid double initialization caused by sceneRenderer & mediaPlayer being initialized before
             // displayWhenReady is executed.
-            return;
+            //return;
         }
 
         if ((errorText == null && mediaImage == null && mediaPlayer == null) || sceneRenderer == null) {
@@ -213,19 +301,35 @@ public class MediaLoader {
         // The important methods here are the setSurface & lockCanvas calls. These will have to happen
         // after the GLView is created.
         if (mediaPlayer != null) {
-            // For videos, attach the displaySurface and mediaPlayer.
-            displaySurface = sceneRenderer.createDisplay(
-                    mediaPlayer.getVideoWidth(), mediaPlayer.getVideoHeight(), mesh);
-            mediaPlayer.setSurface(displaySurface);
+            try {
+                mediaPlayer.setDataSource(rtpUri);
+                mediaPlayer.setOnErrorListener((mp, a, b) -> {
+                    //displayWhenReady();
+                    Log.e(TAG, "MP Error: (" + a + "," + b + ")");
+                    return true;
+                });
+                mediaPlayer.setOnInfoListener((mp, what, extra) -> {
+                    Log.e(TAG, "INFO: " + what + " EXTRA: " + extra);
+                    return true;
+                });
+                displaySurface = sceneRenderer.createDisplay(
+                        mediaPlayer.getVideoWidth(), mediaPlayer.getVideoHeight(), mesh);
+                mediaPlayer.setSurface(displaySurface);
+                mediaPlayer.prepare();
+            } catch (Exception e) {
+                Log.e(TAG, "Couldn't prepare stream: " + e.getMessage());
+                //displayWhenReady();
+            }
             // Start playback.
             //mediaPlayer.setLooping(true);
+            /*
             mediaPlayer.setVolume(0,0);
             mediaPlayer.setOnCompletionListener((m) -> {
                 mediaPlayer.seekTo(0);
                 isPaused = true;
             });
             mediaPlayer.start();
-            mediaPlayer.pause();
+            mediaPlayer.pause();*/
         } else if (mediaImage != null) {
             // For images, acquire the displaySurface and draw the bitmap to it. Since our Mesh class uses
             // an GL_TEXTURE_EXTERNAL_OES texture, it's possible to perform this decoding and rendering of

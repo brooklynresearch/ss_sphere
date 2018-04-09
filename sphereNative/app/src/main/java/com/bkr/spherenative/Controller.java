@@ -1,18 +1,32 @@
 package com.bkr.spherenative;
 
+import android.annotation.SuppressLint;
+import android.content.BroadcastReceiver;
+import android.content.Context;
+import android.content.Intent;
 import android.net.Uri;
 import android.os.Environment;
+import android.support.v4.content.FileProvider;
 import android.util.Log;
+import android.util.Pair;
 
 import com.bkr.spherenative.ClockSync.SyncTimer;
 import com.bkr.spherenative.Comms.DatagramListener;
 import com.bkr.spherenative.Comms.WebsocketClient;
 import com.bkr.spherenative.Display360.MonoscopicView;
+import com.bkr.spherenative.FileSync.FileManager;
+
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
+import java.util.Date;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Observable;
 import io.reactivex.Observer;
+import io.reactivex.SingleObserver;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
 
@@ -22,8 +36,11 @@ import io.reactivex.disposables.Disposable;
  * Listens to Comms messages and MainActivity UI to control ClockSync, Display360, and FileSync classes
  */
 
-public class Controller {
+class Controller {
     private String TAG = "Controller";
+    private String hostIP;
+    private String rtpHost;
+    private Context appContext;
     private Boolean mediaLoaded = false;
     private Boolean commsStarted = false;
 
@@ -34,8 +51,14 @@ public class Controller {
     private CompositeDisposable disposables = new CompositeDisposable();
     private String websocketUrl;
 
+    Controller(Context context) {
+        appContext = context;
+    }
+
     public boolean initialize(String hostIpAddr, MonoscopicView viewElement) {
+        hostIP = hostIpAddr;
         panoView = viewElement;
+        rtpHost = "rtsp://" + hostIpAddr + ":8554/movie.mp4";
 
         return initPanoView() &&
                 initComms(hostIpAddr) &&
@@ -45,18 +68,32 @@ public class Controller {
 
     private boolean initPanoView() {
         panoView.initialize();
-        loadMedia();
+        startStream(rtpHost);
+        //loadMedia();
         return true;
     }
 
-    public void loadMedia() {
+    private void startStream(String uri) {
+        Disposable d = Observable.timer(1, TimeUnit.SECONDS)
+                .subscribe(i -> {
+                    panoView.initVideoStream(uri);
+                });
+    }
+
+    private void loadMedia() {
         Log.d(TAG, "Loading media");
         //TODO: should call filesync and wait for correct fileuri
-        File downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-        Uri fileUri = Uri.fromFile(new File(downloadDir + "/movie.mp4"));
+        String defaultVideo = "movie.mp4";
+        if (!FileManager.hasFile(defaultVideo)) {
+            String remotePath = "http://" + hostIP + ":3000/" + defaultVideo;
+            FileManager.getFileFromHost(appContext, remotePath, defaultVideo, onDownloadComplete);
+        } else {
+            File downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+            Uri fileUri = Uri.fromFile(new File(downloadDir + "/movie.mp4"));
 
-        panoView.loadMedia(fileUri);
-        mediaLoaded = true;
+            panoView.loadMedia(fileUri);
+            mediaLoaded = true;
+        }
     }
 
     private boolean initComms(String hostIpAddr) {
@@ -64,23 +101,27 @@ public class Controller {
         websocketUrl = "http://" + hostIpAddr + ":8080";
         wsClient = new WebsocketClient();
 
-        dgramListener = new DatagramListener();
+        dgramListener = new DatagramListener(55555, 1500);
+        //dgramListener.setup();
 
         Log.d(TAG, "...Done.");
         return true;
     }
 
-    public void startComms() {
+    @SuppressLint("CheckResult")
+    private void startComms() {
         Log.d(TAG, "Starting comms");
         wsClient.connect(websocketUrl, createWsObserver());
-        //dgramListener.listen(createDgramObserver());
+        Log.d(TAG, "starting Dgram");
+        Observable.timer(3000, TimeUnit.MILLISECONDS).subscribe(emitter ->
+                dgramListener.startListening(createDgramObserver()));
         commsStarted = true;
     }
 
 
     private boolean initFileSync() {
-        //do stuff
         Log.d(TAG, "Initializing FileSync...");
+        //do stuff
         Log.d(TAG, "...Done.");
         return true;
     }
@@ -104,7 +145,6 @@ public class Controller {
 
             @Override
             public void onNext(HashMap<String, String> socketMsg) {
-                //Log.d(TAG, "wsObserver onNext");
                 handleSocketMessage(socketMsg);
             }
 
@@ -125,7 +165,7 @@ public class Controller {
 
             @Override
             public void onSubscribe(Disposable d) {
-                disposables.add(d);
+                //disposables.add(d);
             }
 
             @Override
@@ -148,11 +188,67 @@ public class Controller {
     private void handleSocketMessage(HashMap<String, String> msgMap) {
         Log.d(TAG, "GOT WEBSOCKET: " + msgMap.toString());
         //get fields and pass to panoView or fileSync
+        switch(msgMap.get("type")) {
+            case "toggle-play":
+                String serverTime = msgMap.get("serverTime");
+                String delay = msgMap.get("delay");
+                long triggerTarget = Long.parseLong(serverTime) + Integer.parseInt(delay);
+                timer.setTrigger(triggerTarget, getTriggerObserver());
+                break;
+            case "pos":
+                String pos = msgMap.get("value");
+                if (!pos.equals("-1")) {
+                    setSpherePosition(msgMap.get("value"));
+                }
+                break;
+            case "newtable":
+                try {
+                    JSONObject table = new JSONObject(msgMap.get("table"));
+                    panoView.setPositionTable(table);
+                } catch (JSONException e) {
+                    Log.e(TAG, "Error parsing pos table" + e.getMessage());
+                }
+                break;
+            case "update-apk":
+                newApk();
+                break;
+            default:
+                Log.e(TAG, "Unknown message type: " + msgMap.toString());
+        }
+    }
+
+    private SingleObserver getTriggerObserver() {
+        return new SingleObserver() {
+            @Override
+            public void onSubscribe(Disposable d) {
+                disposables.add(d);
+            }
+
+            @Override
+            public void onSuccess(Object o) {
+                panoView.togglePlayback();
+            }
+
+            @Override
+            public void onError(Throwable e) {
+
+            }
+        };
     }
 
     private void handleDgram(Integer n) {
-        //check value and pass to panoView
+        Pair<Float, Float> srcRange = new Pair<>(0.0f, 39000.0f);
+        Pair<Float,Float> dstRange = new Pair<>(0.0f, 360.0f);
+        panoView.setYawAngle(convertToRange(n.floatValue(), srcRange, dstRange) - 180.0f);
         Log.d(TAG, "GOT DGRAM: " + n.toString());
+    }
+
+    private static float convertToRange(float value, Pair<Float, Float> srcRange, Pair<Float, Float> dstRange) {
+        float srcMax = srcRange.second - srcRange.first;
+        float dstMax = dstRange.second - dstRange.first;
+        float adjValue = value - srcRange.first;
+
+        return  (adjValue * dstMax / srcMax) + dstRange.first;
     }
 
     public void setSpherePosition(String pos) {
@@ -160,9 +256,43 @@ public class Controller {
         panoView.setSpherePosition(pos);
     }
 
+    private void newApk() {
+        long t = new Date().getTime();
+        String apk_filename = "/sphere-" + t + ".apk";
+        BroadcastReceiver onApkComplete = new BroadcastReceiver() {
+            public void onReceive(Context ctxt, Intent intent) {
+                installUpdate(apk_filename);
+            }
+        };
+        String remotePath = "http://" + hostIP + ":3000/sphere.apk";
+        FileManager.getFileFromHost(appContext, remotePath, apk_filename, onApkComplete);
+}
+
+    private void installUpdate(String apk_filename) {
+        Log.d(TAG,"APK Download Complete");
+        Log.d(TAG, "INSTALLING APK");
+
+        File toInstall = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), apk_filename);
+        Uri apkUri = FileProvider.getUriForFile(appContext, BuildConfig.APPLICATION_ID + ".provider", toInstall);
+
+        Intent newIntent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
+        newIntent.setData(apkUri);
+        newIntent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        newIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
+        appContext.startActivity(newIntent);
+    }
+
+    private BroadcastReceiver onDownloadComplete = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+            loadMedia();
+        }
+    };
+
     public void pause() {
         Log.d(TAG, "Controller Pausing...");
         disposables.dispose();
+        dgramListener.stop();
         timer.stopSync();
         panoView.onPause();
         commsStarted = false;
@@ -173,7 +303,7 @@ public class Controller {
         timer.startSync();
         panoView.onResume();
         if (!mediaLoaded) {
-            loadMedia();
+            //loadMedia();
         }
         if (!commsStarted) {
             startComms();

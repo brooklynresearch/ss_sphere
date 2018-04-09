@@ -24,6 +24,12 @@ router.get('/play', function(req,res,next) {
   res.end();
 });
 
+router.get('/test-stream', function(req, res, next) {
+    console.log("stream");
+    socketCmd.streamVideo();
+    res.end();
+})
+
 router.get('/pause', function(req, res, next) {
     console.log("pause");
     //socketCmd.sendUdpCommand("pause");

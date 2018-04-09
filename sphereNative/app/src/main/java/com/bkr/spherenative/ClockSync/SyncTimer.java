@@ -21,7 +21,6 @@ import io.reactivex.schedulers.Schedulers;
 
 public class SyncTimer {
     private String TAG = "SyncTimer";
-    private Long POLL_INTERVAL = 1L;
     private Disposable intervalDisposable;
     private SntpClient client = new SntpClient();
     private String ntpHost = "";
@@ -32,7 +31,9 @@ public class SyncTimer {
     }
 
     public void startSync() {
+        final Long POLL_INTERVAL = 1L;
         Observable<Long> interval = Observable.interval(POLL_INTERVAL, TimeUnit.SECONDS, Schedulers.io());
+        interval.observeOn(Schedulers.io());
         interval.subscribe(new Observer<Long>() {
             @Override
             public void onSubscribe(Disposable d) {

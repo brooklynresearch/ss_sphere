@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity
     String TAG = "sphere-native";
 
     //*******************************************
-    String SERVER_IP_ADDRESS = "192.168.1.123";
+    String SERVER_IP_ADDRESS = "192.168.0.188";
     //*******************************************
 
     int btnCounter = 0;
@@ -57,15 +57,12 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        //disposables = new CompositeDisposable(); // stream listeners to dispose
-
         String[] permissions = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
         if(!hasPermissions(this, permissions)) {
             ActivityCompat.requestPermissions(this, permissions, 1);
         } else {
             initialized = controller.initialize(SERVER_IP_ADDRESS, findViewById(R.id.video_view));
-            //Log.d(TAG, "INTIALIZED: " + initialized);
         }
     }
 
@@ -117,8 +114,6 @@ public class MainActivity extends AppCompatActivity
                         | View.SYSTEM_UI_FLAG_FULLSCREEN
                         | View.SYSTEM_UI_FLAG_IMMERSIVE_STICKY);
 
-        // Resume the 3D rendering.
-        //videoView.onResume();
         if (initialized) {
             controller.resume();
         }

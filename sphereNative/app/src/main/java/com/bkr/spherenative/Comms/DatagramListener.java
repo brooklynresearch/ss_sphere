@@ -1,7 +1,5 @@
 package com.bkr.spherenative.Comms;
 
-import android.annotation.SuppressLint;
-import android.provider.ContactsContract;
 import android.util.Log;
 
 import java.io.IOException;
@@ -10,8 +8,7 @@ import java.net.DatagramSocket;
 import java.net.SocketException;
 
 import io.reactivex.Observable;
-import io.reactivex.Observer;
-import io.reactivex.schedulers.Schedulers;
+
 
 /**
  * Created by tarvu on 2/20/18.
@@ -20,51 +17,35 @@ import io.reactivex.schedulers.Schedulers;
 public class DatagramListener {
     private String TAG = "DatagramListener";
     private DatagramSocket socket;
-    private boolean keepListening;
     private int port;
-    private int packetSize;
+    private byte[] recvBuffer;
 
     public DatagramListener(int port, int packetSize) {
         this.port = port;
-        this.packetSize = packetSize;
+        this.recvBuffer = new byte[packetSize];
     }
 
-    @SuppressLint("CheckResult")
-    public void startListening(Observer observer) {
+    public Observable<DatagramPacket> getStream() {
         try {
             socket = new DatagramSocket(this.port);
         } catch (SocketException e) {
             e.printStackTrace();
         }
-        Log.d(TAG, "listening...");
-        keepListening = true;
-        Observable<String> stream = Observable.create(emitter -> {
-            byte[] recvBuf = new byte[this.packetSize];
-            DatagramPacket packet = new DatagramPacket(recvBuf, recvBuf.length);
-            while (keepListening) {
-                try {
-                    //socket.setSoTimeout(1000);
-                    //Log.e("UDP", "Waiting for UDP broadcast");
-                    socket.receive(packet);
-                    //String senderIP = packet.getAddress().getHostAddress();
-                    String message = new String(packet.getData()).trim();
-                    emitter.onNext(message);
-                } catch (IOException e) {
-                    Log.e(TAG, "Discarding error: " + e.getMessage());;
-                }
+
+        return Observable.fromCallable( () -> {
+            DatagramPacket packet = new DatagramPacket(recvBuffer, recvBuffer.length);
+            try {
+                socket.receive(packet);
+            } catch (IOException e) {
+                Log.e(TAG, e.getMessage());
             }
-        });
-
-        stream.subscribeOn(Schedulers.io());
-
-        stream.map(Integer::parseInt)
-                .filter(i -> i >= 0 && i <= 36000) //ignore bad data
-                .subscribe(observer);
+            return packet;
+        }).repeat();
     }
 
-    public void stop() {
-        Log.d(TAG, "Stopping datagram listener");
-        keepListening = false;
-        socket.close();
+    public void destroy() {
+        if (!socket.isClosed()) {
+            socket.close();
+        }
     }
 }

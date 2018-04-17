@@ -1,6 +1,6 @@
 package com.bkr.spherenative.Comms;
 
-import android.annotation.SuppressLint;
+
 import android.util.Log;
 
 import org.json.JSONArray;
@@ -11,8 +11,6 @@ import java.net.URISyntaxException;
 import java.util.HashMap;
 
 import io.reactivex.Observable;
-import io.reactivex.Observer;
-import io.reactivex.schedulers.Schedulers;
 import io.socket.client.IO;
 import io.socket.client.Socket;
 
@@ -24,25 +22,24 @@ public class WebsocketClient {
     private String TAG = "WebsocketClient";
     private Socket socket;
 
-    public void connect(String url, Observer observer) {
+    public void connect(String url) {
         try {
             socket = IO.socket(url);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }
 
-        setEventHandlers(socket, observer);
+        socket.on(Socket.EVENT_CONNECT, args -> {
+            Log.d(TAG, "Websocket connected");
+        }).on(Socket.EVENT_DISCONNECT, args -> {
+            Log.d(TAG, "Websocket disconnected");
+        });
+
         socket.connect();
     }
 
-    @SuppressLint("CheckResult")
-    private void setEventHandlers(Socket socket, Observer observer) {
-        Observable<HashMap<String, String>> stream = Observable.create(emitter -> {
-            emitter.setCancellable(() -> {
-                if (socket.connected()) {
-                    socket.close();
-                }
-            });
+    public Observable<HashMap<String,String>> getStream() {
+        return Observable.create(emitter -> {
             socket.on("toggle-play", args -> {
                 HashMap<String, String> msgMap = new HashMap<>();
                 msgMap.put("type", "toggle-play");
@@ -68,7 +65,7 @@ public class WebsocketClient {
                 msgMap.put("type", "filelist");
                 JSONArray data = (JSONArray) args[0];
                 msgMap.put("list", data.toString());
-                //emitter.onNext(msgMap); //TODO: get this to fliesync
+                emitter.onNext(msgMap); //TODO: get this to filesync
             });
             socket.on("pos", args -> {
                 HashMap<String, String> msgMap = new HashMap<>();
@@ -90,14 +87,6 @@ public class WebsocketClient {
                 emitter.onNext(msgMap);
             });
         });
-        socket.on(Socket.EVENT_CONNECT, args -> {
-            Log.d(TAG, "Websocket connected");
-        }).on(Socket.EVENT_DISCONNECT, args -> {
-            Log.d(TAG, "Websocket disconnected");
-        });
-
-        stream.subscribeOn(Schedulers.io());
-        stream.subscribe(observer);
     }
 
     public void destroy() {

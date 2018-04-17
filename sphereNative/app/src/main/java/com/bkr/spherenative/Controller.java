@@ -1,6 +1,5 @@
 package com.bkr.spherenative;
 
-import android.annotation.SuppressLint;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -25,10 +24,10 @@ import java.util.HashMap;
 import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
-import io.reactivex.Observer;
-import io.reactivex.SingleObserver;
+import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.disposables.Disposable;
+import io.reactivex.schedulers.Schedulers;
 
 /**
  * Created by tarvu on 3/16/18.
@@ -42,7 +41,6 @@ class Controller {
     private String rtpHost;
     private Context appContext;
     private Boolean mediaLoaded = false;
-    private Boolean commsStarted = false;
 
     private MonoscopicView panoView;
     private DatagramListener dgramListener;
@@ -50,6 +48,11 @@ class Controller {
     private SyncTimer timer;
     private CompositeDisposable disposables = new CompositeDisposable();
     private String websocketUrl;
+
+    private Observable<Integer> dgramStream;
+    private Observable<HashMap<String,String>> wSocketStream;
+    private Disposable dgramDisposable;
+    private Disposable wSocketDisposable;
 
     Controller(Context context) {
         appContext = context;
@@ -68,8 +71,8 @@ class Controller {
 
     private boolean initPanoView() {
         panoView.initialize();
-        startStream(rtpHost);
-        //loadMedia();
+        //startStream(rtpHost);
+        loadMedia();
         return true;
     }
 
@@ -100,22 +103,25 @@ class Controller {
         Log.d(TAG, "Initializing comms...");
         websocketUrl = "http://" + hostIpAddr + ":8080";
         wsClient = new WebsocketClient();
+        wSocketStream = wsClient.getStream().subscribeOn(Schedulers.io());
 
         dgramListener = new DatagramListener(55555, 1500);
-        //dgramListener.setup();
+        dgramStream = dgramListener.getStream().subscribeOn(Schedulers.io())
+                        .map(p -> Integer.parseInt(new String(p.getData()).trim())) // string -> int
+                        .filter(i -> i >= 0 && i <= 39000); // drop out-of-range values;
 
         Log.d(TAG, "...Done.");
         return true;
     }
 
-    @SuppressLint("CheckResult")
     private void startComms() {
-        Log.d(TAG, "Starting comms");
-        wsClient.connect(websocketUrl, createWsObserver());
+        Log.d(TAG, "Starting websocket");
+        wsClient.connect(websocketUrl);
+
+        wSocketDisposable = wSocketStream.subscribe(this::handleSocketMessage);
+
         Log.d(TAG, "starting Dgram");
-        Observable.timer(3000, TimeUnit.MILLISECONDS).subscribe(emitter ->
-                dgramListener.startListening(createDgramObserver()));
-        commsStarted = true;
+        dgramDisposable = dgramStream.subscribe(this::handleDgram);
     }
 
 
@@ -134,57 +140,6 @@ class Controller {
         return true;
     }
 
-
-    private Observer<HashMap<String,String>> createWsObserver() {
-        return new Observer<HashMap<String, String>>() {
-
-            @Override
-            public void onSubscribe(Disposable d) {
-                disposables.add(d);
-            }
-
-            @Override
-            public void onNext(HashMap<String, String> socketMsg) {
-                handleSocketMessage(socketMsg);
-            }
-
-            @Override
-            public void onError(Throwable e) {
-
-            }
-
-            @Override
-            public void onComplete() {
-
-            }
-        };
-    }
-
-    private Observer<Integer> createDgramObserver() {
-        return new Observer<Integer>() {
-
-            @Override
-            public void onSubscribe(Disposable d) {
-                //disposables.add(d);
-            }
-
-            @Override
-            public void onNext(Integer integer) {
-                handleDgram(integer);
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                Log.e(TAG, e.getMessage());
-            }
-
-            @Override
-            public void onComplete() {
-
-            }
-        };
-    }
-
     private void handleSocketMessage(HashMap<String, String> msgMap) {
         Log.d(TAG, "GOT WEBSOCKET: " + msgMap.toString());
         //get fields and pass to panoView or fileSync
@@ -193,7 +148,10 @@ class Controller {
                 String serverTime = msgMap.get("serverTime");
                 String delay = msgMap.get("delay");
                 long triggerTarget = Long.parseLong(serverTime) + Integer.parseInt(delay);
-                timer.setTrigger(triggerTarget, getTriggerObserver());
+                Disposable t = timer.setTrigger(triggerTarget)
+                    .subscribeOn(AndroidSchedulers.mainThread())
+                    .subscribe(l -> panoView.togglePlayback());
+                disposables.add(t);
                 break;
             case "pos":
                 String pos = msgMap.get("value");
@@ -215,25 +173,6 @@ class Controller {
             default:
                 Log.e(TAG, "Unknown message type: " + msgMap.toString());
         }
-    }
-
-    private SingleObserver getTriggerObserver() {
-        return new SingleObserver() {
-            @Override
-            public void onSubscribe(Disposable d) {
-                disposables.add(d);
-            }
-
-            @Override
-            public void onSuccess(Object o) {
-                panoView.togglePlayback();
-            }
-
-            @Override
-            public void onError(Throwable e) {
-
-            }
-        };
     }
 
     private void handleDgram(Integer n) {
@@ -266,7 +205,7 @@ class Controller {
         };
         String remotePath = "http://" + hostIP + ":3000/sphere.apk";
         FileManager.getFileFromHost(appContext, remotePath, apk_filename, onApkComplete);
-}
+    }
 
     private void installUpdate(String apk_filename) {
         Log.d(TAG,"APK Download Complete");
@@ -291,29 +230,24 @@ class Controller {
 
     public void pause() {
         Log.d(TAG, "Controller Pausing...");
-        disposables.dispose();
-        dgramListener.stop();
+        dgramDisposable.dispose();
+        wSocketDisposable.dispose();
         timer.stopSync();
         panoView.onPause();
-        commsStarted = false;
     }
 
     public void resume() {
         Log.d(TAG, "Controller Resuming...");
         timer.startSync();
         panoView.onResume();
-        if (!mediaLoaded) {
-            //loadMedia();
-        }
-        if (!commsStarted) {
-            startComms();
-        }
+        startComms();
     }
 
     public void destroy() {
-        disposables.dispose();
+        dgramDisposable.dispose();
+        wSocketDisposable.dispose();
         wsClient.destroy();
-        dgramListener.stop();
+        dgramListener.destroy();
         timer.stopSync();
         panoView.destroy();
     }

@@ -25,36 +25,17 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.media.MediaPlayer;
 import android.net.Uri;
-import android.os.AsyncTask;
 import android.support.annotation.AnyThread;
 import android.support.annotation.MainThread;
-import android.support.annotation.NonNull;
 import android.util.Log;
 import android.view.Surface;
 
-import com.bkr.spherenative.Comms.DatagramListener;
-import com.bkr.spherenative.Comms.VideoFrameListener;
 import com.bkr.spherenative.Display360.rendering.Mesh;
 import com.bkr.spherenative.Display360.rendering.SceneRenderer;
-import com.google.vr.ndk.base.DaydreamApi;
 
-import java.io.IOException;
 import java.security.InvalidParameterException;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.HashMap;
-import java.util.LinkedList;
-import java.util.Map;
-import java.util.Queue;
-import java.util.Set;
-import java.util.concurrent.Callable;
-import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Completable;
-import io.reactivex.CompletableObserver;
-import io.reactivex.Observable;
-import io.reactivex.android.schedulers.AndroidSchedulers;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 /**
@@ -182,23 +163,9 @@ public class MediaLoader {
             return true;
         });
         loadMediaTask.subscribeOn(Schedulers.io());
-        loadMediaTask.subscribe(new CompletableObserver() {
-            @Override
-            public void onSubscribe(Disposable d) {
-
-            }
-
-            @Override
-            public void onComplete() {
-                Log.d(TAG, "MediaLoader oncomplete");
-            }
-
-            @Override
-            public void onError(Throwable e) {
-                Log.e(TAG, e.getMessage());
-                e.printStackTrace();
-            }
-        });
+        loadMediaTask.subscribe(() -> Log.d(TAG, "MediaLoader complete"),
+                e -> Log.e(TAG, e.getMessage())
+        );
     }
 
     public void startStream(String uri) {
@@ -228,33 +195,6 @@ public class MediaLoader {
             Log.e(TAG, "Could not open stream: " + e.getMessage());
         }*/
         displayWhenReady();
-
-        /*
-
-        // 4k x 2k is a good default resolution for monoscopic panoramas.
-        displaySurface = sceneRenderer.createDisplay(
-                2 * DEFAULT_SURFACE_HEIGHT_PX, DEFAULT_SURFACE_HEIGHT_PX, mesh);
-
-        Queue<Bitmap> frames = new LinkedList<>();
-
-        Disposable di = Observable.interval(0,33, TimeUnit.MILLISECONDS) // ~30 fps
-                .subscribeOn(AndroidSchedulers.mainThread())
-                .subscribe(i -> {
-                    if (frames.peek() != null) {
-                        Canvas c = displaySurface.lockCanvas(null);
-                        c.drawBitmap(frames.remove(), 0, 0, null);
-                        displaySurface.unlockCanvasAndPost(c);
-                    } else {
-                        //Log.e(TAG, "Empty buffer");
-                    }
-                });
-
-        VideoFrameListener frameListener = new VideoFrameListener(33333, 3200000); // based on movie.mp4 packet size
-        Disposable d = frameListener.getStream().subscribe(packet -> {
-            byte[] frameData = packet.getData();
-            Bitmap bitmap = BitmapFactory.decodeByteArray(frameData, 0, frameData.length);
-            frames.add(bitmap);
-        });*/
     }
 
     public void togglePlayback() {
@@ -290,7 +230,7 @@ public class MediaLoader {
         if (displaySurface != null) {
             // Avoid double initialization caused by sceneRenderer & mediaPlayer being initialized before
             // displayWhenReady is executed.
-            //return;
+            return;
         }
 
         if ((errorText == null && mediaImage == null && mediaPlayer == null) || sceneRenderer == null) {
@@ -301,6 +241,7 @@ public class MediaLoader {
         // The important methods here are the setSurface & lockCanvas calls. These will have to happen
         // after the GLView is created.
         if (mediaPlayer != null) {
+            /*
             try {
                 mediaPlayer.setDataSource(rtpUri);
                 mediaPlayer.setOnErrorListener((mp, a, b) -> {
@@ -319,17 +260,22 @@ public class MediaLoader {
             } catch (Exception e) {
                 Log.e(TAG, "Couldn't prepare stream: " + e.getMessage());
                 //displayWhenReady();
-            }
+            }*/
             // Start playback.
             //mediaPlayer.setLooping(true);
-            /*
+
+            displaySurface = sceneRenderer.createDisplay(
+                    mediaPlayer.getVideoWidth(), mediaPlayer.getVideoHeight(), mesh);
+            mediaPlayer.setSurface(displaySurface);
+
             mediaPlayer.setVolume(0,0);
             mediaPlayer.setOnCompletionListener((m) -> {
                 mediaPlayer.seekTo(0);
                 isPaused = true;
             });
+            Log.d(TAG, "Mediaplayer loaded");
             mediaPlayer.start();
-            mediaPlayer.pause();*/
+            mediaPlayer.pause();
         } else if (mediaImage != null) {
             // For images, acquire the displaySurface and draw the bitmap to it. Since our Mesh class uses
             // an GL_TEXTURE_EXTERNAL_OES texture, it's possible to perform this decoding and rendering of

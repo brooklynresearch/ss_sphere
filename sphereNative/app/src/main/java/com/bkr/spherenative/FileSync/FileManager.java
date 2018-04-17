@@ -6,6 +6,7 @@ import android.content.Context;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Environment;
+import android.util.Log;
 
 import java.io.File;
 
@@ -14,7 +15,7 @@ import java.io.File;
  */
 
 public class FileManager {
-
+    private String TAG = "FileManager";
     public static boolean hasFile(String filename) {
         File downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         return new File(downloadDir, filename).exists();
@@ -27,6 +28,10 @@ public class FileManager {
         DownloadManager.Request req = new DownloadManager.Request(download_uri);
         req.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, localFilename);
         req.setTitle(localFilename);
-        downloadManager.enqueue(req);
+        try {
+            downloadManager.enqueue(req);
+        } catch (NullPointerException e) {
+            Log.e("FileManager", e.getMessage());
+        }
     }
 }

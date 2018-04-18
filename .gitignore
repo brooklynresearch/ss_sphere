@@ -24,6 +24,8 @@ sphere/node_modules
 *.swp
 
 *.aar
+*.mp4
+*.png
 
 sphere/platforms/android/CordovaLib/build/intermediates/incremental/packageDebugResources/merger.xml
 

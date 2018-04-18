@@ -1,7 +1,0 @@
-.env
-*~
-*.swp
-*.log
-node_modules/*
-bin/*
-uploads/*

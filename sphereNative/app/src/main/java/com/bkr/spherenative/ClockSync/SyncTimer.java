@@ -27,7 +27,9 @@ public class SyncTimer {
 
     public void startSync() {
         final Long POLL_INTERVAL = 1L;
-        Observable<Long> interval = Observable.interval(POLL_INTERVAL, TimeUnit.SECONDS, Schedulers.io());
+        Observable<Long> interval = Observable.interval(POLL_INTERVAL, TimeUnit.SECONDS,
+                                        Schedulers.io());
+
         intervalDisposable = interval.subscribe(
                 l -> {
                     if (!ntpHost.isEmpty() && client.requestTime(ntpHost, 1000)) {

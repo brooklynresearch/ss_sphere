@@ -36,6 +36,7 @@ import com.bkr.spherenative.Display360.rendering.SceneRenderer;
 import java.security.InvalidParameterException;
 
 import io.reactivex.Completable;
+import io.reactivex.disposables.CompositeDisposable;
 import io.reactivex.schedulers.Schedulers;
 
 /**
@@ -120,6 +121,8 @@ public class MediaLoader {
 
     private String rtpUri;
 
+    private CompositeDisposable disposables = new CompositeDisposable();
+
     public MediaLoader(Context context) {
         this.context = context;
     }
@@ -130,6 +133,7 @@ public class MediaLoader {
      */
     @SuppressLint("CheckResult")
     public void loadVideo(Uri uri) {
+        resetMedia();
         // Load the bitmap in a background thread to avoid blocking the UI thread. This operation can
         // take 100s of milliseconds.
         // Note that this sample doesn't cancel any pending mediaLoaderTasks since it assumes only one
@@ -159,13 +163,31 @@ public class MediaLoader {
                 // Since this is a background thread, we need to switch to the main thread to show a toast.
                 Log.e(TAG, "Could not open video: " + e.getMessage());
             }
-            displayWhenReady();
+            //displayWhenReady();
             return true;
         });
         loadMediaTask.subscribeOn(Schedulers.io());
-        loadMediaTask.subscribe(() -> Log.d(TAG, "MediaLoader complete"),
+        loadMediaTask.subscribe(this::displayWhenReady,
                 e -> Log.e(TAG, e.getMessage())
         );
+    }
+
+    public void loadImage(Uri uri) {
+        resetMedia();
+
+        int stereoFormat = Mesh.MEDIA_MONOSCOPIC;
+
+        mesh = Mesh.createUvSphere(
+                SPHERE_RADIUS_METERS, DEFAULT_SPHERE_ROWS, DEFAULT_SPHERE_COLUMNS,
+                DEFAULT_SPHERE_VERTICAL_DEGREES, DEFAULT_SPHERE_HORIZONTAL_DEGREES,
+                stereoFormat);
+
+        Completable loadImageTask = Completable.fromCallable(() -> {
+            mediaImage = BitmapFactory.decodeFile(uri.getPath());
+            return true;
+         }).subscribeOn(Schedulers.io());
+
+         disposables.add(loadImageTask.subscribe(this::displayWhenReady));
     }
 
     public void startStream(String uri) {
@@ -195,6 +217,23 @@ public class MediaLoader {
             Log.e(TAG, "Could not open stream: " + e.getMessage());
         }*/
         displayWhenReady();
+    }
+
+    private void resetMedia() {
+        if (mediaPlayer != null) {
+            synchronized (MediaLoader.this) {
+                mediaPlayer.release();
+                mediaPlayer = null;
+                displaySurface.release();
+                displaySurface = null;
+            }
+        }
+        if (mediaImage != null) {
+            mediaImage.recycle();
+            mediaImage = null;
+            displaySurface.release();
+            displaySurface = null;
+        }
     }
 
     public void togglePlayback() {
@@ -233,7 +272,8 @@ public class MediaLoader {
             return;
         }
 
-        if ((errorText == null && mediaImage == null && mediaPlayer == null) || sceneRenderer == null) {
+        if ((errorText == null && mediaImage == null &&
+                mediaPlayer == null) || sceneRenderer == null) {
             // Wait for everything to be initialized.
             return;
         }
@@ -277,6 +317,7 @@ public class MediaLoader {
             mediaPlayer.start();
             mediaPlayer.pause();
         } else if (mediaImage != null) {
+            Log.d(TAG, "image loaded");
             // For images, acquire the displaySurface and draw the bitmap to it. Since our Mesh class uses
             // an GL_TEXTURE_EXTERNAL_OES texture, it's possible to perform this decoding and rendering of
             // a bitmap in the background without stalling the GL thread. If the Mesh used a standard
@@ -353,6 +394,7 @@ public class MediaLoader {
 
     @MainThread
     public synchronized void pause() {
+        disposables.dispose();
         if (mediaPlayer != null) {
             mediaPlayer.pause();
             isPaused = true;
@@ -369,6 +411,7 @@ public class MediaLoader {
     /** Tears down MediaLoader and prevents further work from happening. */
     @MainThread
     public synchronized void destroy() {
+        disposables.dispose();
         if (mediaPlayer != null) {
             mediaPlayer.stop();
             mediaPlayer.release();

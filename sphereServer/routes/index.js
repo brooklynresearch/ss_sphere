@@ -84,5 +84,17 @@ router.get('/update-apk', function(req, res, next) {
     res.end();
 });
 
+router.get('/default-image', function(req, res, next) {
+    console.log("Sending default-image command", req.query);
+    socketCmd.sendSocketBroadcast('default-image');
+    res.end();
+});
+
+router.get('/default-video', function(req, res, next) {
+    console.log("Sending default-video command", req.query);
+    socketCmd.sendSocketBroadcast('default-video');
+    res.end();
+});
+
 module.exports = router;
 

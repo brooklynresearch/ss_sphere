@@ -17,13 +17,20 @@ import java.io.File;
 public class FileManager {
     private String TAG = "FileManager";
     public static boolean hasFile(String filename) {
-        File downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+        File downloadDir = Environment
+                            .getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
         return new File(downloadDir, filename).exists();
     }
 
-    public static void getFileFromHost(Context ctx, String fileLocation, String localFilename, BroadcastReceiver onDownloadComplete) {
-        DownloadManager downloadManager = (DownloadManager) ctx.getSystemService(Context.DOWNLOAD_SERVICE);
-        ctx.registerReceiver(onDownloadComplete, new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+    public static void getFileFromHost(Context ctx, String fileLocation, String localFilename,
+                                       BroadcastReceiver onDownloadComplete) {
+
+        DownloadManager downloadManager =
+                (DownloadManager) ctx.getSystemService(Context.DOWNLOAD_SERVICE);
+
+        ctx.registerReceiver(onDownloadComplete,
+                new IntentFilter(DownloadManager.ACTION_DOWNLOAD_COMPLETE));
+
         Uri download_uri = Uri.parse(fileLocation);
         DownloadManager.Request req = new DownloadManager.Request(download_uri);
         req.setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, localFilename);

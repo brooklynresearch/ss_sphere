@@ -86,6 +86,18 @@ public class WebsocketClient {
                 msgMap.put("type", "update-apk");
                 emitter.onNext(msgMap);
             });
+            socket.on("default-image", args -> {
+                HashMap<String, String> msgMap = new HashMap<>();
+                //JSONArray data = (JSONArray) args[0];
+                msgMap.put("type", "default-image");
+                emitter.onNext(msgMap);
+            });
+            socket.on("default-video", args -> {
+                HashMap<String, String> msgMap = new HashMap<>();
+                //JSONArray data = (JSONArray) args[0];
+                msgMap.put("type", "default-video");
+                emitter.onNext(msgMap);
+            });
         });
     }
 

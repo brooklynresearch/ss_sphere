@@ -57,7 +57,8 @@ public class MainActivity extends AppCompatActivity
             }
         });
 
-        String[] permissions = {Manifest.permission.READ_EXTERNAL_STORAGE, Manifest.permission.WRITE_EXTERNAL_STORAGE};
+        String[] permissions = {Manifest.permission.READ_EXTERNAL_STORAGE,
+                Manifest.permission.WRITE_EXTERNAL_STORAGE};
 
         if(!hasPermissions(this, permissions)) {
             ActivityCompat.requestPermissions(this, permissions, 1);
@@ -67,12 +68,14 @@ public class MainActivity extends AppCompatActivity
     }
 
     @Override
-    public void onRequestPermissionsResult(int requestCode, String[] permissions, int[] grantResults) {
+    public void onRequestPermissionsResult(int requestCode, String[] permissions,
+                                           int[] grantResults) {
         if (requestCode == 1) {
             if (grantResults.length >= 1 && grantResults[0] == PackageManager.PERMISSION_GRANTED) {
                 Log.d(TAG, "Permission Granted. Initializing...");
 
-                initialized = controller.initialize(SERVER_IP_ADDRESS, findViewById(R.id.video_view));
+                initialized = controller.initialize(SERVER_IP_ADDRESS,
+                        findViewById(R.id.video_view));
             } else {
                 Log.e(TAG, "Permission Denied. Doing nothing");
             }
@@ -82,7 +85,8 @@ public class MainActivity extends AppCompatActivity
     public static boolean hasPermissions(Context context, String... permissions) {
         if (context != null && permissions != null) {
             for (String permission : permissions) {
-                if (ActivityCompat.checkSelfPermission(context, permission) != PackageManager.PERMISSION_GRANTED) {
+                if (ActivityCompat.checkSelfPermission(context, permission) !=
+                        PackageManager.PERMISSION_GRANTED) {
                     return false;
                 }
             }

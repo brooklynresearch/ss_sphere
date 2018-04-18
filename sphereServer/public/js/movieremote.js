@@ -61,3 +61,19 @@ updateBtn.onclick = function() {
   xhr.send();
 };
 
+var dftVidBtn = document.getElementById('default-video');
+dftVidBtn.onclick = function() {
+  console.log("update-apk button");
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", "default-video");
+  xhr.send();
+};
+
+var dftImgBtn = document.getElementById('default-image');
+dftImgBtn.onclick = function() {
+  console.log("default-image button");
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", "default-image");
+  xhr.send();
+};
+

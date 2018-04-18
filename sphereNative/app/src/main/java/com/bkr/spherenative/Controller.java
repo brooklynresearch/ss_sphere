@@ -54,6 +54,9 @@ class Controller {
     private Disposable dgramDisposable;
     private Disposable wSocketDisposable;
 
+    private static File DOWNLOAD_DIR =
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+
     Controller(Context context) {
         appContext = context;
     }
@@ -72,7 +75,8 @@ class Controller {
     private boolean initPanoView() {
         panoView.initialize();
         //startStream(rtpHost);
-        loadMedia();
+        //loadMedia();
+        //loadImage();
         return true;
     }
 
@@ -83,19 +87,41 @@ class Controller {
                 });
     }
 
-    private void loadMedia() {
-        Log.d(TAG, "Loading media");
-        //TODO: should call filesync and wait for correct fileuri
-        String defaultVideo = "movie.mp4";
-        if (!FileManager.hasFile(defaultVideo)) {
-            String remotePath = "http://" + hostIP + ":3000/" + defaultVideo;
-            FileManager.getFileFromHost(appContext, remotePath, defaultVideo, onDownloadComplete);
-        } else {
-            File downloadDir = Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
-            Uri fileUri = Uri.fromFile(new File(downloadDir + "/movie.mp4"));
+    private void loadMedia(String type, String name) {
+        switch(type) {
+            case "image":
+                if (checkFile("image", name)) {
+                    Uri path = Uri.fromFile(new File(DOWNLOAD_DIR + "/" + name));
+                    panoView.loadImage(path);
+                }
+                break;
+            case "video":
+                if (checkFile("video", name)) {
+                    Uri path = Uri.fromFile(new File(DOWNLOAD_DIR + "/" + name));
+                    panoView.loadVideo(path);
+                }
+                break;
+            case "stream":
+                //something here
+                break;
+        }
+    }
 
-            panoView.loadMedia(fileUri);
-            mediaLoaded = true;
+    private boolean checkFile(String type, String name) {
+        if (!FileManager.hasFile(name)) {
+            BroadcastReceiver onComplete = new BroadcastReceiver() { //on download complete
+                @Override
+                public void onReceive(Context context, Intent intent) {
+                    loadMedia(type, name);
+                    context.unregisterReceiver(this);
+                }
+            };
+            String folder = type.equals("video") ? "moviefiles/" : "imagefiles/";
+            String remotePath = "http://" + hostIP + ":3000/" + folder + name;
+            FileManager.getFileFromHost(appContext, remotePath, name, onComplete); //start download
+            return false;
+        } else { //we already have it. check for integrity here if necessary
+            return true;
         }
     }
 
@@ -107,7 +133,10 @@ class Controller {
 
         dgramListener = new DatagramListener(55555, 1500);
         dgramStream = dgramListener.getStream().subscribeOn(Schedulers.io())
-                        .map(p -> Integer.parseInt(new String(p.getData()).trim())) // string -> int
+                        .map(p ->
+                                // packet -> string -> int
+                                Integer.parseInt(new String(p.getData()).trim())
+                        )
                         .filter(i -> i >= 0 && i <= 39000); // drop out-of-range values;
 
         Log.d(TAG, "...Done.");
@@ -170,6 +199,12 @@ class Controller {
             case "update-apk":
                 newApk();
                 break;
+            case "default-image":
+                loadMedia("image","panostill.png");
+                break;
+            case "default-video":
+                loadMedia("video", "movie.mp4");
+                break;
             default:
                 Log.e(TAG, "Unknown message type: " + msgMap.toString());
         }
@@ -182,7 +217,8 @@ class Controller {
         Log.d(TAG, "GOT DGRAM: " + n.toString());
     }
 
-    private static float convertToRange(float value, Pair<Float, Float> srcRange, Pair<Float, Float> dstRange) {
+    private static float convertToRange(float value, Pair<Float, Float> srcRange,
+                                        Pair<Float, Float> dstRange) {
         float srcMax = srcRange.second - srcRange.first;
         float dstMax = dstRange.second - dstRange.first;
         float adjValue = value - srcRange.first;
@@ -211,8 +247,12 @@ class Controller {
         Log.d(TAG,"APK Download Complete");
         Log.d(TAG, "INSTALLING APK");
 
-        File toInstall = new File(Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS), apk_filename);
-        Uri apkUri = FileProvider.getUriForFile(appContext, BuildConfig.APPLICATION_ID + ".provider", toInstall);
+        File toInstall = new File(
+                    Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS),
+                    apk_filename);
+
+        Uri apkUri = FileProvider.getUriForFile(appContext,
+                BuildConfig.APPLICATION_ID + ".provider", toInstall);
 
         Intent newIntent = new Intent(Intent.ACTION_INSTALL_PACKAGE);
         newIntent.setData(apkUri);
@@ -220,13 +260,6 @@ class Controller {
         newIntent.addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION);
         appContext.startActivity(newIntent);
     }
-
-    private BroadcastReceiver onDownloadComplete = new BroadcastReceiver() {
-        @Override
-        public void onReceive(Context context, Intent intent) {
-            loadMedia();
-        }
-    };
 
     public void pause() {
         Log.d(TAG, "Controller Pausing...");

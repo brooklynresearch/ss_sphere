@@ -95,9 +95,13 @@ public final class MonoscopicView extends GLSurfaceView {
 
     /** Parses the Intent and loads the appropriate media. */
 
-    public void loadMedia(Uri fileUri) {
+    public void loadVideo(Uri fileUri) {
         Log.d("Monoscopic", fileUri.toString());
         mediaLoader.loadVideo(fileUri);
+    }
+
+    public void loadImage(Uri fileUri) {
+        mediaLoader.loadImage(fileUri);
     }
 
     public void initVideoStream(String uri) {
@@ -180,7 +184,8 @@ public final class MonoscopicView extends GLSurfaceView {
         public void onSurfaceChanged(GL10 gl, int width, int height) {
             GLES20.glViewport(0, 0, width, height);
             Matrix.perspectiveM(
-                    projectionMatrix, 0, FIELD_OF_VIEW_DEGREES, (float) width / height, Z_NEAR, Z_FAR);
+                    projectionMatrix, 0, FIELD_OF_VIEW_DEGREES,
+                    (float) width / height, Z_NEAR, Z_FAR);
         }
 
         @Override
@@ -189,18 +194,23 @@ public final class MonoscopicView extends GLSurfaceView {
             // Orientation = pitch * sensor * yaw since that is closest to what most users expect the
             // behavior to be.
             synchronized (this) {
-                Matrix.multiplyMM(tempMatrix, 0, deviceOrientationMatrix, 0, touchYawMatrix, 0);
-                Matrix.multiplyMM(viewMatrix, 0, touchPitchMatrix, 0, tempMatrix, 0);
+                Matrix.multiplyMM(tempMatrix, 0, deviceOrientationMatrix, 0,
+                        touchYawMatrix, 0);
+                Matrix.multiplyMM(viewMatrix, 0, touchPitchMatrix, 0,
+                        tempMatrix, 0);
             }
 
-            Matrix.multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0, viewMatrix, 0);
+            Matrix.multiplyMM(viewProjectionMatrix, 0, projectionMatrix, 0,
+                    viewMatrix, 0);
             scene.glDrawFrame(viewProjectionMatrix, Type.MONOCULAR);
         }
 
         /** Adjusts the GL camera's rotation based on device rotation. Runs on the sensor thread. */
         @BinderThread
         public synchronized void setDeviceOrientation(float[] matrix, float deviceRoll) {
-            System.arraycopy(matrix, 0, deviceOrientationMatrix, 0, deviceOrientationMatrix.length);
+            System.arraycopy(matrix, 0, deviceOrientationMatrix, 0,
+                    deviceOrientationMatrix.length);
+
             this.deviceRoll = -deviceRoll;
             updatePitchMatrix();
         }

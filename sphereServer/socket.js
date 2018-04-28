@@ -89,8 +89,8 @@ var startListeners = function(io) {
 
         // controller has set a new videoo
         var dark = false;
-        socket.on('set video', function(msg) {
-            console.log("set video");
+        socket.on('set media', function(msg) {
+            console.log("set media", msg);
             if (msg === '-1') {
                 dark = !dark
                 if (dark){
@@ -101,12 +101,17 @@ var startListeners = function(io) {
                     sendUdpCommand("f"+"+0");
                 }
             } else {
+                if (msg.type === "Images") {
+                    io.emit("load-image", {"name": msg.name});
+                } else if (msg.type === "Videos") {
+                    io.emit("load-video", {"name": msg.name});
+                }
                 // set an internal variable to this new set video if it is new
                 // var delay = 30000;
                 // emit this to all the devices in order to tell them to play
                 // io.emit('switch video', msg);
-                io.emit('frame', msg);
-                sendUdpCommand("f"+msg);
+                //io.emit('frame', msg);
+                //sendUdpCommand("f"+msg);
                 // setTimeout(function() {
                 //     sendUdpCommand('play');
                 // }, delay);
@@ -119,31 +124,6 @@ var startListeners = function(io) {
             //socket.emit('ACK', 'newfile');
         });
     });
-}
-
-var streamVideo = function() {
-    /*
-    console.log("streamVideo()")
-    let broadcast = process.env.BROADCAST_ADDR;
-    let demux = require('node-demux');
-    let video = new demux();
-    video.on('start', () => {
-        console.log("Starting Video stream");
-    });
-    video.on('metadata', function(metadata) {
-        console.log("Stream Info: ");
-        console.log(metadata);
-    });
-    video.on('frame', (i, data) => {
-        console.log("Frame");
-        udpBroadcaster.send(data, 33333, broadcast, (err) => {
-            if (err) {
-                console.log("ERROR on Send Video Frame: ", err);
-            }
-        });
-    });
-    video.load("./public/moviefiles/movie.mp4");
-    video.play();*/
 }
 
 var sendSocketBroadcast = function(sockEvent, msg) {
@@ -173,7 +153,7 @@ module.exports = {
     startListeners: startListeners,
     sendUdpCommand: sendUdpCommand,
     sendSocketBroadcast: sendSocketBroadcast,
-    streamVideo: streamVideo,
+    //streamVideo: streamVideo,
     stop: stop
 }
 

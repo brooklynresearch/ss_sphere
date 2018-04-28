@@ -199,11 +199,11 @@ class Controller {
             case "update-apk":
                 newApk();
                 break;
-            case "default-image":
-                loadMedia("image","panostill.png");
+            case "load-image":
+                loadMedia("image",msgMap.get("name") + ".png");
                 break;
-            case "default-video":
-                loadMedia("video", "movie.mp4");
+            case "load-video":
+                loadMedia("video", msgMap.get("name") + ".mp4");
                 break;
             default:
                 Log.e(TAG, "Unknown message type: " + msgMap.toString());
@@ -214,7 +214,7 @@ class Controller {
         Pair<Float, Float> srcRange = new Pair<>(0.0f, 39000.0f);
         Pair<Float,Float> dstRange = new Pair<>(0.0f, 360.0f);
         panoView.setYawAngle(convertToRange(n.floatValue(), srcRange, dstRange) - 180.0f);
-        Log.d(TAG, "GOT DGRAM: " + n.toString());
+        //Log.d(TAG, "GOT DGRAM: " + n.toString());
     }
 
     private static float convertToRange(float value, Pair<Float, Float> srcRange,

@@ -77,3 +77,10 @@ dftImgBtn.onclick = function() {
   xhr.send();
 };
 
+var streamBtn = document.getElementById('start-stream');
+streamBtn.onclick = function() {
+  console.log("start-stream button");
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", "start-stream");
+  xhr.send();
+};

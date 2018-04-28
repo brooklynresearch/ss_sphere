@@ -30,7 +30,7 @@ public class MainActivity extends AppCompatActivity
     String TAG = "sphere-native";
 
     //*******************************************
-    String SERVER_IP_ADDRESS = "192.168.0.188";
+    String SERVER_IP_ADDRESS = "192.168.1.123";
     //*******************************************
 
     int btnCounter = 0;

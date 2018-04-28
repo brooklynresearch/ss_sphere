@@ -37,6 +37,10 @@ body {
     background-position: center;
 }
 
+#media-type {
+    text-align: center;
+}
+
 #vid-wrap {
     width: 136px;
     margin-top: 22px
@@ -54,6 +58,10 @@ body {
     background-image: url(Liberty.jpg);
 }
 
+.video:chopper {
+    background-image: url(chopper.jpg);
+}
+
 #vid-02 {
     background-image: url(TimesSquare_01.jpg);
 }
@@ -64,6 +72,10 @@ body {
 
 #vid-04 {
     background-image: url(brightness.svg);
+}
+
+.chopper {
+    background-image: url(chopper.jpg);
 }
 
 .video {

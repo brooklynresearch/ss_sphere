@@ -96,5 +96,11 @@ router.get('/default-video', function(req, res, next) {
     res.end();
 });
 
+router.get('/start-stream', function(req, res, next) {
+    console.log("Sending start-stream command", req.query);
+    socketCmd.sendSocketBroadcast('start-stream');
+    res.end();
+});
+
 module.exports = router;
 

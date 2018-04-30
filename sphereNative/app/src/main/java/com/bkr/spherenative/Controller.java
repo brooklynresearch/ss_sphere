@@ -131,11 +131,11 @@ class Controller {
         wsClient = new WebsocketClient();
         wSocketStream = wsClient.getStream().subscribeOn(Schedulers.io());
 
-        dgramListener = new DatagramListener(55555, 1500);
+        dgramListener = new DatagramListener(55555, 100);
         dgramStream = dgramListener.getStream().subscribeOn(Schedulers.io())
                         .map(p ->
-                                // packet -> string -> int
-                                Integer.parseInt(new String(p.getData()).trim())
+                            // packet -> string -> int
+                            Integer.parseInt(new String(p.getData()).trim())
                         )
                         .filter(i -> i >= 0 && i <= 39000); // drop out-of-range values;
 
@@ -213,8 +213,10 @@ class Controller {
     private void handleDgram(Integer n) {
         Pair<Float, Float> srcRange = new Pair<>(0.0f, 39000.0f);
         Pair<Float,Float> dstRange = new Pair<>(0.0f, 360.0f);
-        panoView.setYawAngle(convertToRange(n.floatValue(), srcRange, dstRange) - 180.0f);
+        float angle = convertToRange(n.floatValue(), srcRange, dstRange) - 180.0f;
         //Log.d(TAG, "GOT DGRAM: " + n.toString());
+        //Log.d(TAG, "SETTING ANGLE: " + angle);
+        panoView.setYawAngle(angle);
     }
 
     private static float convertToRange(float value, Pair<Float, Float> srcRange,

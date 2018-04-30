@@ -22,9 +22,14 @@ public class WebsocketClient {
     private String TAG = "WebsocketClient";
     private Socket socket;
 
+    private IO.Options opts = new IO.Options();
+
     public void connect(String url) {
+        opts.reconnection = true;
+        opts.reconnectionAttempts = 999999;
+        opts.reconnectionDelay = 1000;
         try {
-            socket = IO.socket(url);
+            socket = IO.socket(url, opts);
         } catch (URISyntaxException e) {
             throw new RuntimeException(e);
         }

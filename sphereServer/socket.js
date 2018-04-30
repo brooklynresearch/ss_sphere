@@ -18,11 +18,11 @@ var startListeners = function(io) {
     let broadcast = process.env.BROADCAST_ADDR;
 
     serialServer.on('serial', (data) => {
-        console.log("got serial");
-        console.log(data);
-        let encoderValue = 39000 - data;
-        console.log("UDP BROADCAST: ", encoderValue);
-        udpBroadcaster.send(encoderValue.toString(), 55555, broadcast, (err) => {
+        console.log("got serial", data);
+        console.log("value: ", data.toString());
+        //let encoderValue = 39000 - data;
+        udpBroadcaster.send(data.toString(), 55555, broadcast, (err) => {
+            console.log("UDP BROADCAST: ", data.toString());
             if (err) {
                 console.log("ERROR on broadcast: ", err);
             }

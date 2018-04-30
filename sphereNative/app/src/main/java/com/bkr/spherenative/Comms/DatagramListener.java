@@ -33,6 +33,9 @@ public class DatagramListener {
         }
 
         return Observable.fromCallable( () -> {
+            for (int i = 0; i < recvBuffer.length; i++)
+                recvBuffer[i] = 0; // clear out the buffer
+
             DatagramPacket packet = new DatagramPacket(recvBuffer, recvBuffer.length);
             try {
                 socket.receive(packet);

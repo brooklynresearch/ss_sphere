@@ -50,7 +50,7 @@ public class MainActivity extends AppCompatActivity
         button.setBackgroundColor(Color.TRANSPARENT);
         button.setOnClickListener(v -> {
             btnCounter++;
-            if (btnCounter == 5) {
+            if (btnCounter == 4) {
                 Log.d(TAG, "Button Press");
                 btnCounter = 0;
                 showPositionDialog();
@@ -134,8 +134,7 @@ public class MainActivity extends AppCompatActivity
     private void showPositionDialog() {
         final EditText positionTxt = new EditText(this);
 
-        // Set the default text to a link of the Queen
-        positionTxt.setHint("0101");
+        positionTxt.setHint(controller.getCurrentPosition());
         positionTxt.setInputType(InputType.TYPE_CLASS_NUMBER);
 
         new AlertDialog.Builder(this)

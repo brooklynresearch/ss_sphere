@@ -20,7 +20,7 @@ router.get('/moviecontrol', function(req, res, next) {
 router.get('/play', function(req,res,next) {
   console.log("play");
   //socketCmd.sendUdpCommand("play");  
-  socketCmd.sendSocketBroadcast('toggle-play', {timestamp: Date.now(), delay: 2000});
+  socketCmd.sendSocketBroadcast('toggle-play', {timestamp: Date.now(), delay: 500});
   res.end();
 });
 

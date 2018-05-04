@@ -88,18 +88,18 @@ var startListeners = function(io) {
         });
 
         // controller has set a new videoo
-        var dark = false;
+        //var dark = false;
         socket.on('set media', function(msg) {
             console.log("set media", msg);
-            if (msg === '-1') {
-                dark = !dark
-                if (dark){
+            if (msg.name === 'black screen') {
+                //dark = !dark
+                //if (dark){
                     sendSocketBroadcast("dark", "true");
-                    sendUdpCommand("f"+"-0");
-                } else {
-                    sendSocketBroadcast("dark", "false");
-                    sendUdpCommand("f"+"+0");
-                }
+                    //sendUdpCommand("f"+"-0");
+                //} else {
+                    //sendSocketBroadcast("dark", "false");
+                    //sendUdpCommand("f"+"+0");
+                //}
             } else {
                 if (msg.type === "Images") {
                     io.emit("load-image", {"name": msg.name});

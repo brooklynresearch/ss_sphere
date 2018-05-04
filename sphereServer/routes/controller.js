@@ -1,5 +1,6 @@
 var express = require('express');
 var router = express.Router();
+var socketCmd = require('../socket');
 var fs = require('fs');
 const exec = require('child_process').exec;
 
@@ -28,6 +29,22 @@ router.get('/', function(req, res, next) {
                 name4: names[3]
             });
     });
+});
+
+/* GET play cmd */
+router.get('/play', function(req,res,next) {
+  console.log("play");
+  //socketCmd.sendUdpCommand("play");  
+  socketCmd.sendSocketBroadcast('toggle-play', {timestamp: Date.now(), delay: 500});
+  res.end();
+});
+
+/* GET stop cmd */
+router.get('/stop', function(req,res,next) {
+  console.log("stop");
+  //socketCmd.sendUdpCommand("play");  
+  socketCmd.sendSocketBroadcast('stop-video', 0);
+  res.end();
 });
 
 module.exports = router;

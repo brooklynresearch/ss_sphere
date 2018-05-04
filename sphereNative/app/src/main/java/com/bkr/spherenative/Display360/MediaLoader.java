@@ -190,6 +190,20 @@ public class MediaLoader {
          disposables.add(loadImageTask.subscribe(this::displayWhenReady));
     }
 
+    public void clearScreen() {
+        resetMedia();
+    }
+
+    public void stopVideo() {
+        if (mediaPlayer != null) {
+            synchronized (MediaLoader.this) {
+                mediaPlayer.pause();
+                mediaPlayer.seekTo(0);
+                isPaused = true;
+            }
+        }
+    }
+
     public void startStream(String uri) {
         rtpUri = uri;
         mesh = Mesh.createUvSphere(

@@ -34,12 +34,14 @@ public final class MonoscopicView extends GLSurfaceView {
     private MediaLoader mediaLoader;
     private Renderer renderer;
 
-    JSONObject positionTable;
-    String position;
+    private JSONObject positionTable = null;
+    private String position = "0101";
 
     //long and lat values in positionTable
-    float positionYaw = 10;
-    float positionPitch = 20;
+    float startYaw = 10;
+    float startPitch = 20;
+    float positionYaw;
+    float positionPitch;
 
     private boolean isPaused = true; // we start with video paused
 
@@ -51,6 +53,10 @@ public final class MonoscopicView extends GLSurfaceView {
 
     public void togglePlayback() {
         mediaLoader.togglePlayback();
+    }
+
+    public void stopVideo() {
+        mediaLoader.stopVideo();
     }
 
     /**
@@ -67,6 +73,10 @@ public final class MonoscopicView extends GLSurfaceView {
         setEGLContextClientVersion(2);
         setRenderer(renderer);
         setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+    }
+
+    public String getPosition() {
+        return position;
     }
 
     /** Starts the sensor & video only when this View is active. */
@@ -104,6 +114,10 @@ public final class MonoscopicView extends GLSurfaceView {
         mediaLoader.loadImage(fileUri);
     }
 
+    public void clearScreen() {
+        mediaLoader.clearScreen();
+    }
+
     public void initVideoStream(String uri) {
         mediaLoader.startStream(uri);
     }
@@ -111,15 +125,23 @@ public final class MonoscopicView extends GLSurfaceView {
     public void setPositionTable(JSONObject table) {
         positionTable = table;
         Log.d(TAG, "position table: " + positionTable.toString());
+
+        updatePosition();
     }
 
     public void setSpherePosition(String pos) {
         position = pos;
+        updatePosition();
+    }
+
+    private void updatePosition() {
+        if (positionTable == null) return;
         try {
-            JSONObject positionEntry = positionTable.getJSONObject(pos);
-            positionYaw += (float) positionEntry.getDouble("long");
-            positionPitch += (float) positionEntry.getDouble("lat");
+            JSONObject positionEntry = positionTable.getJSONObject(position);
+            positionYaw = startYaw + (float) positionEntry.getDouble("long");
+            positionPitch = startPitch + (float) positionEntry.getDouble("lat");
             renderer.setPitchOffset(positionPitch);
+            setYawAngle(positionYaw);
         } catch (JSONException e) {
             Log.e(TAG, "JSON Error: " + e.getMessage());
         }

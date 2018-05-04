@@ -74,10 +74,15 @@ class Controller {
 
     private boolean initPanoView() {
         panoView.initialize();
+        loadMedia("image", "Liberty.png"); //default media
         //startStream(rtpHost);
         //loadMedia();
         //loadImage();
         return true;
+    }
+
+    public String getCurrentPosition() {
+        return panoView.getPosition();
     }
 
     private void startStream(String uri) {
@@ -182,10 +187,13 @@ class Controller {
                     .subscribe(l -> panoView.togglePlayback());
                 disposables.add(t);
                 break;
+            case "stop-video":
+                panoView.stopVideo();
+                break;
             case "pos":
                 String pos = msgMap.get("value");
                 if (!pos.equals("-1")) {
-                    setSpherePosition(msgMap.get("value"));
+                    panoView.setSpherePosition(pos);
                 }
                 break;
             case "newtable":
@@ -204,6 +212,9 @@ class Controller {
                 break;
             case "load-video":
                 loadMedia("video", msgMap.get("name") + ".mp4");
+                break;
+            case "dark-screen":
+                panoView.clearScreen();
                 break;
             default:
                 Log.e(TAG, "Unknown message type: " + msgMap.toString());
@@ -230,6 +241,7 @@ class Controller {
 
     public void setSpherePosition(String pos) {
         //From MainActivity UI dialog or websocket message
+        wsClient.send("register position", pos);
         panoView.setSpherePosition(pos);
     }
 

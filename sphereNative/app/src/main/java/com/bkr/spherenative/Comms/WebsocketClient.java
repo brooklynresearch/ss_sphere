@@ -58,6 +58,11 @@ public class WebsocketClient {
                 }
                 emitter.onNext(msgMap);
             });
+            socket.on("stop-video", args -> {
+               HashMap<String, String> msgMap = new HashMap<>();
+               msgMap.put("type", "stop-video");
+               emitter.onNext(msgMap);
+            });
             socket.on("newtable", args -> {
                 HashMap<String, String> msgMap = new HashMap<>();
                 msgMap.put("type", "newtable");
@@ -113,7 +118,16 @@ public class WebsocketClient {
                 }
                 emitter.onNext(msgMap);
             });
+            socket.on("dark", args -> {
+                HashMap<String, String> msgMap = new HashMap<>();
+                msgMap.put("type", "dark-screen");
+                emitter.onNext(msgMap);
+            });
         });
+    }
+
+    public void send(String msgType, String msg) {
+        socket.emit(msgType, msg);
     }
 
     public void destroy() {

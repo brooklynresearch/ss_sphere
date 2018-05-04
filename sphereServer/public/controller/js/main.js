@@ -8,7 +8,9 @@ jQuery(function() {
 
     function initSocket() {
 
-        socket = new io.connect("http://192.168.1.123:8080", {
+        let old = "http://192.168.1.123:8080";
+        let host = window.location.hostname + ":8080";
+        socket = new io.connect(host, {
           'reconnection': true,
           'reconnectionDelay': 500,
           'reconnectionDelayMax': 1000,
@@ -44,9 +46,30 @@ jQuery(function() {
         $('[data-id="' + vidId + '"]').addClass('active').siblings().removeClass('active');
         console.log("emitting set video");
         socket.emit('set media', {"type": mediaType, "name": vidName});
+        if (mediaType === "Videos" && vidName !== "black screen") {
+            showPlaybackControls();
+        }
+    }
+
+    function showPlaybackControls() {
+        $('#playback-controls').css('display', 'inline-block');
+        $('#play-pause-btn').on('click', event => {
+            let state = $("#play-pause-btn").attr('data-state');
+            $("#play-pause-btn").attr('data-state', state === "pause" ? "play" : "pause");
+
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "play");
+            xhr.send();
+        })
+        $('#stop-btn').on('click', event => {
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "stop");
+            xhr.send();
+        })
     }
 
     function toggleMediaType() {
+        $('#playback-controls').css('display', 'none');
         newType = mediaType === "Images" ? "Videos" : "Images";
         mediaType = newType;
         return newType;
@@ -58,7 +81,6 @@ jQuery(function() {
             console.log("media type select");
             document.getElementById('media-type').innerHTML = toggleMediaType();
             if (mediaType === "Videos") {
-                console.log("videos");
                 $('#vid-01').attr('data-name', "Chopper");
                 $('#vid-01').css('background-image', 'url(' + "css/chopper.jpg" + ')');
                 $('#vid-02').hide();

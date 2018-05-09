@@ -15,6 +15,7 @@ import com.bkr.spherenative.Comms.WebsocketClient;
 import com.bkr.spherenative.Display360.MonoscopicView;
 import com.bkr.spherenative.FileSync.FileManager;
 
+import org.json.JSONArray;
 import org.json.JSONException;
 import org.json.JSONObject;
 
@@ -39,6 +40,7 @@ class Controller {
     private String TAG = "Controller";
     private String hostIP;
     private String rtpHost;
+    private FileManager fileManager;
     private Context appContext;
     private Boolean mediaLoaded = false;
 
@@ -59,6 +61,7 @@ class Controller {
 
     Controller(Context context) {
         appContext = context;
+        fileManager = new FileManager();
     }
 
     public boolean initialize(String hostIpAddr, MonoscopicView viewElement) {
@@ -201,7 +204,16 @@ class Controller {
                     JSONObject table = new JSONObject(msgMap.get("table"));
                     panoView.setPositionTable(table);
                 } catch (JSONException e) {
-                    Log.e(TAG, "Error parsing pos table" + e.getMessage());
+                    Log.e(TAG, "Error parsing pos table: " + e.getMessage());
+                }
+                break;
+            case "filelist":
+                try {
+                    JSONArray list = new JSONArray(msgMap.get("list"));
+                    int dlCnt = fileManager.syncFiles(appContext, list);
+                    Log.d(TAG, "Starting " + dlCnt + " downloads...");
+                } catch (JSONException e) {
+                    Log.e(TAG, "Error parsing file list: " + e.getMessage());
                 }
                 break;
             case "update-apk":

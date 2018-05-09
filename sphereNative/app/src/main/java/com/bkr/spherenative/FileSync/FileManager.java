@@ -3,10 +3,15 @@ package com.bkr.spherenative.FileSync;
 import android.app.DownloadManager;
 import android.content.BroadcastReceiver;
 import android.content.Context;
+import android.content.Intent;
 import android.content.IntentFilter;
 import android.net.Uri;
 import android.os.Environment;
 import android.util.Log;
+
+import org.json.JSONArray;
+import org.json.JSONException;
+import org.json.JSONObject;
 
 import java.io.File;
 
@@ -40,5 +45,34 @@ public class FileManager {
         } catch (NullPointerException e) {
             Log.e("FileManager", e.getMessage());
         }
+    }
+
+    private BroadcastReceiver onComplete = new BroadcastReceiver() {
+        @Override
+        public void onReceive(Context context, Intent intent) {
+
+        }
+    };
+
+    public int syncFiles(Context ctx, JSONArray list) {
+        int count = 0;
+        JSONObject fileEntry;
+        String filedir = "";
+        String filename = "";
+        for (int i = 0; i < list.length(); i++) {
+            try {
+                fileEntry = (JSONObject) list.get(i);
+                filename = (String) fileEntry.get("name");
+                filedir = (String) fileEntry.get("dir");
+            } catch (JSONException e) {
+                Log.e(TAG, e.getMessage());
+            }
+            if (!hasFile(filename)) {
+                count++;
+                String filepath = filedir + "/" + filename;
+                getFileFromHost(ctx, filepath, filename, onComplete);
+            }
+        }
+        return count;
     }
 }

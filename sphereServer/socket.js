@@ -87,7 +87,7 @@ var startListeners = function(io) {
             socket.disconnect(true);
         });
 
-        // controller has set a new videoo
+        // controller has set a new video
         //var dark = false;
         socket.on('set media', function(msg) {
             console.log("set media", msg);
@@ -116,7 +116,6 @@ var startListeners = function(io) {
                 //     sendUdpCommand('play');
                 // }, delay);
             }
-
         });
         socket.on('newfile', function(url) {
             console.log("sending URL: ", url);

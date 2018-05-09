@@ -14,11 +14,14 @@ var connect = function() {
 
 var useTestDatabase = function() {
     dbClient = new Client(process.env.TEST_DATABASE_URL);
+    console.log("Connecting to database URL: ", process.env.TEST_DATABASE_URL);
     dbClient.connect( function(error) {
         if (error) {
             console.log("ERROR: Could not connect to test database!", error.message);
+            return false;
         }
     });
+    return true;
 }
 
 var createPhone = function(ipAddress, socketId, cb) {

@@ -67,7 +67,7 @@ public class WebsocketClient {
                 HashMap<String, String> msgMap = new HashMap<>();
                 msgMap.put("type", "newtable");
                 JSONObject data = (JSONObject) args[0];
-                msgMap.put("table", data.toString()); // TODO: add table items to map
+                msgMap.put("table", data.toString());
                 emitter.onNext(msgMap);
             });
             socket.on("filelist", args -> {
@@ -81,13 +81,6 @@ public class WebsocketClient {
                 HashMap<String, String> msgMap = new HashMap<>();
                 msgMap.put("type", "pos");
                 msgMap.put("value", args[0].toString());
-                emitter.onNext(msgMap);
-            });
-            socket.on("filelist", args -> {
-                HashMap<String, String> msgMap = new HashMap<>();
-                JSONArray data = (JSONArray) args[0];
-                msgMap.put("type", "filelist");
-                msgMap.put("list", data.toString()); //  TODO: add list items to map
                 emitter.onNext(msgMap);
             });
             socket.on("update-apk", args -> {

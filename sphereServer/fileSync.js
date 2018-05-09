@@ -56,7 +56,7 @@ class FileSync extends events.EventEmitter {
                     let size = stats.size;
                     console.log("size", size);
                     console.log("ds check: ", file.includes(".DS_Store"));
-                    if(!file.includes(".DS_Store")){
+                    if(!file.includes(".DS_Store")) {
 
                         db.createFile(file, size, false, (err, result) => {
                             if (err) {

@@ -5,10 +5,10 @@ var table = process.env.TABLE;
 
 function connect() {
     return new Promise((accept, reject) => {
-        if(db.useTestDatabase())
+        if(db.connect())
             accept();
         else
-            reject();
+            reject("Could not connect");
     });
 }
 
@@ -17,7 +17,7 @@ function clearFiles() {
     return new Promise((accept, reject) => {
         db.clearFiles((err, result) => {
             if (err) {
-                console.log("Error deleting file entries: ", err);
+                reject(err);
             } else {
                 console.log("Deleted file entries. ", result);
                 accept();
@@ -31,7 +31,7 @@ function clearPhones() {
     return new Promise((accept, reject) => {
         db.clearPhones((err, result) => {
             if (err) {
-                console.log("Error deleting phone entries: ", err);
+                reject(err);
             } else {
                 console.log("Deleted phone entries. ", result);
                 accept();
@@ -47,5 +47,6 @@ function disconnect() {
 
 connect()
     .then(table === "files" ? clearFiles : clearPhones)
-    .then(disconnect);
+    .then(disconnect)
+    .catch(console.error);
 

@@ -21,8 +21,8 @@ var socketModule;
 
 var fileSync = require('./fileSync').FileSync;
 //fileSync.setUpdateHour(process.env.UPDATE_HOUR);
-fileSync.getSavedFiles(() => {
-    fileSync.saveLocalFiles();
+fileSync.updateDatabase(() => {
+    //fileSync.saveLocalFiles();
     socketModule = require('./socket');
     socketModule.startListeners(io);
 });

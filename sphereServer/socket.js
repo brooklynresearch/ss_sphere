@@ -2,7 +2,7 @@ var db = require('./db');
 var dgram = require('dgram');
 var fs = require('fs');
 
-db.useTestDatabase();
+db.connect();
 
 var udpBroadcaster;
 var ioInstance;

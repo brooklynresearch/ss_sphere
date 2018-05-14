@@ -45,7 +45,9 @@ var startListeners = function(io) {
         db.getPhone(ipAddress, function(err, result) {
             if(result.rows.length === 0) {
                 db.createPhone(ipAddress, socket.id, function(err, result) {
-                    socket.emit('pos', result.rows[0].position);
+                    if (!err) {
+                        socket.emit('pos', result.rows[0].position);
+                    }
                 });
             } else {
                 socket.emit('pos', result.rows[0].position);
@@ -67,7 +69,7 @@ var startListeners = function(io) {
                 console.log("Error reading file table: ", err.message);
             } else {
                 let jsonData = result.rows.map(function(r) {
-                    return {id: r.id, name: r.name, active: r.active, selected: r.selected, size: r.size}
+                    return {id: r.id, dir: r.dir, name: r.name, active: r.active, selected: r.selected, size: r.size}
                 });
                 console.log("Sending File List");
                 socket.emit('filelist', jsonData);

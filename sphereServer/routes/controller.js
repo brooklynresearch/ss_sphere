@@ -1,12 +1,25 @@
 var express = require('express');
 var router = express.Router();
 var socketCmd = require('../socket');
+var db = require('../db');
 var fs = require('fs');
 const exec = require('child_process').exec;
 
 /* GET controller page. */
 router.get('/', function(req, res, next) {
 
+    db.connect();
+    db.getFiles((err, result) => {
+        if (err) console.log(e.message);
+        let files = result.rows.map(r => {
+            return {name: r.name, dir: r.dir};
+        });
+        console.log(files);
+        res.render('controller', {title: 'Controller', files: files});
+        db.disconnect();
+    });
+
+    /*
     exec("cat ./videofile.config | grep -e NAMES -e POSITIONS | sed -e 's/[=\"]/ /g' | awk '{print $2}'",
             (err, stdout, stderr) => {
 
@@ -29,6 +42,7 @@ router.get('/', function(req, res, next) {
                 name4: names[3]
             });
     });
+    */
 });
 
 /* GET play cmd */

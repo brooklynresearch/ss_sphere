@@ -4,8 +4,6 @@ var events = require('events');
 var socket = require('./socket');
 var request = require('request');
 var url = require('url');
-var spawn = require('child_process').spawn;
-var schedule = require('node-schedule');
 
 class FileSync extends events.EventEmitter {
     constructor() {
@@ -21,7 +19,9 @@ class FileSync extends events.EventEmitter {
 
     /* get list of files saved in database */
     getSavedFiles() {
-        return new Promise((accept, reject) => {
+        this.fileTable = [];
+        this.foundFiles = [];
+        return new Promise((resolve, reject) => {
             console.log("getting db files");
             db.getFiles((err, result) => {
                 if (err)
@@ -30,14 +30,14 @@ class FileSync extends events.EventEmitter {
                     result.rows.map(row => {
                         this.fileTable.push({id: row.id, dir: row.dir, name: row.name});
                     });
-                    accept();
+                    resolve();
                 }
             });
         });
     }
 
     scanFolders() {
-        console.log("scan");
+        console.log("Scanning media directories...");
         let p1 = this.scanDirectory("imagefiles");
         let p2 = this.scanDirectory("moviefiles");
         return Promise.all([p1,p2])
@@ -56,19 +56,18 @@ class FileSync extends events.EventEmitter {
 
     /* get list of files in dirName */
     scanDirectory(dirName) {
-        return new Promise((accept, reject) => {
+        return new Promise((resolve, reject) => {
             fs.readdir("./public/" + dirName + "/", (err, files) => {
                 if (err)
                     reject(err);
                 else
-                    accept({dir: dirName, files: files});
+                    resolve({dir: dirName, files: files});
             });
         });
     }
 
-    /* Delete file entries in database that have since been removed from dirName */
+    /* Delete file entries in database that have since been removed */
     deleteOldFiles() {
-        console.log(this.foundFiles);
         let files = this.foundFiles;
         let fileTable = this.getFileTable();
         return new Promise((resolve, reject) => {
@@ -90,7 +89,6 @@ class FileSync extends events.EventEmitter {
     saveNewFiles() {
         let files = this.foundFiles;
         let fileTable = this.getFileTable();
-        console.log("FILES: ", files);
         let nameList = fileTable.map(f => f.name);
         return new Promise((resolve, reject) => {
             let fileList = files;
@@ -102,14 +100,15 @@ class FileSync extends events.EventEmitter {
                     console.log("size", size);
                     db.createFile(file.name, file.dir, size, false, (err, result) => {
                         if (err) {
-                            reject(err);
+                            //reject(err);
                         } else {
-                            console.log("New file in "+ result.rows[0].dir +": " , result.rows[0].name);
+                            console.log("New file in "+ result.rows[0].dir +
+                                ": " + result.rows[0].name);
                             console.log("Size in bytes: " , result.rows[0].size);
                         }
                     });
                 } else {
-                    resolve();
+                    //resolve();
                 }
             })).then(resolve());
         });
@@ -131,7 +130,13 @@ class FileSync extends events.EventEmitter {
                 console.log("Error reading file table: ", err.message);
             } else {
                 let jsonData = result.rows.map(function(r) {
-                    return {id: r.id, dir: r.dir, name: r.name, active: r.active, selected: r.selected, size: r.size}
+                    return {
+                        id: r.id,
+                        dir: r.dir,
+                        name: r.name,
+                        active: r.active,
+                        selected: r.selected,
+                        size: r.size }
                 });
                 console.log("Sending File List", jsonData);
                 socket.sendSocketBroadcast('filelist', jsonData);

@@ -52,11 +52,20 @@ app.use('/frame', index);
 app.use('/sleep', index);
 app.use('/update-apk', index);
 app.use('/controller', routeController);
+app.use('/newfile', (req, res, next) => {
+    console.log("Got /newfile");
+    fileSync.updateDatabase(() => {
+        fileSync.sendFileList();
+        res.end();
+    })
+});
+/*
 app.use('/newconfig', (req, res, next) => {
     console.log("Got /newconfig");
     fileSync.saveLocalFiles();
     res.end();
 });
+*/
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

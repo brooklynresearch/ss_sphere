@@ -53,30 +53,27 @@ body {
     background-repeat: no-repeat;
     background-position: center;
 }
-
-#vid-01 {
+/*
+#vid-00 {
     background-image: url(Liberty.jpg);
 }
 
-.video:chopper {
-    background-image: url(chopper.jpg);
-}
-
-#vid-02 {
+#vid-01 {
     background-image: url(TimesSquare_01.jpg);
 }
 
-#vid-03 {
+#vid-02 {
     background-image: url(CentralPark_01.jpg);
 }
+*/
 
-#vid-04 {
+#black {
     background-image: url(brightness.svg);
 }
-
+/*
 .chopper {
     background-image: url(chopper.jpg);
-}
+}*/
 
 #playback-controls {
     display:none;

@@ -50,7 +50,7 @@ public class FileManager {
     private BroadcastReceiver onComplete = new BroadcastReceiver() {
         @Override
         public void onReceive(Context context, Intent intent) {
-
+            Log.d(TAG, "Download complete");
         }
     };
 
@@ -69,7 +69,7 @@ public class FileManager {
             }
             if (!hasFile(filename)) {
                 count++;
-                String filepath = filedir + "/" + filename;
+                String filepath = "http://192.168.1.123:3000/" + filedir + "/" + filename;
                 getFileFromHost(ctx, filepath, filename, onComplete);
             }
         }

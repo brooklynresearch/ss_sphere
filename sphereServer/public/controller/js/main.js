@@ -35,7 +35,7 @@ jQuery(function() {
     function getCurrent() {
     //something that gets the currently playing video, returns currentVid
 
-    setCurrent(currentVid);
+        setCurrent(currentVid);
 
     }
 
@@ -75,22 +75,30 @@ jQuery(function() {
         return newType;
     }
 
+    function updateButtons() {
+        let type = mediaType === "Images" ? "imagefiles" : "moviefiles";
+        $('#vid-wrap').children('div').each((i, el) => {
+            if ($(el).attr('data-dir') === type || $(el).attr('data-name') === 'black screen') {
+                $(el).show();
+            } else {
+                $(el).hide();
+            }
+        });
+    }
+
     function initMediaSelect() {
         $('#media-type-select').off();
         $('#media-type-select').on('click', event => {
             console.log("media type select");
             document.getElementById('media-type').innerHTML = toggleMediaType();
-            if (mediaType === "Videos") {
-                $('#vid-01').attr('data-name', "Chopper");
-                $('#vid-01').css('background-image', 'url(' + "css/chopper.jpg" + ')');
-                $('#vid-02').hide();
-                $('#vid-03').hide();
-            } else {
-                $('#vid-01').attr('data-name', "Liberty");
-                $('#vid-01').css('background-image', 'url(' + "css/Liberty.jpg" + ')');
-                $('#vid-02').show();
-                $('#vid-03').show();
-            }
+            updateButtons();
+        });
+    }
+
+    function loadThumbs() {
+        $('#vid-wrap').children('div').each((i, el) => {
+            let name = $(el).attr('data-name').split('.')[0];
+            $(el).css("background-image", "url(thumbs/" + name + ".jpg)")
         });
     }
 
@@ -99,7 +107,7 @@ jQuery(function() {
         $('.video').off();
         $('.video').on('click', function(event) {
             newVid = $(this).attr('data-id');
-            newVidName = $(this).attr('data-name');
+            newVidName = $(this).attr('data-name').split('.')[0];
             $('.view-mode').addClass('disabled');
             $('#message').text('Activate '+ newVidName +' ?');
             $('#confirm-wrap').fadeIn('fast', function() {
@@ -124,9 +132,10 @@ jQuery(function() {
 
     function init() {
         initSocket();
-        // getCurrent();
         initMediaSelect();
+        loadThumbs();
         initVids();
+        updateButtons();
     }
 
     init();

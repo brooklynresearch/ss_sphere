@@ -1,4 +1,5 @@
 var express = require('express');
+var path = require('path');
 var router = express.Router();
 var socketCmd = require('../socket');
 var fs = require('fs');
@@ -24,9 +25,10 @@ router.get('/play', function(req,res,next) {
   res.end();
 });
 
-router.get('/test-stream', function(req, res, next) {
+router.get('/stream.sdp', function(req, res, next) {
     console.log("stream");
-    socketCmd.streamVideo();
+    res.sendFile(path.resolve(__dirname + '../public', 'stream.sdp'))
+    //socketCmd.streamVideo();
     res.end();
 })
 

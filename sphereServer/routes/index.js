@@ -25,12 +25,14 @@ router.get('/play', function(req,res,next) {
   res.end();
 });
 
+/*
 router.get('/stream.sdp', function(req, res, next) {
     console.log("stream");
     res.sendFile(path.resolve(__dirname + '../public', 'stream.sdp'))
     //socketCmd.streamVideo();
     res.end();
 })
+*/
 
 router.get('/pause', function(req, res, next) {
     console.log("pause");

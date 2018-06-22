@@ -67,7 +67,7 @@ var startListeners = function(io) {
                 console.log("Error reading file table: ", err.message);
             } else {
                 let jsonData = result.rows.map(function(r) {
-                    return {id: r.id, name: r.name, active: r.active, selected: r.selected, size: r.size}
+                    return {id: r.id, name: r.name, dir: r.dir, active: r.active, selected: r.selected, size: r.size}
                 });
                 console.log("Sending File List");
                 socket.emit('filelist', jsonData);

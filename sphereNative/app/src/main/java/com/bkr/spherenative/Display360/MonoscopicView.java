@@ -118,8 +118,9 @@ public final class MonoscopicView extends GLSurfaceView {
         mediaLoader.clearScreen();
     }
 
-    public void initVideoStream(String uri) {
-        mediaLoader.startStream(uri);
+    public void initVideoStream(Uri sdpUri) {
+        Log.e(TAG, "initVideStream()");
+        mediaLoader.startStream(sdpUri.toString());
     }
 
     public void setPositionTable(JSONObject table) {

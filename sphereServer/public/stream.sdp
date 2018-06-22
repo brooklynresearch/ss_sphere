@@ -1,20 +1,15 @@
 v=0
-o=- 378149528 378149528 IN IP4 127.0.0.1
-s=radar.stream
+o=- 896575485 896575485 IN IP4 127.0.0.1
+s=webcam.stream
 t=0 0
 a=sdplang:en
 a=range:npt=now-
 a=control:*
-m=audio 5006 RTP/AVP 96
-c=IN IP4 239.0.0.1/63
-a=rtpmap:96 mpeg4-generic/48000/2
-a=fmtp:96 profile-level-id=1;mode=AAC-hbr;sizelength=13;indexlength=3;indexdeltalength=3;config=1190
-a=control:trackID=1
 m=video 5004 RTP/AVP 97
 c=IN IP4 239.0.0.1/63
 a=rtpmap:97 H264/90000
-a=fmtp:97 packetization-mode=1;profile-level-id=42001E;sprop-parameter-sets=Z2QAKK2wpDBSAgFxQWKQPQRWFIYKQEAuKCxSB6CKwpDBSAgFxQWKQPQRTDoUKQNC4oJHMGIemHQoUgaFxQSOYMQ9MOhQpA0LigkcwYh6xEQmIVilsQRWUURJsogxOU4QITKUIEVlCCTYQVhBMJQhMIjGggWQJFaIGBJZBAaEnaMIDwsSWQQKCwsrRBQYOWQweO0YEBZASNAogszlAUAW7ARAAAH0gADqYBgAAAMDk4cAAA7msr//4wAAAwBycOAAAdzWV//8aA==,aP48sA==
-a=cliprect:0,0,720,1280
-a=framesize:97 1280-720
-a=framerate:59.94
-a=control:trackID=2
+a=fmtp:97 packetization-mode=1;profile-level-id=64001E;sprop-parameter-sets=Z2QAHqzZQNQ9sBEAAAMAAQAAAwAojxYtlg==,aOvjyyLA
+a=cliprect:0,0,480,848
+a=framesize:97 848-480
+a=framerate:20.0
+a=control:trackID=1

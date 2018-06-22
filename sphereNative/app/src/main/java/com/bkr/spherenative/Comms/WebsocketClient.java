@@ -111,6 +111,11 @@ public class WebsocketClient {
                 }
                 emitter.onNext(msgMap);
             });
+            socket.on("start-stream", args -> {
+               HashMap<String, String> msgMap = new HashMap<>();
+               msgMap.put("type", "start-stream");
+               emitter.onNext(msgMap);
+            });
             socket.on("dark", args -> {
                 HashMap<String, String> msgMap = new HashMap<>();
                 msgMap.put("type", "dark-screen");

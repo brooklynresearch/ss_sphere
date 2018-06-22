@@ -22,7 +22,6 @@ import org.json.JSONObject;
 import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
-import java.util.concurrent.TimeUnit;
 
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
@@ -88,11 +87,12 @@ class Controller {
         return panoView.getPosition();
     }
 
-    private void startStream(String uri) {
-        Disposable d = Observable.timer(1, TimeUnit.SECONDS)
-                .subscribe(i -> {
-                    panoView.initVideoStream(uri);
-                });
+    private void startStream() {
+        Uri sdpPath = Uri.fromFile(new File(DOWNLOAD_DIR + "/" + "stream.sdp"));
+        //Disposable d = Observable.timer(1, TimeUnit.SECONDS)
+                //.subscribe(i -> {
+                    panoView.initVideoStream(sdpPath);
+                //});
     }
 
     private void loadMedia(String type, String name) {
@@ -224,6 +224,9 @@ class Controller {
                 break;
             case "load-video":
                 loadMedia("video", msgMap.get("name") + ".mp4");
+                break;
+            case "start-stream":
+                startStream();
                 break;
             case "dark-screen":
                 panoView.clearScreen();

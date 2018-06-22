@@ -20,7 +20,6 @@ var io = require('socket.io')(8080);
 var socketModule;
 
 var fileSync = require('./fileSync').FileSync;
-//fileSync.setUpdateHour(process.env.UPDATE_HOUR);
 fileSync.updateDatabase(() => {
     //fileSync.saveLocalFiles();
     socketModule = require('./socket');
@@ -43,7 +42,7 @@ app.use('/', index);
 app.use('/moviecontrol', index);
 app.use('/play', index);
 app.use('/pause', index);
-app.use('/test-stream', index);
+app.use('/start-stream', index);
 app.use('/sendparams', index);
 app.use('/hidedebug', index);
 app.use('/dark', index);
@@ -52,20 +51,11 @@ app.use('/frame', index);
 app.use('/sleep', index);
 app.use('/update-apk', index);
 app.use('/controller', routeController);
-app.use('/newfile', (req, res, next) => {
-    console.log("Got /newfile");
-    fileSync.updateDatabase(() => {
-        fileSync.sendFileList();
-        res.end();
-    })
-});
-/*
 app.use('/newconfig', (req, res, next) => {
     console.log("Got /newconfig");
     fileSync.saveLocalFiles();
     res.end();
 });
-*/
 
 // catch 404 and forward to error handler
 app.use(function(req, res, next) {

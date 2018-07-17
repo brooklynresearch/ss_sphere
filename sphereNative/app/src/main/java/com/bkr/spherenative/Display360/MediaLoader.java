@@ -25,7 +25,6 @@ import android.graphics.Color;
 import android.graphics.Paint;
 import android.net.Uri;
 import android.os.Environment;
-import android.support.annotation.AnyThread;
 import android.support.annotation.MainThread;
 import android.util.Log;
 import android.view.Surface;
@@ -37,9 +36,7 @@ import java.io.File;
 import java.security.InvalidParameterException;
 
 import io.reactivex.Completable;
-import io.reactivex.Observable;
 import io.reactivex.disposables.CompositeDisposable;
-import io.reactivex.disposables.Disposable;
 import io.reactivex.schedulers.Schedulers;
 
 import org.videolan.libvlc.IVLCVout;
@@ -111,21 +108,22 @@ public class MediaLoader implements IVLCVout.Callback, IVLCVout.OnNewVideoLayout
     // media player would be separated from the rendering code. It is left in this class for
     // simplicity.
     // This should be set or cleared in a synchronized manner.
-    LibVLC mLibVLC;
-    MediaPlayer mediaPlayer;
-    Boolean isPaused = true;
+    private LibVLC mLibVLC;
+    private MediaPlayer mediaPlayer;
+    private Boolean isPaused = true;
     // This sample also supports loading images.
-    Bitmap mediaImage;
+    private Bitmap mediaImage;
     // If the video or image fails to load, a placeholder panorama is rendered with error text.
-    String errorText;
 
     // Due to the slow loading media times, it's possible to tear down the app before mediaPlayer is
     // ready. In that case, abandon all the pending work.
     // This should be set or cleared in a synchronized manner.
     private boolean isDestroyed = false;
 
+    private String errorText;
+
     // The type of mesh created depends on the type of media.
-    Mesh mesh;
+    private Mesh mesh;
     // The sceneRenderer is set after GL initialization is complete.
     private SceneRenderer sceneRenderer;
     // The displaySurface is configured after both GL initialization and media loading.
@@ -134,41 +132,35 @@ public class MediaLoader implements IVLCVout.Callback, IVLCVout.OnNewVideoLayout
     private CompositeDisposable disposables = new CompositeDisposable();
 
     private String mediaType;
+    //private int mediaWidth = 4096;
+    //private int mediaHeight = 2048;
+
     private int mediaWidth = 1280;
     private int mediaHeight = 720;
 
     private static File DOWNLOAD_DIR =
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 
+    private String videoFilename;
+
     public MediaLoader(Context context) {
         this.context = context;
-        final ArrayList<String> args = new ArrayList<>();
-        args.add("-vvv");
-        args.add("--no-spu"); // no subtitles
-        args.add("--audio-time-stretch");
-        args.add("--aout=opensles");
-        args.add("--http-reconnect");
-        args.add("--network-caching=" + 6 * 1000);
-
-        mLibVLC = new LibVLC(context, args);
-        mediaPlayer = new MediaPlayer(mLibVLC);
         mediaType = "image";
     }
 
-    /**
-     * Loads custom videos based on the Intent or load the default video. See the Javadoc for this
-     * class for information on generating a custom intent via adb.
-     */
     @SuppressLint("CheckResult")
-    public void loadVideo(Uri uri) {
+    public void loadVideo(String filename) {
         resetMedia();
-        // Load the bitmap in a background thread to avoid blocking the UI thread. This operation can
-        // take 100s of milliseconds.
-        // Note that this sample doesn't cancel any pending mediaLoaderTasks since it assumes only one
-        // Intent will ever be fired for a single Activity lifecycle.
-        //mediaLoaderTask = new MediaLoaderTask(uiView);
-        //Log.d(TAG, uri.toString());
-        //videoLoaderTask.execute(uri);
+
+        videoFilename = filename;
+
+        final ArrayList<String> args = new ArrayList<>();
+        args.add("-vvv");
+        args.add("--rtsp-frame-buffer-size=500000");
+        args.add("--live-caching=" + 6000);
+        args.add("--no-drop-late-frames");
+        args.add("--network-caching=" + 6000);
+
         Completable loadMediaTask = Completable.fromCallable(() -> {
             int stereoFormat = Mesh.MEDIA_MONOSCOPIC;
 
@@ -177,14 +169,14 @@ public class MediaLoader implements IVLCVout.Callback, IVLCVout.OnNewVideoLayout
                     DEFAULT_SPHERE_VERTICAL_DEGREES, DEFAULT_SPHERE_HORIZONTAL_DEGREES,
                     stereoFormat);
 
-            //Log.d(TAG, "IN doInBackground: " + fileLocation[0].toString());
-
             try {
 
                 //MediaPlayer mp = MediaPlayer.create(context, uri);
+                mLibVLC = new LibVLC(context, args);
+                MediaPlayer mp = new MediaPlayer(mLibVLC);
                 synchronized (MediaLoader.this) {
                     // This needs to be synchronized with the methods that could clear mediaPlayer.
-                    //mediaPlayer = mp;
+                    mediaPlayer = mp;
                 }
                 //videoWidgetView.loadVideo(fileInformation[0].first, fileInformation[0].second);
             } catch (InvalidParameterException e) {
@@ -233,10 +225,10 @@ public class MediaLoader implements IVLCVout.Callback, IVLCVout.OnNewVideoLayout
         }
     }
 
-    public void startStream(String sdpUri) {
+    public void startStream() {
         resetMedia();
 
-        mediaType = "video";
+        mediaType = "stream";
         mesh = Mesh.createUvSphere(
                 SPHERE_RADIUS_METERS, DEFAULT_SPHERE_ROWS, DEFAULT_SPHERE_COLUMNS,
                 DEFAULT_SPHERE_VERTICAL_DEGREES, DEFAULT_SPHERE_HORIZONTAL_DEGREES,
@@ -244,31 +236,14 @@ public class MediaLoader implements IVLCVout.Callback, IVLCVout.OnNewVideoLayout
 
         try {
             Log.e(TAG, "startStream()");
-            //MediaPlayer mp = MediaPlayer.create(context, sdpUri);
-            //MediaPlayer mp = new MediaPlayer();
-            //Media media = new Media(mLibVLC, Uri.fromFile(new File(DOWNLOAD_DIR + "/stream.sdp" )));
-            //Media media = new Media(mLibVLC, Uri.parse("http://192.168.0.174:3000/stream.sdp"));
-            //media.setHWDecoderEnabled(true, true);
-            //mediaPlayer.setMedia(media);
-            //media.release();
-            //MediaPlayer mp = MediaPlayer.create(this.context, Uri.parse("http://192.168.1.122:3000/stream.sdp"));
-            //mp.setDataSource("http://192.168.1.122:3000/stream.sdp");
-            //mp.setOnPreparedListener(MediaPlayer::start);
-            //mp.prepare();
             displayWhenReady();
-            //videoWidgetView.loadVideo(fileInformation[0].first, fileInformation[0].second);
         } catch (Exception e) {
-            // An error here is normally due to being unable to locate the file.
-            // Since this is a background thread, we need to switch to the main thread to show a toast.
             Log.e(TAG, "Could not open stream: " + e.getMessage());
-            //startStream(uri);
-        } /*catch (IOException e) {
-            Log.e(TAG, "Could not open stream: " + e.getMessage());
-        }*/
+        }
     }
 
     private void resetMedia() {
-        if (mediaType.equals("video") && mediaPlayer != null) {
+        if (mediaType.equals("video") || mediaType.equals("stream") && mediaPlayer != null) {
             synchronized (MediaLoader.this) {
                 mediaPlayer.release();
                 mediaPlayer = null;
@@ -329,48 +304,8 @@ public class MediaLoader implements IVLCVout.Callback, IVLCVout.OnNewVideoLayout
         // The important methods here are the setSurface & lockCanvas calls. These will have to happen
         // after the GLView is created.
         if (mediaType.equals("video") && mediaPlayer != null) {
-            /*
-            try {
-                mediaPlayer.setDataSource(rtpUri);
-                mediaPlayer.setOnErrorListener((mp, a, b) -> {
-                    //displayWhenReady();
-                    Log.e(TAG, "MP Error: (" + a + "," + b + ")");
-                    return true;
-                });
-                mediaPlayer.setOnInfoListener((mp, what, extra) -> {
-                    Log.e(TAG, "INFO: " + what + " EXTRA: " + extra);
-                    return true;
-                });
-                displaySurface = sceneRenderer.createDisplay(
-                        mediaPlayer.getVideoWidth(), mediaPlayer.getVideoHeight(), mesh);
-                mediaPlayer.setSurface(displaySurface);
-                mediaPlayer.prepare();
-            } catch (Exception e) {
-                Log.e(TAG, "Couldn't prepare stream: " + e.getMessage());
-                //displayWhenReady();
-            }*/
-            // Start playback.
-            //mediaPlayer.setLooping(true);
 
-            //Media.VideoTrack track = mediaPlayer.getCurrentVideoTrack();
-            /*
-            displaySurface = sceneRenderer.createDisplay(
-                    mediaWidth, mediaHeight, mesh);
-
-            //mediaPlayer.setSurface(displaySurface);
-            mediaPlayer.getVLCVout().setVideoSurface(displaySurface, null);
-            mediaPlayer.getVLCVout().setWindowSize(mediaWidth, mediaHeight);
-            mediaPlayer.getVLCVout().attachViews();*/
-
-            //mediaPlayer.setVolume(0,0);
-            //mediaPlayer.setOnCompletionListener((m) -> {
-                //mediaPlayer.seekTo(0);
-                //isPaused = true;
-            //});
-
-            Media media = new Media(mLibVLC, Uri.parse("http://192.168.1.123:3000/stream.sdp"));
-            media.addOption(":no-spu");
-            media.addOption(":start-time=0");
+            Media media = new Media(mLibVLC, Uri.fromFile(new File(DOWNLOAD_DIR + "/" + videoFilename )));
             media.parse();
 
             Log.e(TAG, "TRACKS: " + media.getTrackCount());
@@ -378,32 +313,18 @@ public class MediaLoader implements IVLCVout.Callback, IVLCVout.OnNewVideoLayout
             displaySurface = sceneRenderer.createDisplay(
                     mediaWidth, mediaHeight, mesh);
 
-            mediaPlayer.getVLCVout().setWindowSize(mediaWidth, mediaHeight);
+            //mediaPlayer.getVLCVout().setWindowSize(mediaWidth, mediaHeight);
             mediaPlayer.getVLCVout().setVideoSurface(displaySurface, null);
-            mediaPlayer.getVLCVout().addCallback(this);
+
             mediaPlayer.getVLCVout().attachViews(this);
-            mediaPlayer.setVideoTrackEnabled(true);
-
-            //media.addOption(":codec=mediacodec_ndk,mediacodec_jni,none");
-
-            //Media media = new Media(mLibVLC, Uri.fromFile(new File(DOWNLOAD_DIR + "/stream.sdp" )));
-
-            //Media media = new Media(mLibVLC, Uri.parse("http://download.blender.org/peach/bigbuckbunny_movies/BigBuckBunny_640x360.m4v"));
 
             mediaPlayer.setMedia(media);
-            Log.e(TAG, "IS MEDIA PARSED?: " + media.isParsed());
             media.release();
             Log.d(TAG, "Mediaplayer loaded");
             mediaPlayer.play();
-            /*
-            Disposable d = Observable.timer(5, TimeUnit.SECONDS)
-                .subscribe(i -> {
-                    if (mediaPlayer.getVLCVout().areViewsAttached()) {
-                        Log.e(TAG, "Play CMD");
-                        mediaPlayer.play();
-                    }
-            });*/
-            //mediaPlayer.pause();
+
+            mediaPlayer.pause();
+
         } else if (mediaType.equals("image") && mediaImage != null) {
             Log.d(TAG, "image loaded");
             // For images, acquire the displaySurface and draw the bitmap to it. Since our Mesh class uses
@@ -416,6 +337,23 @@ public class MediaLoader implements IVLCVout.Callback, IVLCVout.OnNewVideoLayout
             Canvas c = displaySurface.lockCanvas(null);
             c.drawBitmap(mediaImage, 0, 0, null);
             displaySurface.unlockCanvasAndPost(c);
+
+        } else if(mediaType.equals("stream") && mediaPlayer != null) {
+
+            Media media = new Media(mLibVLC, Uri.parse("http://192.168.1.123:3000/stream.sdp"));
+            media.parse();
+
+            displaySurface = sceneRenderer.createDisplay(
+                    mediaWidth, mediaHeight, mesh);
+
+            mediaPlayer.getVLCVout().setVideoSurface(displaySurface, null);
+            mediaPlayer.getVLCVout().attachViews(this);
+
+            mediaPlayer.setMedia(media);
+            media.release();
+            Log.d(TAG, "Mediaplayer loaded");
+            mediaPlayer.play();
+
         } else {
             // Handle the error case by creating a placeholder panorama.
             mesh = Mesh.createUvSphere(

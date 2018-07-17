@@ -1,17 +1,24 @@
 console.log("movieremote");
 
-var playBtn = document.getElementById('play-btn');
+var playBtn = document.getElementById('play');
 playBtn.onclick = function() {
-  var xhr = new XMLHttpRequest();
-  xhr.open("GET", "play");
-  xhr.send();
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "play");
+    xhr.send();
 };
 
-var pauseBtn = document.getElementById('pause-btn');
-pauseBtn.onclick = function() {
-  var xhr = new XMLHttpRequest();
-  xhr.open("GET", "pause");
-  xhr.send();
+var playBtn = document.getElementById('pause');
+playBtn.onclick = function() {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "pause");
+    xhr.send();
+};
+
+var testStreamBtn = document.getElementById('test-stream');
+testStreamBtn.onclick = function() {
+    var xhr = new XMLHttpRequest();
+    xhr.open("GET", "test-stream");
+    xhr.send();
 };
 
 var sndParamsBtn = document.getElementById('send-params');
@@ -30,23 +37,12 @@ hideDebugBtn.onclick = function() {
   console.log("hidedebug");
 };
 
-
-var darkBtn = document.getElementById('toggle-dark');
-darkBtn.onclick = function() {
-  console.log("dark");
-	var xhr = new XMLHttpRequest();
-	xhr.open("GET", "dark");
-	xhr.send();
-
-};
-
 var reloadBtn = document.getElementById('refresh');
 reloadBtn.onclick = function() {
   console.log("reload");
   var xhr = new XMLHttpRequest();
   xhr.open("GET", "reload");
   xhr.send();
-
 };
 
 var sleepBtn = document.getElementById('sleep');
@@ -54,5 +50,37 @@ sleepBtn.onclick = function() {
   console.log("sleep");
   var xhr = new XMLHttpRequest();
   xhr.open("GET", "sleep?time=400");
+  xhr.send();
+};
+
+var updateBtn = document.getElementById('update');
+updateBtn.onclick = function() {
+  console.log("update-apk button");
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", "update-apk");
+  xhr.send();
+};
+
+var dftVidBtn = document.getElementById('default-video');
+dftVidBtn.onclick = function() {
+  console.log("update-apk button");
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", "default-video");
+  xhr.send();
+};
+
+var dftImgBtn = document.getElementById('default-image');
+dftImgBtn.onclick = function() {
+  console.log("default-image button");
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", "default-image");
+  xhr.send();
+};
+
+var streamBtn = document.getElementById('start-stream');
+streamBtn.onclick = function() {
+  console.log("start-stream button");
+  var xhr = new XMLHttpRequest();
+  xhr.open("GET", "start-stream");
   xhr.send();
 };

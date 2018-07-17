@@ -13,6 +13,7 @@ var rowPhones = [6, 9, 10, 11, 12, 13, 13, 12, 11, 10, 9, 6];
 // the first half and second half should be symmetrical
 var rowLongOrigin = [30.0, 24.0, 18.0, 12.0, 6.0, 0.0, 0.0, 6.0, 12.0, 18.0, 24.0, 30.0];
 var longOrigin = 6.0;
+var longOriginCheat = [0.0, 0.0, 0.0, 0.0, 6.0, 6.0, 6.0, 6.0, 0.0, 0.0, 0.0, 0.0];
 var longOriginCalc = true;
 
 // the difference in longitude between each phone for each row
@@ -54,7 +55,7 @@ function positionGenerator() {
 
 		if(longOriginCalc){
 			if(row < rowLongOrigin.length / 2){
-				rowLongOrigin[row] = longOrigin * ((rowLongOrigin.length / 2) - row - 1);
+				rowLongOrigin[row] = longOrigin * ((rowLongOrigin.length / 2) - row - 1) + longOriginCheat[row];
 				rowLongOrigin[rowLongOrigin.length - row - 1] = rowLongOrigin[row];
 			}
 		}

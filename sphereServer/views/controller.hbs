@@ -1,13 +1,24 @@
- <div id="control-wrap">
+<div id="control-wrap">
     <div id="header">
-        <div id="logo" class="center"></div>
+    </div>
+    <div id="media-type-select">
+        <h3 id="media-type">Images</h3>
     </div>
     <div id="vid-wrap" class="center view-mode">
-        <div id="vid-01" class="video" data-id={{vid1}} data-name={{name1}}></div>
+        {{#each files}}
+            <div id="vid-0{{@index}}" class="video" data-dir={{this.dir}} data-name={{this.name}}></div>
+        {{/each}}
+        <div id="black" class="video" data-id="-1" data-name="black screen"></div>
+       <!-- <div id="vid-01" class="video" data-id={{vid1}} data-name={{name1}}></div>
         <div id="vid-02" class="video" data-id={{vid2}} data-name={{name2}}></div>
-        <div id="vid-03" class="video" data-id={{vid3}} data-name={{name3}}></div>
-        <div id="vid-04" class="video" data-id="-1" data-name="black screen"></div>
+        <div id="vid-03" class="video" data-id={{vid3}} data-name={{name3}}></div>  -->
     </div>
+
+    <div id="playback-controls">
+        <div id="play-pause-btn" data-state="play"></div>
+        <div id="stop-btn"></div>
+    </div>
+
     <div id="confirm-wrap" class="confirm-mode">
         <div id="message"></div>
         <div id="conf-btn-wrap">
@@ -15,8 +26,8 @@
             <div id="cancel" class="button right">cancel</div>
         </div>
     </div>
+
     <div id="settings-wrap">
-        
     </div>
     <div id="settings" class="view-mode"></div>
 </div>

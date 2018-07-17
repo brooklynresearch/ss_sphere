@@ -9,7 +9,7 @@ describe("Socket Module", function() {
     console.log("=====================");
 
     afterEach((done) => {
-        db.clearTable(function(err, result) {
+        db.clearPhones(function(err, result) {
             expect(err).toBeFalsy();
             done();
         });
@@ -23,18 +23,42 @@ describe("Socket Module", function() {
                 //console.log("CONNECTED");
             });
             socket.on('pos', function(data) {
-                expect(data).toEqual(-1);
+                expect(data).toEqual("-1");
                 socket.close();
                 done();
             });
         });
     });
 
+    describe("Send Position Table", function() {
+        console.log("\t[+]Testing Send Position Table");
+        it("should send position table json when phone connnects", function(done) {
+            let socket = io(server, {});
+            socket.on('newtable', function(table) {
+                expect(table).toBeDefined();
+                socket.close();
+                done();
+            });
+        })
+    })
+
+    describe("Send File List", function() {
+        console.log("\t[+]Testing Send File List");
+        it("should send file list when phone connects", function(done) {
+            let socket = io(server,{});
+            socket.on('filelist', function(list) {
+                expect(list).toBeDefined();
+                socket.close();
+                done();
+            })
+        })
+    })
+
     describe("Update Position", function() {
         console.log("\t[+]Testing update position");
         it("should respond with new position number", function(done) {
             let socket = io(server,{});
-            let newPosition = 666;
+            let newPosition = "666";
 
             socket.on('connect', function() {
                 //console.log("CONNECTED");

@@ -14,11 +14,14 @@ var connect = function() {
 
 var useTestDatabase = function() {
     dbClient = new Client(process.env.TEST_DATABASE_URL);
+    console.log("Connecting to database URL: ", process.env.TEST_DATABASE_URL);
     dbClient.connect( function(error) {
         if (error) {
             console.log("ERROR: Could not connect to test database!", error.message);
+            return false;
         }
     });
+    return true;
 }
 
 var createPhone = function(ipAddress, socketId, cb) {
@@ -123,10 +126,11 @@ var deletePhone = function(phoneIpAddress, cb) {
     });
 }
 
-var createFile = function(name, size, isActive, cb) {
+var createFile = function(name, dirName, size, isActive, cb) {
     var query = squel.insert()
                 .into("files")
                 .set("name", name)
+                .set("dir", dirName)
                 .set("url", "")
                 .set("runtime", -1)
                 .set("size", size)
@@ -163,10 +167,10 @@ var setActive = function(name, isActive, cb) {
     });
 }
 
-var deleteFile = function(name, cb) {
+var deleteFile = function(fileId, cb) {
     var query = squel.delete()
                 .from("files")
-                .where("name = ?", name)
+                .where("id = ?", fileId)
                 .toParam();
 
     dbClient.query({text: query.text, values: query.values}, function(err, result) {

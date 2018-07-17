@@ -37,6 +37,10 @@ body {
     background-position: center;
 }
 
+#media-type {
+    text-align: center;
+}
+
 #vid-wrap {
     width: 136px;
     margin-top: 22px
@@ -49,21 +53,62 @@ body {
     background-repeat: no-repeat;
     background-position: center;
 }
-
-#vid-01 {
+/*
+#vid-00 {
     background-image: url(Liberty.jpg);
 }
 
-#vid-02 {
+#vid-01 {
     background-image: url(TimesSquare_01.jpg);
 }
 
-#vid-03 {
+#vid-02 {
     background-image: url(CentralPark_01.jpg);
 }
+*/
 
-#vid-04 {
+#black {
     background-image: url(brightness.svg);
+}
+/*
+.chopper {
+    background-image: url(chopper.jpg);
+}*/
+
+#playback-controls {
+    display:none;
+    position: absolute;
+    width: 100%;
+    text-align:center;
+}
+
+#play-pause-btn {
+    display: inline-block;
+    margin-left:auto;
+    margin-right:auto;
+    height: 48px;
+    width: 48px;
+    background-repeat: no-repeat;
+    background-position: center;
+}
+
+#play-pause-btn[data-state=play] {
+    background-image: url(ic_play_arrow_white.svg);
+}
+
+#play-pause-btn[data-state=pause] {
+    background-image: url(ic_pause_white.svg);
+}
+
+#stop-btn {
+    background-image: url(ic_stop_white.svg);
+    display: inline-block;
+    margin-left:auto;
+    margin-right:auto;
+    height: 48px;
+    width: 48px;
+    background-repeat: no-repeat;
+    background-position: center;
 }
 
 .video {

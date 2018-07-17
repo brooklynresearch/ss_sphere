@@ -1,4 +1,5 @@
 var express = require('express');
+var path = require('path');
 var router = express.Router();
 var socketCmd = require('../socket');
 var fs = require('fs');
@@ -19,14 +20,25 @@ router.get('/moviecontrol', function(req, res, next) {
 /* GET play cmd */
 router.get('/play', function(req,res,next) {
   console.log("play");
-  socketCmd.sendUdpCommand("play");  
+  //socketCmd.sendUdpCommand("play");  
+  socketCmd.sendSocketBroadcast('toggle-play', {timestamp: Date.now(), delay: 500});
   res.end();
 });
 
+/*
+router.get('/stream.sdp', function(req, res, next) {
+    console.log("stream");
+    res.sendFile(path.resolve(__dirname + '../public', 'stream.sdp'))
+    //socketCmd.streamVideo();
+    res.end();
+})
+*/
+
 router.get('/pause', function(req, res, next) {
-  console.log("paused");
-  socketCmd.sendUdpCommand("pause");
-  res.end();
+    console.log("pause");
+    //socketCmd.sendUdpCommand("pause");
+    socketCmd.sendSocketBroadcast('pause', 0);
+    res.end();
 });
 
 router.get('/sendparams', function(req, res, next) {
@@ -67,6 +79,30 @@ router.get('/reload', function(req, res, next) {
 router.get('/sleep', function(req, res, next) {
     console.log("Sending sleep command", req.query);
     socketCmd.sendSocketBroadcast('sleep', req.query.time);
+    res.end();
+});
+
+router.get('/update-apk', function(req, res, next) {
+    console.log("Sending update-apk command", req.query);
+    socketCmd.sendSocketBroadcast('update-apk');
+    res.end();
+});
+
+router.get('/default-image', function(req, res, next) {
+    console.log("Sending default-image command", req.query);
+    socketCmd.sendSocketBroadcast('default-image');
+    res.end();
+});
+
+router.get('/default-video', function(req, res, next) {
+    console.log("Sending default-video command", req.query);
+    socketCmd.sendSocketBroadcast('default-video');
+    res.end();
+});
+
+router.get('/start-stream', function(req, res, next) {
+    console.log("Sending start-stream command", req.query);
+    socketCmd.sendSocketBroadcast('start-stream');
     res.end();
 });
 

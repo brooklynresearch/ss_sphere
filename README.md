@@ -1,5 +1,13 @@
 # Sphere v2
 
+## Overview
+
+Sphere consists of a mobile app and a control server that allow multiple android devices connected via ethernet 
+to function together as a single 360-degreee panoramic image or video display. The server receives serial input
+from a rotary encoder to allow panning through the image or video. The server also handles time synchronization
+of video playback, distribution of media files to the devices, and serves a control page to allow users to select
+from among available media options.
+
 ## Setup
 
 ### Network
@@ -101,11 +109,54 @@ Steps for streaming a video source:
 
 * Finally, go to the debug page at '/moviecontrol' and click 'start-stream'
 
+## Test Hardware
+
+* Control Server: Lenovo Thinkpad (OS: Ubuntu 17.10)
+
+* Router: Ubiquiti Edgerouter Pro 8-Port
+
+* Switches: (1) Cisco SG100D-08, (4) Cisco SG112-24
+
+* Android Devices: Samsung Galaxy S8, Samsung Galaxy S8+
+
+* Device Ethernet Adapters: Cable Matters USB-C Multiport Video Adapter with Power Delivery [serial: 201048-BLK]
+
+## Software Versions
+
+### Server
+
+* Target SDK: 26
+
+* Node.js: 8.9.3
+
+* npm: 6.0.1
+
+* PostgreSQL: 9.6.9
+
+### Android App
+
+* Gradle: 3.1.0
+
+* Google VR SDK: 1.120.0
+
+* LibVLC: 3.0.0
+
+* RxJava: 2.1.9
+
+* RxAndroid: 2.0.2
+
 ## Further Work / Potential Improvements
 
 * Controller page interface for selecting live streams
 
-* Ability to set video dimensions via the controller (right now they are hardcoded).
+* Ability to set video dimensions via the controller (right now they are hardcoded). Wrong values cause the media
+    to be poorly mapped onto the panorama surface.
 
-* Real interface for debug/dev page ("/moviecontrol").
+* Viewport calculations are generated using the 'pos-generator.js' script. These calculations will need to
+    be adjusted based on media dimensions.
+
+* Proper interface for debug/dev page ("/moviecontrol").
+
+* Since VLC is used as the android media player, it should be possible to use VLC for streaming on both ends
+   without Wowza. The possible complication could be the SDP file which I have been relying on Wowza to generate.
 

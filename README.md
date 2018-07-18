@@ -111,7 +111,7 @@ Steps for streaming a video source:
 
 ## Test Hardware
 
-* Control Server: Lenovo Thinkpad (OS: Ubuntu )
+* Control Server: Lenovo Thinkpad (OS: Ubuntu 17.10)
 
 * Router: Ubiquiti Edgerouter Pro 8-Port
 

@@ -29,7 +29,7 @@ public class MainActivity extends AppCompatActivity
     String TAG = "sphere-native";
 
     //*******************************************
-    String SERVER_IP_ADDRESS = "192.168.1.123";
+    String SERVER_IP_ADDRESS = "192.168.0.174";
     //*******************************************
 
     int btnCounter = 0;
@@ -133,7 +133,7 @@ public class MainActivity extends AppCompatActivity
     private void showPositionDialog() {
         final EditText positionTxt = new EditText(this);
 
-        positionTxt.setHint(controller.getCurrentPosition());
+        //positionTxt.setHint(controller.getCurrentPosition());
         positionTxt.setInputType(InputType.TYPE_CLASS_NUMBER);
 
         new AlertDialog.Builder(this)

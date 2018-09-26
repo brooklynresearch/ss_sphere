@@ -43,7 +43,8 @@ class Controller {
     private Context appContext;
     private Boolean mediaLoaded = false;
 
-    private MonoscopicView panoView;
+    //private MonoscopicView panoView;
+    private SurfaceView2D panoView;
     private DatagramListener dgramListener;
     private WebsocketClient wsClient;
     private SyncTimer timer;
@@ -63,7 +64,7 @@ class Controller {
         fileManager = new FileManager();
     }
 
-    public boolean initialize(String hostIpAddr, MonoscopicView viewElement) {
+    public boolean initialize(String hostIpAddr, SurfaceView2D viewElement) {
         hostIP = hostIpAddr;
         panoView = viewElement;
         rtpHost = "rtsp://" + hostIpAddr + ":8554/movie.mp4";
@@ -76,22 +77,22 @@ class Controller {
 
     private boolean initPanoView() {
         panoView.initialize();
-        loadMedia("image", "Liberty.png"); //default media
+        //loadMedia("image", "Liberty.png"); //default media
         //startStream(rtpHost);
         //loadMedia();
         //loadImage();
         return true;
     }
-
+/*
     public String getCurrentPosition() {
         return panoView.getPosition();
-    }
+    }*/
 
     private void startStream() {
         Uri sdpPath = Uri.fromFile(new File(DOWNLOAD_DIR + "/" + "stream.sdp"));
         //Disposable d = Observable.timer(1, TimeUnit.SECONDS)
                 //.subscribe(i -> {
-                    panoView.initVideoStream(sdpPath);
+                    //panoView.initVideoStream(sdpPath);
                 //});
     }
 
@@ -100,13 +101,13 @@ class Controller {
             case "image":
                 if (checkFile("image", name)) {
                     Uri path = Uri.fromFile(new File(DOWNLOAD_DIR + "/" + name));
-                    panoView.loadImage(path);
+                    //panoView.loadImage(path);
                 }
                 break;
             case "video":
                 if (checkFile("video", name)) {
                     Uri path = Uri.fromFile(new File(DOWNLOAD_DIR + "/" + name));
-                    panoView.loadVideo(path);
+                    //panoView.loadVideo(path);
                 }
                 break;
             case "stream":
@@ -181,7 +182,7 @@ class Controller {
         Log.d(TAG, "GOT WEBSOCKET: " + msgMap.toString());
         //get fields and pass to panoView or fileSync
         switch(msgMap.get("type")) {
-            case "toggle-play":
+            /*case "toggle-play":
                 String serverTime = msgMap.get("serverTime");
                 String delay = msgMap.get("delay");
                 long triggerTarget = Long.parseLong(serverTime) + Integer.parseInt(delay);
@@ -189,14 +190,14 @@ class Controller {
                     .subscribeOn(AndroidSchedulers.mainThread())
                     .subscribe(l -> panoView.togglePlayback());
                 disposables.add(t);
-                break;
+                break;*/
             case "stop-video":
-                panoView.stopVideo();
+                //panoView.stopVideo();
                 break;
             case "pos":
                 String pos = msgMap.get("value");
                 if (!pos.equals("-1")) {
-                    panoView.setSpherePosition(pos);
+                    //panoView.setSpherePosition(pos);
                 }
                 break;
             case "newtable":
@@ -229,7 +230,7 @@ class Controller {
                 startStream();
                 break;
             case "dark-screen":
-                panoView.clearScreen();
+                //panoView.clearScreen();
                 break;
             default:
                 Log.e(TAG, "Unknown message type: " + msgMap.toString());
@@ -243,7 +244,7 @@ class Controller {
         float angle = convertToRange(n.floatValue(), srcRange, dstRange) - 180.0f;
         //Log.d(TAG, "GOT DGRAM: " + n.toString());
         //Log.d(TAG, "SETTING ANGLE: " + angle);
-        panoView.setYawAngle(angle);
+        //panoView.setYawAngle(angle);
     }
 
     private static float convertToRange(float value, Pair<Float, Float> srcRange,
@@ -258,7 +259,7 @@ class Controller {
     public void setSpherePosition(String pos) {
         //From MainActivity UI dialog or websocket message
         wsClient.send("register position", pos);
-        panoView.setSpherePosition(pos);
+        //panoView.setSpherePosition(pos);
     }
 
     private void newApk() {
@@ -312,6 +313,6 @@ class Controller {
         wsClient.destroy();
         dgramListener.destroy();
         timer.stopSync();
-        panoView.destroy();
+        //panoView.destroy();
     }
 }

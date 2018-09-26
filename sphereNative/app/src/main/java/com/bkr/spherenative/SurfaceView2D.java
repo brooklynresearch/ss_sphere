@@ -31,6 +31,7 @@ public class SurfaceView2D extends GLSurfaceView {
 
     public SurfaceView2D(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
+        setEGLContextClientVersion(2);
         setPreserveEGLContextOnPause(true);
     }
 
@@ -72,11 +73,13 @@ public class SurfaceView2D extends GLSurfaceView {
     }
 
     static class Renderer implements GLSurfaceView.Renderer {
-        private final SceneRenderer scene = SceneRenderer.createFor2D();
+        //private final SceneRenderer scene = SceneRenderer.createFor2D();
+
+        private GLCanvas canvas;
 
         @Override
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-
+            canvas = new GLCanvas();
         }
 
         @Override
@@ -86,7 +89,7 @@ public class SurfaceView2D extends GLSurfaceView {
 
         @Override
         public void onDrawFrame(GL10 gl) {
-
+            canvas.draw();
         }
     }
 }

@@ -237,6 +237,7 @@ class Controller {
     }
 
     private void handleDgram(Integer n) {
+        Log.d(TAG, "GOT DGRAM: " + n);
         Pair<Float, Float> srcRange = new Pair<>(0.0f, 39000.0f);
         Pair<Float,Float> dstRange = new Pair<>(0.0f, 360.0f);
         float angle = convertToRange(n.floatValue(), srcRange, dstRange) - 180.0f;

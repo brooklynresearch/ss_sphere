@@ -6,6 +6,7 @@ import android.net.Uri;
 import android.opengl.GLES20;
 import android.opengl.GLUtils;
 import android.os.Environment;
+import android.util.Log;
 
 import java.io.File;
 import java.nio.ByteBuffer;
@@ -16,8 +17,27 @@ import java.nio.ShortBuffer;
 import static android.opengl.GLES20.glCreateProgram;
 
 public class GLCanvas {
+    private String TAG = "GLCanvas";
+
     private static File DOWNLOAD_DIR =
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
+
+    private final float MAX_DEVICE_ROWS = 11f;
+    private final float MAX_DEVICE_COLS = 11f;
+
+    private float DEVICE_ROW = 6f;
+    private float DEVICE_COL = 1f;
+
+    /* DEVICE STARTING TEXTURE COORDINATES */
+    //Y position never changes for position
+    private final float DEVICE_Y_TOP = (DEVICE_ROW-1) / MAX_DEVICE_ROWS;
+    private final float DEVICE_Y_BOTTOM = DEVICE_ROW / MAX_DEVICE_ROWS;
+
+    //X position cfloatges with rotary encoder data
+    private final float DEVICE_STARTX_LEFT = (DEVICE_COL-1)/ MAX_DEVICE_COLS;
+    private final float DEVICE_STARTX_RIGHT = DEVICE_COL / MAX_DEVICE_COLS;
+
+    private float ROTATION = 0; //set via rotary encoder
 
     private FloatBuffer vertexBuffer;
     private FloatBuffer texCoordBuffer;
@@ -45,7 +65,12 @@ public class GLCanvas {
     private int texUniformHandle;
     private int texCoordHandle;
 
-    float color[] = { 0.63671875f, 0.22265625f, 0.76953125f, 1.0f };
+    //float color[] = { 0.63671875f, 0.22265625f, 0.76953125f, 1.0f };
+
+    //Number of phone widths to indent on the left side. Indexed by row num
+    private float rowOffsets[] = {3,2,1,0.5f,0.5f,0,0.5f,0.5f,1,2,3};
+
+    private float LEFT_OFFSET = rowOffsets[Math.round(DEVICE_ROW)]/MAX_DEVICE_COLS;
 
     private final int vertexCount = squareCoords.length / COORDS_PER_VERTEX;
     private final int vertexStride = COORDS_PER_VERTEX * 4; // 4 bytes per vertex
@@ -70,7 +95,7 @@ public class GLCanvas {
                     "}";
 
     private final int program;
-    private final int texture;
+    private int texture;
 
     public GLCanvas() {
         // initialize vertex byte buffer for shape coordinates
@@ -93,12 +118,6 @@ public class GLCanvas {
         // set the buffer to read the first coordinate
         drawListBuffer.position(0);
 
-        ByteBuffer tbb = ByteBuffer.allocateDirect(texCoords.length * 4);
-        tbb.order(ByteOrder.nativeOrder());
-        texCoordBuffer = tbb.asFloatBuffer();
-        texCoordBuffer.put(texCoords);
-        texCoordBuffer.position(0);
-
         int vertexShader = loadShader(GLES20.GL_VERTEX_SHADER, vertexShaderCode);
 
         int fragmentShader = loadShader(GLES20.GL_FRAGMENT_SHADER, fragmentShaderCode);
@@ -114,12 +133,22 @@ public class GLCanvas {
 
         // creates OpenGL ES program executables
         GLES20.glLinkProgram(program);
-
-        Uri path = Uri.fromFile(new File(DOWNLOAD_DIR + "/" + "wash-sq.jpeg"));
-        texture = loadTexture(path);
     }
 
     public void draw() {
+
+        float textureCoords[] = {
+                LEFT_OFFSET+(DEVICE_COL-1)/MAX_DEVICE_COLS+ROTATION, (DEVICE_ROW-1)/MAX_DEVICE_ROWS,    //top left
+                LEFT_OFFSET+(DEVICE_COL-1)/MAX_DEVICE_COLS+ROTATION, DEVICE_ROW/ MAX_DEVICE_ROWS,       //bottom left
+                LEFT_OFFSET+DEVICE_COL/MAX_DEVICE_COLS+ROTATION, DEVICE_ROW/MAX_DEVICE_ROWS,            //bottom right
+                LEFT_OFFSET+DEVICE_COL/MAX_DEVICE_COLS+ROTATION, (DEVICE_ROW-1)/MAX_DEVICE_ROWS         //top right
+        };
+        ByteBuffer tbb = ByteBuffer.allocateDirect(textureCoords.length * 4);
+        tbb.order(ByteOrder.nativeOrder());
+        texCoordBuffer = tbb.asFloatBuffer();
+        texCoordBuffer.put(textureCoords);
+        texCoordBuffer.position(0);
+
         // Add program to OpenGL ES environment
         GLES20.glUseProgram(program);
 
@@ -167,6 +196,20 @@ public class GLCanvas {
         GLES20.glDisableVertexAttribArray(positionHandle);
     }
 
+    public void setRotation(float newValue) {
+        Log.d(TAG, "GLCANVAS: " + newValue);
+        float MAX_ENCODER_VAL = 39000f;
+        float MIDPOINT = MAX_ENCODER_VAL / 2;
+        ROTATION = (newValue - MIDPOINT) / 10000; // positive or negative distance from mid
+    }
+
+    public void setDevicePosition(float dRow, float dCol) {
+        DEVICE_ROW = dRow;
+        DEVICE_COL = dCol;
+
+        LEFT_OFFSET = rowOffsets[Math.round(dRow)]/MAX_DEVICE_COLS;
+    }
+
     private static int loadShader(int type, String shaderCode) {
         // create a vertex shader type (GLES20.GL_VERTEX_SHADER)
         // or a fragment shader type (GLES20.GL_FRAGMENT_SHADER)
@@ -179,7 +222,7 @@ public class GLCanvas {
         return shader;
     }
 
-    private static int loadTexture(Uri fileUri) {
+    public int loadTexture(Uri fileUri) {
         final int[] textureHandle = new int[1];
         GLES20.glGenTextures(1, textureHandle, 0);
 
@@ -204,6 +247,7 @@ public class GLCanvas {
             // Recycle the bitmap, since its data has been loaded into OpenGL.
             bitmap.recycle();
         }
+        texture = textureHandle[0];
         return textureHandle[0];
     }
 

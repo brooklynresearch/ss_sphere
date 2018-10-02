@@ -77,16 +77,20 @@ class Controller {
 
     private boolean initPanoView() {
         panoView.initialize();
+        if (checkFile("image", "wash-sq.jpeg")) {
+            Uri path = Uri.fromFile(new File(DOWNLOAD_DIR + "/" + "wash-sq.jpeg"));
+            panoView.setTexture(path);
+        }
         //loadMedia("image", "Liberty.png"); //default media
         //startStream(rtpHost);
         //loadMedia();
         //loadImage();
         return true;
     }
-/*
+
     public String getCurrentPosition() {
         return panoView.getPosition();
-    }*/
+    }
 
     private void startStream() {
         Uri sdpPath = Uri.fromFile(new File(DOWNLOAD_DIR + "/" + "stream.sdp"));
@@ -121,7 +125,7 @@ class Controller {
             BroadcastReceiver onComplete = new BroadcastReceiver() { //on download complete
                 @Override
                 public void onReceive(Context context, Intent intent) {
-                    loadMedia(type, name);
+                    //loadMedia(type, name);
                     context.unregisterReceiver(this);
                 }
             };
@@ -198,6 +202,7 @@ class Controller {
                 String pos = msgMap.get("value");
                 if (!pos.equals("-1")) {
                     //panoView.setSpherePosition(pos);
+                    panoView.updatePosition(pos);
                 }
                 break;
             case "newtable":
@@ -239,12 +244,13 @@ class Controller {
 
     private void handleDgram(Integer n) {
         Log.d(TAG, "GOT DGRAM: " + n);
-        Pair<Float, Float> srcRange = new Pair<>(0.0f, 39000.0f);
-        Pair<Float,Float> dstRange = new Pair<>(0.0f, 360.0f);
-        float angle = convertToRange(n.floatValue(), srcRange, dstRange) - 180.0f;
+        //Pair<Float, Float> srcRange = new Pair<>(0.0f, 39000.0f);
+        //Pair<Float,Float> dstRange = new Pair<>(0.0f, 360.0f);
+        //float angle = convertToRange(n.floatValue(), srcRange, dstRange) - 180.0f;
         //Log.d(TAG, "GOT DGRAM: " + n.toString());
         //Log.d(TAG, "SETTING ANGLE: " + angle);
         //panoView.setYawAngle(angle);
+        panoView.updateRotation(n.floatValue());
     }
 
     private static float convertToRange(float value, Pair<Float, Float> srcRange,
@@ -260,6 +266,7 @@ class Controller {
         //From MainActivity UI dialog or websocket message
         wsClient.send("register position", pos);
         //panoView.setSpherePosition(pos);
+        panoView.updatePosition(pos);
     }
 
     private void newApk() {

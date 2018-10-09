@@ -1,0 +1,7 @@
+{
+    "encoder_max": 39000.0,
+    "num_repeats": 3,
+    "repeat_type": "mirror",
+    "height_proportion": 0.09090909090909091,
+    "width_scale": 0.75
+}

@@ -86,6 +86,7 @@ jQuery(function() {
         });
     }
 
+    /*
     function initMediaSelect() {
         $('#media-type-select').off();
         $('#media-type-select').on('click', event => {
@@ -93,7 +94,7 @@ jQuery(function() {
             document.getElementById('media-type').innerHTML = toggleMediaType();
             updateButtons();
         });
-    }
+    }*/
 
     function loadThumbs() {
         $('#vid-wrap').children('div').each((i, el) => {

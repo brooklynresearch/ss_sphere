@@ -48,7 +48,7 @@ app.use('/hidedebug', index);
 app.use('/dark', index);
 app.use('/reload', index);
 app.use('/frame', index);
-app.use('/sleep', index);
+app.use('/rotate', index);
 app.use('/update-apk', index);
 app.use('/controller', routeController);
 app.use('/newconfig', (req, res, next) => {

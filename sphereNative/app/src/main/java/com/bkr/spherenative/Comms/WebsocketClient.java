@@ -83,6 +83,12 @@ public class WebsocketClient {
                 msgMap.put("value", args[0].toString());
                 emitter.onNext(msgMap);
             });
+            socket.on("rotate", args -> {
+               HashMap<String, String> msgMap = new HashMap<>();
+               msgMap.put("type", "rotate");
+               msgMap.put("value", args[0].toString());
+               emitter.onNext(msgMap);
+            });
             socket.on("update-apk", args -> {
                 HashMap<String, String> msgMap = new HashMap<>();
                 //JSONArray data = (JSONArray) args[0];

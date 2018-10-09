@@ -5,6 +5,7 @@ import android.net.Uri;
 import android.opengl.GLSurfaceView;
 import android.util.AttributeSet;
 import android.util.Log;
+import android.util.Pair;
 
 import org.json.JSONException;
 import org.json.JSONObject;
@@ -18,8 +19,14 @@ public class SurfaceView2D extends GLSurfaceView {
 
     private Renderer renderer;
 
-    private JSONObject positionTable = null;
+    private JSONObject parameterTable = null;
     private String position = "0601";
+
+    private float MAX_ENCODER_VAL = 39000.0f;
+    private float N_REPETITIONS = 1;
+    private float HEIGHT_PROPORTION = 1/11f; //default full height
+    private float WIDTH_SCALE = 0.75f; //default 4:3 ratio
+    private String REPEAT_TYPE = "mirror";
 
     public SurfaceView2D(Context context, AttributeSet attributeSet) {
         super(context, attributeSet);
@@ -27,25 +34,35 @@ public class SurfaceView2D extends GLSurfaceView {
         setPreserveEGLContextOnPause(true);
     }
 
-    public void initialize() {
+    public boolean initialize() {
         // Configure OpenGL.
         renderer = new Renderer();
         setRenderer(renderer);
         setRenderMode(GLSurfaceView.RENDERMODE_CONTINUOUSLY);
+        return true;
     }
 
-    public void setPositionTable(JSONObject table) {
-        positionTable = table;
-        Log.d(TAG, "position table: " + positionTable.toString());
-
-        //updatePosition();
+    public void setParameterTable(JSONObject table) {
+        parameterTable = table;
+        Log.d(TAG, "parameter table: " + parameterTable.toString());
+        try {
+            N_REPETITIONS = table.getInt("num_repeats");
+            REPEAT_TYPE = table.getString("repeat_type");
+            MAX_ENCODER_VAL = (float)table.getDouble("encoder_max");
+            HEIGHT_PROPORTION = (float)table.getDouble("height_proportion");
+            WIDTH_SCALE = (float)table.getDouble("width_scale");
+            renderer.setParams(HEIGHT_PROPORTION, WIDTH_SCALE);
+        } catch (JSONException e) {
+            Log.e(TAG, "JSON Error: " + e.getMessage());
+            e.printStackTrace();
+        }
     }
 
-    public void updatePosition(String newPos) {
-        position = newPos;
-        String rowStr = newPos.substring(0,2);
-        String colStr = newPos.substring(2,4);
-        renderer.setDevicePosition(Float.parseFloat(rowStr), Float.parseFloat(colStr));
+    public void updatePosition(String posStr, float newRow, float newCol) {
+        position = posStr;
+        //String rowStr = newPos.substring(0,2);
+        //String colStr = newPos.substring(2,4);
+        renderer.setDevicePosition(newRow, newCol);
     }
 
     public String getPosition() {
@@ -53,11 +70,22 @@ public class SurfaceView2D extends GLSurfaceView {
     }
 
     public void updateRotation(float newRotation) {
-        renderer.setRotation(newRotation);
+        renderer.setRotation(mapToRotationRange(newRotation));
+    }
+
+    private float mapToRotationRange(float value) {
+        Pair<Float, Float> srcRange = new Pair<>(0.0f, MAX_ENCODER_VAL);
+        Pair<Float, Float> dstRange = new Pair<>(0.0f, N_REPETITIONS);
+        float srcMax = srcRange.second - srcRange.first;
+        float dstMax = dstRange.second - dstRange.first;
+        float adjValue = value - srcRange.first;
+
+        return  (adjValue * dstMax / srcMax) + dstRange.first;
     }
 
     public void setTexture(Uri fileUri) {
-        renderer.setTexture(fileUri);
+        //initialize();
+        renderer.setTexture(fileUri, REPEAT_TYPE);
     }
 
     @Override
@@ -74,14 +102,17 @@ public class SurfaceView2D extends GLSurfaceView {
 
         private GLCanvas canvas;
         private Uri textureUri;
-        private float savedRow = 0;
-        private float savedCol = 0;
+        private String savedRepeatType;
+        private float savedHeightProportion = 1/11f;
+        private float savedWidthScale = 0.75f;
+        private float savedRow = 6f;
+        private float savedCol = 1f;
 
         @Override
         public void onSurfaceCreated(GL10 gl, EGLConfig config) {
-            canvas = new GLCanvas();
+            canvas = new GLCanvas(savedHeightProportion, savedWidthScale);
             if (textureUri != null) {
-                canvas.loadTexture(textureUri);
+                canvas.loadTexture(textureUri, savedRepeatType);
             }
 
             if (savedRow > 0 && savedCol > 0) {
@@ -99,13 +130,26 @@ public class SurfaceView2D extends GLSurfaceView {
             canvas.draw();
         }
 
-        public void setTexture(Uri fileUri) {
-            textureUri = fileUri;
-            //canvas.loadTexture(fileUri);
+        public void setTexture(Uri fileUri, String repeatType) {
+            if (canvas != null) {
+                canvas.loadTexture(fileUri, repeatType);
+            } else {
+                textureUri = fileUri;
+                savedRepeatType = repeatType;
+            }
         }
 
         public void setRotation(float newRotation) {
             canvas.setRotation(newRotation);
+        }
+
+        public void setParams(float heightProportion, float widthScale) {
+            if (canvas != null) {
+                canvas.setParams(heightProportion, widthScale);
+            } else {
+                savedHeightProportion = heightProportion;
+                savedWidthScale = widthScale;
+            }
         }
 
         public void setDevicePosition(float row, float col) {

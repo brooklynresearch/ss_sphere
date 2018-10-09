@@ -7,12 +7,10 @@ import android.net.Uri;
 import android.os.Environment;
 import android.support.v4.content.FileProvider;
 import android.util.Log;
-import android.util.Pair;
 
 import com.bkr.spherenative.ClockSync.SyncTimer;
 import com.bkr.spherenative.Comms.DatagramListener;
 import com.bkr.spherenative.Comms.WebsocketClient;
-import com.bkr.spherenative.Display360.MonoscopicView;
 import com.bkr.spherenative.FileSync.FileManager;
 
 import org.json.JSONArray;
@@ -22,7 +20,9 @@ import org.json.JSONObject;
 import java.io.File;
 import java.util.Date;
 import java.util.HashMap;
+import java.util.concurrent.TimeUnit;
 
+import io.reactivex.Completable;
 import io.reactivex.Observable;
 import io.reactivex.android.schedulers.AndroidSchedulers;
 import io.reactivex.disposables.CompositeDisposable;
@@ -41,7 +41,7 @@ class Controller {
     private String rtpHost;
     private FileManager fileManager;
     private Context appContext;
-    private Boolean mediaLoaded = false;
+    private Boolean panoCreated = false;
 
     //private MonoscopicView panoView;
     private SurfaceView2D panoView;
@@ -59,6 +59,8 @@ class Controller {
     private static File DOWNLOAD_DIR =
                     Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 
+    private String DEFAULT_IMAGE = "wash-sq.jpeg";
+
     Controller(Context context) {
         appContext = context;
         fileManager = new FileManager();
@@ -70,21 +72,22 @@ class Controller {
         rtpHost = "rtsp://" + hostIpAddr + ":8554/movie.mp4";
 
         return initPanoView() &&
-                initComms(hostIpAddr) &&
-                initFileSync() &&
-                initClockSync(hostIpAddr);
+                initComms(hostIpAddr); // &&
+                //initFileSync(); // &&
+                //initClockSync(hostIpAddr);
     }
 
     private boolean initPanoView() {
-        panoView.initialize();
-        if (checkFile("image", "wash-sq.jpeg")) {
-            Uri path = Uri.fromFile(new File(DOWNLOAD_DIR + "/" + "wash-sq.jpeg"));
-            panoView.setTexture(path);
+        if (!panoCreated) {
+            panoCreated = panoView.initialize();
         }
-        //loadMedia("image", "Liberty.png"); //default media
-        //startStream(rtpHost);
-        //loadMedia();
-        //loadImage();
+        if (checkFile("image", DEFAULT_IMAGE)) {
+            Uri path = Uri.fromFile(new File(DOWNLOAD_DIR + "/" + DEFAULT_IMAGE));
+            panoView.setTexture(path);
+        } else {
+            Completable retryAfterDelay = Completable.timer(10, TimeUnit.SECONDS, AndroidSchedulers.mainThread());
+            disposables.add(retryAfterDelay.subscribe(this::initPanoView));
+        }
         return true;
     }
 
@@ -105,7 +108,7 @@ class Controller {
             case "image":
                 if (checkFile("image", name)) {
                     Uri path = Uri.fromFile(new File(DOWNLOAD_DIR + "/" + name));
-                    //panoView.loadImage(path);
+                    panoView.setTexture(path);
                 }
                 break;
             case "video":
@@ -201,14 +204,14 @@ class Controller {
             case "pos":
                 String pos = msgMap.get("value");
                 if (!pos.equals("-1")) {
-                    //panoView.setSpherePosition(pos);
-                    panoView.updatePosition(pos);
+                    setSpherePosition(pos);
                 }
                 break;
             case "newtable":
                 try {
                     JSONObject table = new JSONObject(msgMap.get("table"));
-                    panoView.setPositionTable(table);
+                    Log.d(TAG, "Got new parameters: " + table.toString());
+                    panoView.setParameterTable(table);
                 } catch (JSONException e) {
                     Log.e(TAG, "Error parsing pos table: " + e.getMessage());
                 }
@@ -226,13 +229,14 @@ class Controller {
                 newApk();
                 break;
             case "load-image":
-                loadMedia("image",msgMap.get("name") + ".png");
+                loadMedia("image",msgMap.get("name") + ".jpeg");
                 break;
             case "load-video":
                 loadMedia("video", msgMap.get("name") + ".mp4");
                 break;
-            case "start-stream":
-                startStream();
+            case "rotate":
+                String value = msgMap.get("value");
+                panoView.updateRotation(Float.parseFloat(value));
                 break;
             case "dark-screen":
                 //panoView.clearScreen();
@@ -253,20 +257,17 @@ class Controller {
         panoView.updateRotation(n.floatValue());
     }
 
-    private static float convertToRange(float value, Pair<Float, Float> srcRange,
-                                        Pair<Float, Float> dstRange) {
-        float srcMax = srcRange.second - srcRange.first;
-        float dstMax = dstRange.second - dstRange.first;
-        float adjValue = value - srcRange.first;
-
-        return  (adjValue * dstMax / srcMax) + dstRange.first;
-    }
-
     public void setSpherePosition(String pos) {
         //From MainActivity UI dialog or websocket message
-        wsClient.send("register position", pos);
-        //panoView.setSpherePosition(pos);
-        panoView.updatePosition(pos);
+        String rowStr = pos.substring(0,2);
+        String colStr = pos.substring(2,4);
+        float rowVal = Float.parseFloat(rowStr);
+        float colVal = Float.parseFloat(colStr);
+        if (rowVal >= 1 && rowVal <= 11 && colVal >= 1 && colVal <= 11) { //sanity check
+            wsClient.send("register position", pos);
+            //panoView.setSpherePosition(pos);
+            panoView.updatePosition(pos, rowVal, colVal);
+        }
     }
 
     private void newApk() {
@@ -303,13 +304,11 @@ class Controller {
         Log.d(TAG, "Controller Pausing...");
         dgramDisposable.dispose();
         wSocketDisposable.dispose();
-        timer.stopSync();
         panoView.onPause();
     }
 
     public void resume() {
         Log.d(TAG, "Controller Resuming...");
-        timer.startSync();
         panoView.onResume();
         startComms();
     }
@@ -319,7 +318,5 @@ class Controller {
         wSocketDisposable.dispose();
         wsClient.destroy();
         dgramListener.destroy();
-        timer.stopSync();
-        //panoView.destroy();
     }
 }

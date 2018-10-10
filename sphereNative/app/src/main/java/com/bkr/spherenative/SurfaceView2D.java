@@ -88,7 +88,8 @@ public class SurfaceView2D extends GLSurfaceView {
 
     public void setTexture(Uri fileUri) {
         //initialize();
-        renderer.setTexture(fileUri, REPEAT_TYPE);
+        //Needs to run on gl thread
+        queueEvent(() -> renderer.setTexture(fileUri, REPEAT_TYPE));
     }
 
     @Override

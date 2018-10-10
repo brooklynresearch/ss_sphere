@@ -128,7 +128,7 @@ class Controller {
             BroadcastReceiver onComplete = new BroadcastReceiver() { //on download complete
                 @Override
                 public void onReceive(Context context, Intent intent) {
-                    //loadMedia(type, name);
+                    loadMedia(type, name);
                     context.unregisterReceiver(this);
                 }
             };

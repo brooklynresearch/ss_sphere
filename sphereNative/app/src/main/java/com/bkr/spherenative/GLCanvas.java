@@ -29,6 +29,8 @@ public class GLCanvas {
 
     private int REPEAT_TYPE = GLES20.GL_MIRRORED_REPEAT;
 
+    private int TEXTURE_ID = 0;
+
     private float ROTATION = 0; //set via rotary encoder
 
     private FloatBuffer vertexBuffer;
@@ -87,7 +89,8 @@ public class GLCanvas {
                     "}";
 
     private final int program;
-    private int texture;
+    private final int[] textureIds = new int[10];
+    private int currentTexturepos = 0;
 
     public GLCanvas(float heightProportion, float widthScale) {
         DEVICE_HEIGHT_PROPORTION = heightProportion;
@@ -131,6 +134,7 @@ public class GLCanvas {
     }
 
     public void draw() {
+        GLES20.glClear(GLES20.GL_COLOR_BUFFER_BIT);
 
         float textureCoords[] = {
                 LEFT_OFFSET+(DEVICE_COL-1)*DEVICE_WIDTH_PROPORTION+ROTATION, (DEVICE_ROW-1)*DEVICE_HEIGHT_PROPORTION,    //top left
@@ -152,7 +156,7 @@ public class GLCanvas {
         GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
 
         // Bind the texture to this unit.
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, texture);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, TEXTURE_ID);
 
         // Tell the texture uniform sampler to use this texture in the shader by binding to texture unit 0.
         GLES20.glUniform1i(texUniformHandle, 0);
@@ -211,57 +215,47 @@ public class GLCanvas {
         return shader;
     }
 
-    public int loadTexture(Uri fileUri, String repeatType) {
-        final int[] textureHandle = new int[1];
-        GLES20.glGenTextures(1, textureHandle, 0);
+    public void loadTexture(Uri fileUri, String repeatType) {
 
-        if (textureHandle[0] != 0)
-        {
-            final BitmapFactory.Options options = new BitmapFactory.Options();
-            options.inScaled = false;   // No pre-scaling
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inScaled = false;   // No pre-scaling
 
-            // Read in the resource
-            final Bitmap bitmap = BitmapFactory.decodeFile(fileUri.getPath(), options);
+        // Read in the resource
+        final Bitmap bitmap = BitmapFactory.decodeFile(fileUri.getPath(), options);
 
-            // Bind to the texture in OpenGL
-            GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureHandle[0]);
-
-            // Set filtering
-            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
-            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
-
-            // Set behavior for out-of-bounds texture coords
-            if (repeatType.equals("mirror")) {REPEAT_TYPE = GLES20.GL_MIRRORED_REPEAT;}
-            else if (repeatType.equals("tile")) {REPEAT_TYPE = GLES20.GL_REPEAT;}
-
-            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, REPEAT_TYPE);
-            GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, REPEAT_TYPE);
-
-            // Load the bitmap into the bound texture.
-            GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
-
-            // Recycle the bitmap, since its data has been loaded into OpenGL.
-            bitmap.recycle();
+        if (TEXTURE_ID != 0) {
+            updateTexture(TEXTURE_ID, bitmap, repeatType);
+        } else {
+            TEXTURE_ID = createTexture();
+            updateTexture(TEXTURE_ID, bitmap, repeatType);
         }
+        bitmap.recycle();
+    }
 
-        Log.d(TAG, "GL error status: " + GLES20.glGetError());
-
-        texture = textureHandle[0];
+    private int createTexture() {
+        final int[] textureHandle = new int[1];
+        GLES20.glGenTextures(1,textureHandle,0);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureHandle[0]);
         return textureHandle[0];
     }
-/*
-    private int createTexture(Bitmap bitmap) {
-        final int[] textureHandle = new int[1];
-        GLES20.glGenTextures(1, textureHandle, 0);
-        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureHandle[0]);
-        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_NEAREST);
-        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_NEAREST);
-        updateTexture(textureHandle, bitmap);
-        return textureHandle;
-    }
 
-    private void updateTexture(int[] textureHandle, Bitmap bitmap) {
-        GLES20.glGenTextures(1, textureHandle, 0);
-    }*/
+    private void updateTexture(int textureId, Bitmap bitmap, String repeatType) {
+        GLES20.glActiveTexture(GLES20.GL_TEXTURE0);
+        GLES20.glBindTexture(GLES20.GL_TEXTURE_2D, textureId);
+
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MIN_FILTER, GLES20.GL_LINEAR);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_MAG_FILTER, GLES20.GL_LINEAR);
+
+        // Set behavior for out-of-bounds texture coords
+        if (repeatType.equals("mirror")) {REPEAT_TYPE = GLES20.GL_MIRRORED_REPEAT;}
+        else if (repeatType.equals("tile")) {REPEAT_TYPE = GLES20.GL_REPEAT;}
+
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_S, REPEAT_TYPE);
+        GLES20.glTexParameteri(GLES20.GL_TEXTURE_2D, GLES20.GL_TEXTURE_WRAP_T, REPEAT_TYPE);
+
+        // Load the bitmap into the bound texture.
+        GLUtils.texImage2D(GLES20.GL_TEXTURE_2D, 0, bitmap, 0);
+        Log.d(TAG, "GL error status: " + GLES20.glGetError());
+    }
 
 }

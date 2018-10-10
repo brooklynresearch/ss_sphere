@@ -59,7 +59,7 @@ class Controller {
     private static File DOWNLOAD_DIR =
                     Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 
-    private String DEFAULT_IMAGE = "wash-sq.jpeg";
+    private String DEFAULT_IMAGE = "desert.jpeg";
 
     Controller(Context context) {
         appContext = context;
@@ -152,8 +152,8 @@ class Controller {
                         .map(p ->
                             // packet -> string -> int
                             Integer.parseInt(new String(p.getData()).trim())
-                        )
-                        .filter(i -> i >= 0 && i <= 39000); // drop out-of-range values;
+                        );
+                        //.filter(i -> i >= 0 && i <= 39000); // drop out-of-range values;
 
         Log.d(TAG, "...Done.");
         return true;

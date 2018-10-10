@@ -59,10 +59,11 @@ public class SurfaceView2D extends GLSurfaceView {
     }
 
     public void updatePosition(String posStr, float newRow, float newCol) {
-        position = posStr;
-        //String rowStr = newPos.substring(0,2);
-        //String colStr = newPos.substring(2,4);
-        renderer.setDevicePosition(newRow, newCol);
+        // fix crash when reassigning same position
+        if (!position.equals(posStr)) {
+            position = posStr;
+            renderer.setDevicePosition(newRow, newCol);
+        }
     }
 
     public String getPosition() {
@@ -70,7 +71,9 @@ public class SurfaceView2D extends GLSurfaceView {
     }
 
     public void updateRotation(float newRotation) {
-        renderer.setRotation(mapToRotationRange(newRotation));
+        if (newRotation >= 0 && newRotation <= MAX_ENCODER_VAL) {
+            renderer.setRotation(mapToRotationRange(newRotation));
+        }
     }
 
     private float mapToRotationRange(float value) {

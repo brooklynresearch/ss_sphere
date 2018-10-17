@@ -121,33 +121,33 @@ will persist after restart.
 ## Troubleshooting
 
 * ISSUE: The image on one or a few of the phones stays still when the sphere is rotated.
-        * Check hardware connection. Unplugging and then replugging the phone(s) usually fixes this. We have seen this happen with some of them when the power to the sphere is unplugged and then replugged.
+  * Check hardware connection. Unplugging and then replugging the phone(s) usually fixes this. We have seen this happen with some of them when the power to the sphere is unplugged and then replugged.
 
 * ISSUE: One or more phones is responding to rotation but is showing the wrong thing.
-        * Most likely the phone needs to have its position set. This can be done by tapping the upper right corner of the screen 4 times and entering the position number in the window that pops up.
-            * Every position is 4 numbers long
-            * The first two numbers are the row number. 01 through 11
-            * The second two numbers are the column number. 01 through 11
-            * Examples:
-                    * The phone on the top row furthest to the left is set to ‘0101’
-                    * The phone on the bottom row furthest to the right is set to ‘1105’
+  * Most likely the phone needs to have its position set. This can be done by tapping the upper right corner of the screen 4 times and entering the position number in the window that pops up.
+    * Every position is 4 numbers long
+    * The first two numbers are the row number. 01 through 11
+    * The second two numbers are the column number. 01 through 11
+    * Examples:
+      * The phone on the top row furthest to the left is set to ‘0101’
+      * The phone on the bottom row furthest to the right is set to ‘1105’
 
-        * If the position is already set correctly, it is probably displaying a different image from the other phones. Try setting an image (either the same one or a different one) 
+  * If the position is already set correctly, it is probably displaying a different image from the other phones. Try setting an image (either the same one or a different one) 
                 with the controller phone. If the problem remains, close the app and start it again from the home screen. It has a green android icon and is named  “Sphere Native.”
 
 * ISSUE:  All of the phone images stay still. None respond to rotation.
-        * This means there is no connection to the mac mini which lives on top of the sphere.
+  * This means there is no connection to the mac mini which lives on top of the sphere.
         Try restarting the mac by holding down the power button on the back corner until the white light on front turns off and then
         pressing the power button again, making sure the white light comes on again.
 
 * ISSUE: setting an image from the controller phone has no effect.
-        * Make sure the controller phone is connected to the correct network
-        * SSID: spherenet
-        * PASS: pizza247
-        * Refresh the controller page by swiping downward to re-establish connection with the sphere.
+  * Make sure the controller phone is connected to the correct network
+    * SSID: spherenet
+    * PASS: *******
+    * Refresh the controller page by swiping downward to re-establish connection with the sphere.
 
 * ISSUE: Controller phone is not displaying the controller page.
-        * The page is bookmarked on the homescreen with the name ‘sphere’
+  * The page is bookmarked on the homescreen with the name ‘sphere’
 
 ## Further Work / Potential Improvements
 

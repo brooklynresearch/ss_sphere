@@ -1,0 +1,17 @@
+.slider-wrapper {
+  display: block;
+  margin-top: 20%;
+  margin-left: auto;
+  margin-right: auto;
+  width: 20px;
+  height: 720px;
+  padding: 0;
+}
+
+.slider-wrapper input {
+  width: 720px;
+  height: 20px;
+  margin: 0;
+  transform-origin: 75px 75px;
+  transform: rotate(-90deg);
+}

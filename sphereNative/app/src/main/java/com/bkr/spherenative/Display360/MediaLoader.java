@@ -141,7 +141,7 @@ public class MediaLoader implements IVLCVout.Callback, IVLCVout.OnNewVideoLayout
     private static File DOWNLOAD_DIR =
             Environment.getExternalStoragePublicDirectory(Environment.DIRECTORY_DOWNLOADS);
 
-    private String videoFilename;
+    private Uri videoUri;
 
     public MediaLoader(Context context) {
         this.context = context;
@@ -149,10 +149,10 @@ public class MediaLoader implements IVLCVout.Callback, IVLCVout.OnNewVideoLayout
     }
 
     @SuppressLint("CheckResult")
-    public void loadVideo(String filename) {
+    public void loadVideo(Uri file) {
         resetMedia();
-
-        videoFilename = filename;
+        mediaType = "video";
+        videoUri = file;
 
         final ArrayList<String> args = new ArrayList<>();
         args.add("-vvv");
@@ -305,7 +305,7 @@ public class MediaLoader implements IVLCVout.Callback, IVLCVout.OnNewVideoLayout
         // after the GLView is created.
         if (mediaType.equals("video") && mediaPlayer != null) {
 
-            Media media = new Media(mLibVLC, Uri.fromFile(new File(DOWNLOAD_DIR + "/" + videoFilename )));
+            Media media = new Media(mLibVLC, videoUri);
             media.parse();
 
             Log.e(TAG, "TRACKS: " + media.getTrackCount());

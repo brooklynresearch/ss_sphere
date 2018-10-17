@@ -52,15 +52,7 @@ var startListeners = function(io) {
             }
         });
 
-        fs.readFile('./public/positions.json', 'utf8', function(err, data) {
-            if (err) {
-                console.log('Error opening file!: ', err);
-            } else {
-                console.log('Sending Position Table');
-                let jsonData = JSON.parse(data);
-                socket.emit('newtable', jsonData);
-            }
-        });
+        sendParamsFile();
 
         db.getFiles((err, result) => {
             if (err) {
@@ -130,6 +122,18 @@ var sendSocketBroadcast = function(sockEvent, msg) {
     ioInstance.emit(sockEvent, msg);
 }
 
+var sendParamsFile = function() {
+    fs.readFile('./public/parameters.json', 'utf8', function(err, data) {
+        if (err) {
+            console.log('Error opening file!: ', err);
+        } else {
+            console.log('Sending Position Table');
+            let jsonData = JSON.parse(data);
+            ioInstance.emit('newtable', jsonData);
+        }
+    });
+}
+
 var sendUdpCommand = function(cmd) {
     let broadcast = process.env.BROADCAST_ADDR;
     for( var i = 0; i < 10; i++ ) {
@@ -152,7 +156,7 @@ module.exports = {
     startListeners: startListeners,
     sendUdpCommand: sendUdpCommand,
     sendSocketBroadcast: sendSocketBroadcast,
-    //streamVideo: streamVideo,
+    sendParamsFile: sendParamsFile,
     stop: stop
 }
 

@@ -43,7 +43,8 @@ router.get('/pause', function(req, res, next) {
 
 router.get('/sendparams', function(req, res, next) {
 
-  //console.log("IN sendparams");
+  console.log("IN sendparams");
+  /*
   fs.readFile('./public/positions.json', 'utf8', function(err, data) {
       if (err) {
           console.log("couldn't Open positions file!: ", err);
@@ -52,7 +53,8 @@ router.get('/sendparams', function(req, res, next) {
           let jsonData = JSON.parse(data);
           socketCmd.sendSocketBroadcast('newtable', jsonData);
       }
-  });
+  });*/
+  socketCmd.sendParamsFile();
   res.end();
 });
 
@@ -76,9 +78,9 @@ router.get('/reload', function(req, res, next) {
   res.end();
 });
 
-router.get('/sleep', function(req, res, next) {
-    console.log("Sending sleep command", req.query);
-    socketCmd.sendSocketBroadcast('sleep', req.query.time);
+router.get('/rotate', function(req, res, next) {
+    console.log("Sending rotate command", req.query);
+    socketCmd.sendSocketBroadcast('rotate', req.query.val);
     res.end();
 });
 

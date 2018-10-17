@@ -86,6 +86,7 @@ jQuery(function() {
         });
     }
 
+    /*
     function initMediaSelect() {
         $('#media-type-select').off();
         $('#media-type-select').on('click', event => {
@@ -93,12 +94,12 @@ jQuery(function() {
             document.getElementById('media-type').innerHTML = toggleMediaType();
             updateButtons();
         });
-    }
+    }*/
 
     function loadThumbs() {
         $('#vid-wrap').children('div').each((i, el) => {
             let name = $(el).attr('data-name').split('.')[0];
-            $(el).css("background-image", "url(thumbs/" + name + ".jpg)")
+            $(el).css("background-image", "url(thumbs/" + name + ".jpeg)")
         });
     }
 
@@ -132,7 +133,7 @@ jQuery(function() {
 
     function init() {
         initSocket();
-        initMediaSelect();
+        //initMediaSelect();
         loadThumbs();
         initVids();
         updateButtons();
